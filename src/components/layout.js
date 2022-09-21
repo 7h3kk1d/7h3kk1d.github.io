@@ -52,6 +52,7 @@ export default ({ children }) => (
                 <ul style={{ listStyle: `none`, float: `right` }}>
                   <ListLink to="/">Home</ListLink>
                   <ListLink to="/about">About</ListLink>
+                  <a href="https://twitter.com/abanduk" style={{background: `none`}}><img alt={`Twitter Profile`} style={{ verticalAalign: `bottom`, marginBottom: 0}}width={25} height={25} src={`/images/twitter.svg`} /></a>
                 </ul>
               </div>
             </header>
