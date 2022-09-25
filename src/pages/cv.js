@@ -44,9 +44,35 @@ export default () =>
             <h4 style={{ marginTop: 0 }}>July 2013-November 2014</h4>
             <ul>
                 <li>First employee who led development team after CTO exit while assuming full stack responsi-
-bilities in a startup environment</li>
+                    bilities in a startup environment</li>
                 <li>Set up automated deployments (Ansible) and notifications saving developers hours per day
-and decreasing downtime</li>
+                    and decreasing downtime</li>
             </ul>
+            <h2>Education</h2>
+            Georgia Institute of Technology, M.S., Computer Science, 2016-2017, GPA 3.8<br />
+            University of Louisiana at Lafayette, B.S., Computer Science, 2009-2013<br />
+            University of Louisiana at Lafayette, B.S., Mathematics, 2009-2013<br />
+            Louisiana School for Math, Sciences and the Arts, High School, 2009
+            <h2>Projects</h2>
+            <h3>GRPC based map reduce framework</h3>
+            <p>Built a C++ map reduce library that utilized GRPC for network communication as well as
+                Protocol Buffers for serialization.</p>
+            <h3>N-body gravitational body simulator</h3>
+            <p>Developed a python program to simulate n celestial bodies gravitational attraction over time.
+                Data was then output to visualization software to view paths.</p>
+            <h3>User load testing simulator</h3>
+            <p>Made a clojure application that would simulate user activities in order to provide high through-
+                put load testing to the backend system. Utilized stochastic state machines to generate actions.</p>
+            <h2>Skills</h2>
+            <h3>Languages</h3>
+            <b>Proficient: </b> Python, Java 8+, Ruby, SQL<br />
+            <b>Intermediate: </b> Clojure, Haskell, JavaScript/TypeScript, C++<br />
+            <b>Beginner: </b> Prolog, LaTeX
+            <h3>Technologies</h3>
+            Docker, Kubernetes, Ansible<br />
+            Git, Linux, GraphQL, RabbitMQ, Redis
+            <h2>Communities</h2>
+            <a href={"https://github.com/palatable/lambda"}>palatable/lambda</a>: Contributor working on purely functional patterns in Java. Also an active member of the support chat helping teach functional programming and lambda usage to new users. <br />
+            <a href={"https://malleable.systems/"}>Malleable Systems Collective</a>: Catalog Curator for community looking into research/techniques of ways to make computing more malleable and accesible to a wider range of audiences.
         </div>
     </Layout>
