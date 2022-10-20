@@ -10,7 +10,7 @@ const ListLink = props =>
     </Link>
   </li>
 
-export default ({ children }) => (
+const layout = ({ children }) => (
   <StaticQuery
     query={graphql`
   query SiteTitleQuery {
@@ -30,15 +30,14 @@ export default ({ children }) => (
             meta={[
               { name: 'description', content: data.site.siteMetadata.description },
               { name: 'keywords', content: 'blog, programming' },
-            ]}
-          />
+            ]} />
           <div
             style={{
               margin: '0 auto',
               maxWidth: 960,
               padding: '1.25rem 1rem',
             }}>
-            <header style={{ marginBottom: '1.45rem', width: '100%' }} >
+            <header style={{ marginBottom: '1.45rem', width: '100%' }}>
               <div>
                 <Link
                   to="/"
@@ -62,6 +61,6 @@ export default ({ children }) => (
         </div>
 
       </>
-    )}
-  />
+    )} />
 )
+export default layout
