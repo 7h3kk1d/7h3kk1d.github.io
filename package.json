@@ -11,7 +11,7 @@
     "gatsby-plugin-typography": "^4.24.0",
     "gatsby-remark-highlight-code": "^3.2.0",
     "gatsby-source-filesystem": "^4.24.0",
-    "gatsby-transformer-remark": "^5.25.1",
+    "gatsby-transformer-remark": "^6.3.2",
     "glamorous": "^5.0.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
