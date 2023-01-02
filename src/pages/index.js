@@ -1,5 +1,5 @@
 import React from 'react'
-import Link from 'gatsby-link'
+import {Link} from 'gatsby-link'
 import { rhythm } from "../utils/typography";
 import Layout from "../components/layout"
 import { graphql } from 'gatsby'
@@ -25,7 +25,7 @@ const IndexPage = ({ data }) => (
 
 export const query = graphql`
   query IndexQuery {
-    allMarkdownRemark(sort: {fields: [frontmatter___date], order: DESC}) {
+    allMarkdownRemark(sort: {frontmatter: {date: DESC}}) {
       totalCount
       edges {
         node {

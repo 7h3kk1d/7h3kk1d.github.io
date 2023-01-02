@@ -1,7 +1,7 @@
 import React from 'react'
 import Helmet from 'react-helmet'
 import { StaticQuery, graphql } from "gatsby"
-import Link from 'gatsby-link'
+import {Link} from 'gatsby-link'
 
 const ListLink = props =>
   <li style={{ display: `inline-block`, marginRight: `1rem` }}>
