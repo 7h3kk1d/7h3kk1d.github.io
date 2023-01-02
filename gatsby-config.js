@@ -17,17 +17,6 @@ module.exports = {
         pathToConfigModule: `src/utils/typography.js`,
       },
     },
-    {
-      resolve: `gatsby-transformer-remark`,
-      options: {
-        plugins: [
-          {
-            resolve: `gatsby-remark-highlight-code`,
-            options: {lineNumbers: true}
-          },
-        ],
-      },
-    },
     `gatsby-plugin-twitter`,
     `gatsby-plugin-sharp`,
     {
@@ -43,6 +32,7 @@ module.exports = {
               maxWidth: 590,
             },
           },
+          `gatsby-remark-prismjs`,
         ],
       },
     },

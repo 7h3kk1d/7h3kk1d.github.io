@@ -2,8 +2,6 @@ import React from "react";
 import { rhythm } from "../utils/typography";
 import Layout from "../components/layout"
 import { graphql } from 'gatsby'
-import { defineCustomElements as deckDeckGoHighlightElement } from "@deckdeckgo/highlight-code/dist/loader";
-deckDeckGoHighlightElement();
 const blogPost = ({ data }) => {
   const post = data.markdownRemark;
   return (
