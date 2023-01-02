@@ -124,7 +124,7 @@ The current divide between programming and software usage provides different aff
 Affordances are generally quite good in end-user applications. Well-designed applications provide contextual menus that provide actions that are available given the current state and data. Additionally, they can show potential operations that are not currently possible but could be in another context (such as menu items being “greyed out”).
 
 <!-- TODO Get images fixed -->
-![Ubuntu non-editable text context menu](images/contextmenu.png) 
+![Ubuntu non-editable text context menu](/images/contextmenu.png) 
 
 This context menu example is not shown as an example of great interaction design but rather how interactions with the software are better enabled when the affordances are provided making it clear what actions are possible.
 
