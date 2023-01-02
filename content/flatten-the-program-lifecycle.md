@@ -83,7 +83,7 @@ This is an especially interesting case for us because these environments are usi
 
 One of the frequent complaints about Jupyter notebooks is the order in which code cells have been run and what data has been loaded is an implicit and hidden state of the environment. This can make it confusing for the user to understand what is going on at any moment. This doesn’t happen with classical programming tools because every time you start a program all the state is built from scratch. In non-programming applications, this happens less often because the applications are built from the ground with the goal of making state management a clear priority while exposing important states to users.
 
-Another common complaint is that notebook-driven development does not follow traditionally good software engineering methodologies or practices. Clearly if the goal was just data exploration and short-term experimentation this wouldn’t an issue. But by the nature of having an environment available to develop analyses that can be shared and reused, the desire for additional robustness becomes invaluable.
+Another common complaint is that notebook-driven development does not follow traditionally good software engineering methodologies or practices. Clearly if the goal was just data exploration and short-term experimentation this wouldn’t be an issue. But by the nature of having an environment available to develop analyses that can be shared and reused, the desire for additional robustness becomes invaluable.
 
 To be clear this is not meant to be an endorsement or admonishment of notebooks but rather to acknowledge the unfortunate tradeoffs that their potential audiences are forced to make.
 
