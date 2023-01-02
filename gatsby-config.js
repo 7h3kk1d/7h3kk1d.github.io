@@ -17,6 +17,16 @@ module.exports = {
         pathToConfigModule: `src/utils/typography.js`,
       },
     },
-    `gatsby-transformer-remark`
+    {
+      resolve: `gatsby-transformer-remark`,
+      options: {
+        plugins: [
+          {
+            resolve: `gatsby-remark-highlight-code`,
+            options: {lineNumbers: true}
+          },
+        ],
+      },
+    },
   ],
 }
