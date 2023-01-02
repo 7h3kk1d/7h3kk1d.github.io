@@ -134,7 +134,7 @@ On the other hand programming tools often give you the ability to create robust 
 
 ## Flatten the lifecycle
 <figure>
-<figcaption>I came across Omar’s tweet while I was writing this and it more articulately conveys what I’m trying to describe</figcaption>
+<figcaption>I came across Omar’s tweet while I was writing this and it more succinctly conveys what I’m trying to describe</figcaption>
 
 <!-- Use gatsby-plugin-twitter -->
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">(in our programming language, it&#39;s always runtime)</p>&mdash; Omar Rizwan (@rsnous) <a href="https://twitter.com/rsnous/status/1495560244696600582?ref_src=twsrc%5Etfw">February 21, 2022</a></blockquote> 
