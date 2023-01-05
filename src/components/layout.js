@@ -10,7 +10,7 @@ const ListLink = props =>
     </Link>
   </li>
 
-const layout = ({ children }) => (
+const layout = ({ children, title }) => (
   <StaticQuery
     query={graphql`
   query SiteTitleQuery {
@@ -26,7 +26,9 @@ const layout = ({ children }) => (
       <>
         <div>
           <Helmet
-            title={data.site.siteMetadata.title}
+            defaultTitle={data.site.siteMetadata.title}
+            title={title}
+            titleTemplate={`%s | ${data.site.siteMetadata.title}`}
             meta={[
               { name: 'description', content: data.site.siteMetadata.description },
               { name: 'keywords', content: 'blog, programming' },

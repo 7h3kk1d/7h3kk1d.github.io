@@ -1,7 +1,7 @@
 import React from "react";
 import Layout from "../components/layout";
 
-const cv = () => <Layout>
+const cv = () => <Layout title={"Curriculum Vitae"}>
     <div>
         <h1>
             Curriculum Vitae

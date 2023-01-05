@@ -1,7 +1,7 @@
 import React from "react";
 import Layout from "../components/layout";
 
-const about = () => <Layout>
+const about = () => <Layout title={"About"}>
   <div>
     <h1>
       About Me
