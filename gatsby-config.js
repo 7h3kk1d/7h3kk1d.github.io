@@ -31,6 +31,7 @@ module.exports = {
               // the content container as this plugin uses this as the
               // base for generating different widths of each image.
               maxWidth: 590,
+              showCaptions: true
             },
           },
           `gatsby-remark-prismjs`,
@@ -52,20 +53,20 @@ module.exports = {
           }
         }
       `,
-      feeds: [
-        {
-          serialize: ({ query: { site, allMarkdownRemark } }) => {
-            return allMarkdownRemark.edges.map(edge => {
-              return Object.assign({}, edge.node.frontmatter, {
-                description: edge.node.excerpt,
-                date: edge.node.frontmatter.date,
-                url: site.siteMetadata.siteUrl + edge.node.fields.slug,
-                guid: site.siteMetadata.siteUrl + edge.node.fields.slug,
-                custom_elements: [{ "content:encoded": edge.node.html }],
+        feeds: [
+          {
+            serialize: ({ query: { site, allMarkdownRemark } }) => {
+              return allMarkdownRemark.edges.map(edge => {
+                return Object.assign({}, edge.node.frontmatter, {
+                  description: edge.node.excerpt,
+                  date: edge.node.frontmatter.date,
+                  url: site.siteMetadata.siteUrl + edge.node.fields.slug,
+                  guid: site.siteMetadata.siteUrl + edge.node.fields.slug,
+                  custom_elements: [{ "content:encoded": edge.node.html }],
+                })
               })
-            })
-          },
-          query: `
+            },
+            query: `
             {
               allMarkdownRemark(sort: { frontmatter: { date: DESC }}) {
                 edges {
@@ -82,10 +83,10 @@ module.exports = {
               }
             }
           `,
-          output: "/rss.xml",
-          title: "Alexander Bandukwala",
-        },
-      ],
+            output: "/rss.xml",
+            title: "Alexander Bandukwala",
+          },
+        ],
       }
     }
   ],
