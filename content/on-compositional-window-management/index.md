@@ -18,36 +18,36 @@ As someone interested in providing more agency in our computing environment I am
 Window management is one of the least valued categories of software given how heavily used it is. Window managers control what is visible when you use a computer, yet in most cases they are inflexible and extremely limited in the scope for which they operate, relinquishing their responsibility to domain-specific applications causing a fragmented experience. I believe that we can do much better, and that composition is a critical component to improve.
 
 
-![An example of TWM, a stacking window manager](https://upload.wikimedia.org/wikipedia/commons/6/63/Windowmanager_twm.png)
+![An example of TWM, a stacking window manager](./twm.png)
 
 Windows are the graphical containers provided by operating systems for end-user applications to embed themselves. In some sense, windows are the fundamental building block of the desktop operating system; without windows, every application would be in charge of the full rendering of the desktop and you could only use one application at a time. Mobile operating systems, such as Android and iOS have also been heavily motivated by the window metaphor, even if you don’t usually see many windows on the screen simultaneously the interactions that the OS provides show “apps” in self-contained usually rectangular GUI layouts meant to resemble windows of the desktop. 
 
 The window manager is a critical component of the operating system that controls the placement and organization of windows on the screen. The most common type of window manager is the [floating window manager](https://en.wikipedia.org/wiki/Stacking_window_manager), which allows multiple windows to be displayed on the screen simultaneously as freeform rectangles that can be moved or resized within a fixed-size 2D canvas. This is the type of window manager used in traditional desktop environments such as Microsoft Windows, macOS, GNOME, and KDE. Floating window managers provide users with a range of customization options, including the ability to arrange windows in semantically meaningful positions, resize windows to fit content or reflect relative importance, and overlap windows to allow for shifting focus while maintaining peripheral awareness.
 
-![The i3 tiling window manager with 3 terminals open and a status bar open at the bottom](https://upload.wikimedia.org/wikipedia/commons/a/af/I3_window_manager_screenshot.png)
+![The i3 tiling window manager with 3 terminals open and a status bar open at the bottom](./i3.png)
 
 [Tiling window managers](https://en.wikipedia.org/wiki/Tiling_window_manager) are another form of window management that’s quite common. Some examples of popular tiling window managers are [i3](https://i3wm.org/), [bspwm](https://github.com/baskerville/bspwm), [xmonad](https://xmonad.org/), and [awesome](https://i3wm.org/). The main idea behind tiling window managers is that the windows should take up the entire available screen without overlapping. This is accomplished by arranging windows into several “tiles” that fill up to represent the entire screen while not requiring users to manually resize or rearrange windows to maximize screen space as they would in a floating window manager. These tiles can still be rearranged or resized but the remaining tiles automatically reflow around to continue maximizing space. Power users will note that all of the major desktop environments mentioned above have added some form of tiling to their floating window managers; for example, Microsoft Windows supports splitting the desktop into two applications by dragging to the left or right side and macOS supports a side-by-side view for full-screen applications.
 
 Another way in which existing window managers have evolved is the introduction of [Virtual Desktops](https://en.wikipedia.org/wiki/Virtual_desktop). Virtual desktops introduce copies of the traditional desktop metaphor so that users can switch between multiple desktops while maintaining window layouts and states when working on different tasks. I’m glad to see that some effort is happening in this space. Still, I can’t help but think window management is just an afterthought in the Operating System and is not considered a primary part of the interface open for exploration.
 
-![Gnome Shell 3.14 with 4 virtual desktops open](https://upload.wikimedia.org/wikipedia/commons/1/12/GNOME_Shell_3.14_showing_workspaces_in_overview_mode.png)
+![Gnome Shell 3.14 with 4 virtual desktops open](./gnome_shell.png)
 
 ## Leave it up to the application
 
 Given the lack of extensibility or capability in the operating system's window management, end-user applications have gone through the effort to implement their own forms of window management. The most obvious example is [tabs](https://en.wikipedia.org/wiki/Tab_(interface)).  Web browsers, modern IDEs, and text editors almost universally support tabs; Even [Windows file explorer is getting tabs](https://www.pcmag.com/news/latest-windows-11-update-adds-tabs-to-file-explorer). Tabs are a great interface feature that allows users to switch between panes quickly while taking up very little room. Once you begin looking for tabs you see the show up in all sorts of forms in many different applications. Instant messaging apps such as Slack, Discord, or Element use horizontal tabs to separate different channels of communication. Email applications often separate inboxes by tabs.
 
-![Some tabs I had open at the time of writing this article](/images/tabs.png)
+![Some tabs I had open at the time of writing this article](./tabs.png)
 
 Since tabs are not provided as an operating system or window management feature, all of these applications are forced to write their own distinct version. This creates more work for the application developers, forces inconsistencies in the interfaces, and most importantly breaks interoperability. It would be perfectly reasonable to want a window with tabs for PDFs, images, and rich document files. Still, you would be forced to open them in a single application that supports all the file types and implemented tabbing. The most common solution to this problem is to just use web apps and recover tabbing by using browser tabs. This is really just giving up and allowing for rich tabs to be a web-only feature; **we should be able to utilize tabs for any application and combine tabs between them**.
 
 Terminal text editors like Emacs and Vim have long supported split windows in order to access multiple buffers on screen at once. Modern IDEs, such as VS Code, have continued this feature allowing for a single editing pane to be split horizontally or vertically. This in-app windowing functionality is eerily familiar to the tiling window managers that were discussed above. The only difference is this is done within the context of a single application window. Unfortunately, similar to tabs, they also suffer from non-interoperability**. Another unfortunate side effect of implementing the tiling internal to the application is that now users have to learn a distinct set of keyboard shortcuts and interactions to manage the windows or splits**. 
 
-![Text editor VSCode with in-editor splits and tabs.](/images/vscodesplits.png)
+![Text editor VSCode with in-editor splits and tabs.](./vscodesplits.png)
 
 Professional media creation applications have been implementing their own window management for years. Tools like Photoshop, DaVinci Resolve, and Blender have many panels that can be visible on the screen at once. Their internal window managers support features such as docking onto sidebars, tabs, and even floating panels. Given that these tools are aimed at professional use they can be more difficult for novice users. The sophistication of these tools may seem cluttered or unnecessary, but they have given great power and agency to power users to customize their workspaces to their benefit. I would like to imagine a world where all kinds of workflows could benefit from these docking/panel interfaces. Instead of browser extensions being locked into the bookmark bar if they could be given panels that could be docked on the sides of the browser. 
 
-![From Blender.org.
-A screenshot of the Blender 3D Graphics Software application which has lots of information on the screen with many menus and toolbars.](https://www.blender.org/wp-content/uploads/2019/07/blender_vfx-1280x720.jpg?x12104)
+![From Blender.org:
+A screenshot of the Blender 3D Graphics Software application which has lots of information on the screen with many menus and toolbars](./blender.jpg)
 
 
 <div style="float: right">
@@ -56,7 +56,7 @@ A screenshot of the Blender 3D Graphics Software application which has lots of i
 
 The last example of in-app window management may be slightly counterintuitive.  [Infinite canvases](https://infinitecanvas.tools/) have been taking off in recent years with applications such as [Muse](https://museapp.com/), [Miro](https://miro.com/), and [Apple’s Freeform](https://www.apple.com/newsroom/2022/12/apple-launches-freeform-a-powerful-new-app-designed-for-creative-collaboration/). An infinite canvas application can be thought of as an arbitrarily large whiteboard space that allows you to represent content spatially. Usually, this involves a drag-and-drop interface often accompanied by some drawing and text functionality. This should seem familiar since it’s very similar to the floating window managers mentioned above. Both are attempting to allow users to layout their work arbitrarily in 2D space by resizing and drag-and-drop. Infinite canvases however have a much more expansive feature set given that the canvas extends infinitely in every direction; plus they allow users to zoom in and out to assist in navigation. Desktop floating window managers should adopt these features allowing users to have many floating windows open without having to fit them all on their limited screen space. Instead, you can just arrange your open windows in an infinite 2D space and zoom around as needed. I can imagine a workflow where personal tasks are located in a topographical region distant from work tasks, so at the end of the workday, a user could shift their focus from work to personal use. In addition, there’s no reason the desktop window manager couldn’t allow for arbitrary drawing/text alongside traditional application windows. Even if not intended to be a desktop window manager I think [Ultra](https://ultra.tf/), a multi-media canvas, can give a glimpse of the feeling a more infinite floating window manager would provide.
 
-![Screenshot of Ultra, a multimedia smart canvas with several websites open on an overlapping infinite canvas](/images/ultra.png)
+![Screenshot of Ultra, a multimedia smart canvas with several websites open on an overlapping infinite canvas](./ultra.png)
 
 
 ## Composition
@@ -69,33 +69,26 @@ Alternatively, another user may choose to keep their top-level container as an i
 
 The following are some ideas for containers that should be available in such a system:
 
-- Tabbed Window
+#### Tabbed Window
+A window with named tabs that change which inner window is being displayed
+ 
+#### Split Windows/Tiling
+A window composed of 2 or more sub-windows arranged in a tiling fashion.
     
-    A window with named tabs that change which inner window is being displayed
+#### Infinite Canvas  
+The infinite replacement of our traditional floating window manager with the addition of drawing and text overlaying the canvas
     
-- Split Windows/Tiling
+#### Fixed-size Canvas
+There’s still value in a canvas you don’t have to traverse so you would still offer a floating window manager fixed to the screen size.
     
-    A window composed of 2 or more sub-windows arranged in a tiling fashion.
+#### Grid or gallery view  
+Similar to tiling but windows are represented in consistent rows/columns
     
-- Infinite Canvas
+#### Panel and docking bars  
+A container that adds a panel bar so that windows can be docked inside the panel and hidden away if needed.
     
-    The infinite replacement of our traditional floating window manager with the addition of drawing and text overlaying the canvas
-    
-- Fixed-size Canvas
-    
-    There’s still value in a canvas you don’t have to traverse so you would still offer a floating window manager fixed to the screen size.
-    
-- Grid or gallery view
-    
-    Similar to tiling but windows are represented in consistent rows/columns
-    
-- Panel and docking bars
-    
-    A container that adds a panel bar so that windows can be docked inside the panel and hidden away if needed.
-    
-- Document view
-    
-    A more outlandish option would be a document view where the window would represent something akin to a linearized document like Notion or Google Docs. Sub-windows would behave similarly to inline blocks or images in a text document. You could write an essay and have a fully featured application inline the document. This would unlock a new sort of literate computing environment.
+#### Document view  
+A more outlandish option would be a document view where the window would represent something akin to a linearized document like Notion or Google Docs. Sub-windows would behave similarly to inline blocks or images in a text document. You could write an essay and have a fully featured application inline the document. This would unlock a new sort of literate computing environment.
     
 
 These suggestions are just a starting point. In an idealized system, new containers would be easy to add extending the system as needed. The main idea is that the window manager should be thought of as decomposing windows into sub-windows as opposed to being a single fixed layer.

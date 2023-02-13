@@ -1,3 +1,5 @@
-img {
-    float: right
+figcaption {
+    text-align: center;
+    color: #5B5B66;
+    font-size: 16px;
 }
