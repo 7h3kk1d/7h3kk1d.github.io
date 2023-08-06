@@ -54,7 +54,9 @@ const layout = ({ children, title }) => (
                   <ListLink to="/">Home</ListLink>
                   <ListLink to="/about">About</ListLink>
                   <ListLink to="/cv">CV</ListLink>
-                  <a href="https://twitter.com/abanduk" style={{background: `none`}}><img alt={`Twitter Profile`} style={{ verticalAalign: `bottom`, marginBottom: 0}}width={25} height={25} src={`/images/twitter.svg`} /></a>
+                  <ListLink to="https://twitter.com/abanduk">Twitter</ListLink>
+                  <ListLink to="https://fosstodon.org/@thekkid">Mastodon</ListLink>
+                  <ListLink to="https://github.com/7h3kk1d">GitHub</ListLink>
                 </ul>
               </div>
             </header>
