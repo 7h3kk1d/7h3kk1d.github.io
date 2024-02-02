@@ -42,10 +42,8 @@ const cv = () => <Layout title={"Curriculum Vitae"}>
         <h3>Software Engineer, Telnyx</h3>
         <h4 style={{ marginTop: 0 }}>July 2013-November 2014</h4>
         <ul>
-            <li>First employee who led development team after CTO exit while assuming full stack responsi-
-                bilities in a startup environment</li>
-            <li>Set up automated deployments (Ansible) and notifications saving developers hours per day
-                and decreasing downtime</li>
+            <li>First employee who led development team after CTO exit while assuming full stack responsibilities in a startup environment</li>
+            <li>Set up automated deployments (Ansible) and notifications saving developers hours per day and decreasing downtime</li>
         </ul>
         <h2>Education</h2>
         Georgia Institute of Technology, M.S., Computer Science, 2016-2017, GPA 3.8<br />
@@ -54,14 +52,11 @@ const cv = () => <Layout title={"Curriculum Vitae"}>
         Louisiana School for Math, Sciences and the Arts, High School, 2009
         <h2>Projects</h2>
         <h3>GRPC based map reduce framework</h3>
-        <p>Built a C++ map reduce library that utilized GRPC for network communication as well as
-            Protocol Buffers for serialization.</p>
+        <p>Built a C++ map reduce library that utilized GRPC for network communication as well as Protocol Buffers for serialization.</p>
         <h3>N-body gravitational body simulator</h3>
-        <p>Developed a python program to simulate n celestial bodies gravitational attraction over time.
-            Data was then output to visualization software to view paths.</p>
+        <p>Developed a python program to simulate n celestial bodies gravitational attraction over time. Data was then output to visualization software to view paths.</p>
         <h3>User load testing simulator</h3>
-        <p>Made a clojure application that would simulate user activities in order to provide high through-
-            put load testing to the backend system. Utilized stochastic state machines to generate actions.</p>
+        <p>Made a clojure application that would simulate user activities in order to provide high throughput load testing to the backend system. Utilized stochastic state machines to generate actions.</p>
         <h2>Skills</h2>
         <h3>Languages</h3>
         <b>Proficient: </b> Python, Java 8+, Ruby, SQL<br />
