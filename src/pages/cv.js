@@ -50,6 +50,11 @@ const cv = () => <Layout title={"Curriculum Vitae"}>
         University of Louisiana at Lafayette, B.S., Computer Science, 2009-2013<br />
         University of Louisiana at Lafayette, B.S., Mathematics, 2009-2013<br />
         Louisiana School for Math, Sciences and the Arts, High School, 2009
+        <h2>Talks</h2>
+        <ul>
+            <li> <a href="https://popl24.sigplan.org/home/propl-2024">PROPL 2024</a>: <a href="https://hazel.org/papers/propl24.pdf">Toward a Live, Rich, Composable, and Collaborative
+Planetary Compute Engine</a></li>
+        </ul>
         <h2>Projects</h2>
         <h3>GRPC based map reduce framework</h3>
         <p>Built a C++ map reduce library that utilized GRPC for network communication as well as Protocol Buffers for serialization.</p>
