@@ -7,7 +7,7 @@ export const about =   <div>
 <img src={"https://gravatar.com/avatar/" + emailHash +"?s=300"} alt="Gravatar Profile Pic" style={{ float: 'right', marginLeft: '20px' }}></img>
 <p>
   I'm a researcher in the <a href="https://neurocy.notion.site/Future-of-Programming-Lab-241d162461a04064ae1fd9ae32bf4cb1">Future of Programming Lab</a> at the University of Michigan,
-  where my work focuses on programming languages, particularly <a href="https://hazel.org/">Hazel</a>, a live functional programming language.
+  where my work focuses on programming languages, specifically <a href="https://hazel.org/">Hazel</a>, a live functional programming language.
   I'm interested in utilizing the intersection of Programming Language Theory and Human-Computer Interaction to make the power of computing better for everyone.
   My long-term vision is to extend live programming into creating <a href="https://malleable.systems">malleable software</a> by integrating programming language concepts into end-user interfaces.
   Before my research career, I worked as a professional software engineer for over a decade.
