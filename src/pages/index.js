@@ -3,9 +3,12 @@ import {Link} from 'gatsby-link'
 import { rhythm } from "../utils/typography";
 import Layout from "../components/layout"
 import { graphql } from 'gatsby'
-
+import {about} from '../components/about';
 const IndexPage = ({ data }) => (
   <Layout>
+    <div>
+      {about}
+    </div>
     <div>
       <h1>Posts</h1>
       {data.allMarkdownRemark.edges.map(({ node }) => (
