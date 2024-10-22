@@ -4,10 +4,14 @@ import { rhythm } from "../utils/typography";
 import Layout from "../components/layout"
 import { graphql } from 'gatsby'
 import {about} from '../components/about';
+import {research} from '../components/research';
 const IndexPage = ({ data }) => (
   <Layout>
     <div>
       {about}
+    </div>
+    <div>
+      {research}
     </div>
     <div>
       <h1>Posts</h1>

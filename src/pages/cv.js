@@ -11,8 +11,15 @@ const cv = () => <Layout title={"Curriculum Vitae"}>
             {"Software Engineer seeking opportunities to pursue the future of computing via cutting edge technology and overlooked research. Particularly interested in utilizing the intersection of Programming Language Theory and Human-Computer Interaction to make the power of computing better for everyone. "}
         </p>
         <h2>Employment</h2>
+        <h3>Graduate Researcher, University of Michigan (Future of Programming Lab)</h3>
+        <h4 style={{ marginTop: 0 }}>September 2024-Present</h4>
+        <ul>
+            <li>Conducting research on live programming languages, focusing on <a href="http://hazel.org">Hazel</a> and its application in creating malleable software</li>
+            <li>Exploring the intersection of Programming Language Theory and Human-Computer Interaction to make computing more accessible</li>
+            <li>Contributing to the <a href="https://github.com/hazelgrove/hazel/commits?author=7h3kk1d">open-source Hazel project</a>, implementing key features and working on development processes</li>
+        </ul>
         <h3>Senior Software Engineer, DRW Holdings (Reference Data)</h3>
-        <h4 style={{ marginTop: 0 }}>April 2020-Present</h4>
+        <h4 style={{ marginTop: 0 }}>April 2020-June 2024</h4>
         <ul>
             <li>Performing feature development, maintenance and support for dozens of polyglot services (Java, Ruby, Clojure, Python)</li>
             <li>Leading greenfield development of multiple projects while onboarding team on using functional abstractions in Java</li>
@@ -46,6 +53,7 @@ const cv = () => <Layout title={"Curriculum Vitae"}>
             <li>Set up automated deployments (Ansible) and notifications saving developers hours per day and decreasing downtime</li>
         </ul>
         <h2>Education</h2>
+        University of Michigan, Ph.D. Student, Computer Science, 2024-Present<br />
         Georgia Institute of Technology, M.S., Computer Science, 2016-2017, GPA 3.8<br />
         University of Louisiana at Lafayette, B.S., Computer Science, 2009-2013<br />
         University of Louisiana at Lafayette, B.S., Mathematics, 2009-2013<br />
@@ -65,7 +73,7 @@ Planetary Compute Engine</a></li>
         <h2>Skills</h2>
         <h3>Languages</h3>
         <b>Proficient: </b> Python, Java 8+, Ruby, SQL<br />
-        <b>Intermediate: </b> Clojure, Haskell, JavaScript/TypeScript, C++<br />
+        <b>Intermediate: </b>OCaml/Reason, Clojure, Haskell, JavaScript/TypeScript, C++<br />
         <b>Beginner: </b> Prolog, LaTeX
         <h3>Technologies</h3>
         Docker, Kubernetes, Ansible<br />

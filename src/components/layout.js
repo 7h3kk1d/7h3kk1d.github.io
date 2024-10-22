@@ -57,6 +57,7 @@ const layout = ({ children, title }) => (
                   <ListLink to="https://twitter.com/abanduk">Twitter</ListLink>
                   <ListLink to="https://fosstodon.org/@thekkid">Mastodon</ListLink>
                   <ListLink to="https://github.com/7h3kk1d">GitHub</ListLink>
+                  <ListLink to="mailto:alexander@bandukwala.me">Email</ListLink>
                 </ul>
               </div>
             </header>
