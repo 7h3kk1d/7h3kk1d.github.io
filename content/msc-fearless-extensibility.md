@@ -28,17 +28,25 @@ Another key issue in extensibility is **trust**. When allowing third-party exten
 
 One potential solution is to build **shared software sources**, such as package managers or app stores, where extensions are vetted and reviewed by the community. Additionally, **cryptographic authorities** can help verify that code has been reviewed and approved by trusted parties.
 
-Beyond that, we can use **static analysis** and **programming language techniques** to restrict what extensible components can do. For example, can we ensure that an extension cannot read from the file system or access the network unless explicitly allowed?
+Beyond that, we should use **static analysis** and **programming language techniques** to restrict what extensible components can do. For example, can we ensure that an extension cannot read from the file system or access the network unless explicitly allowed?
 
-Another concept to explore here is **capability-based security (OCAP)**, which emphasizes controlling what resources (or capabilities) an extension is allowed to access.
+Another concept to explore here is [**capability-based security (OCAP)**](https://en.wikipedia.org/wiki/Object-capability_model), which emphasizes controlling what resources (or capabilities) an extension is allowed to access.
+
+## Orthogonality
+
+A crucial aspect of designing extensible systems is ensuring that orthogonal extensions do not interfere with each other. **Non-interference** means that multiple extensions can coexist without breaking or altering each other’s behavior in normal operation, preserving the stability and predictability of the system. **Orthogonality** is the property of extensions that obviously _should not_ affect each other.
+
+> A styling extension for a web browser and a tab manager would be examples of **orthogonal** extensions since you would not expect any confluence of behavior when having both.
+
+## Compositionality
+
+While orthogonality focuses on ensuring that independent extensions do not interfere, **compositionality** goes a step further by enabling multiple extensions to work together in a predictable and structured way. Compositional systems allow extensions to combine and build on each other’s functionality, often producing more powerful results than any single extension alone.
+
+The challenge of compositionality lies in ensuring that extensions can interoperate smoothly, without unexpected interactions or conflicts. To achieve this, systems need well-defined interfaces and extension points that provide predictable behavior when used in combination. In addition they may also need ways for end-users to handle intrinsic conflicts themselves.
 
 ## Data-Oriented Consistent Approach
 
 When designing extensible systems, it's crucial to build on **sound data-oriented primitives**. By focusing on more flexible, composable interactions from the start, we can create systems that are easier to extend later on, without resorting to bolted-on complexity.
-
-## Compositionality
-
-Finally, a core challenge in extensibility is ensuring that systems remain **composable**. How do we ensure that extensions can work together in a predictable, understandable way?
 
 ### Making Extensible Systems Composable
 
