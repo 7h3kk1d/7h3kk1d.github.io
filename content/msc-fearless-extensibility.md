@@ -44,13 +44,17 @@ While orthogonality focuses on ensuring that independent extensions do not inter
 
 The challenge of compositionality lies in ensuring that extensions can interoperate smoothly, without unexpected interactions or conflicts. To achieve this, systems need well-defined interfaces and extension points that provide predictable behavior when used in combination. In addition they may also need ways for end-users to handle intrinsic conflicts themselves.
 
-## Data-Oriented Consistent Approach
-
-When designing extensible systems, it's crucial to build on **sound data-oriented primitives**. By focusing on more flexible, composable interactions from the start, we can create systems that are easier to extend later on, without resorting to bolted-on complexity.
-
 ### Making Extensible Systems Composable
 
-We can look to functional programming and **mathematical rigor** for inspiration. For example, **static analysis** can help us ensure that extensions adhere to certain properties, while **debuggability** and **observability** are essential for maintaining a high level of trust in the system.
+I am obviously biased given my background, but I believe we can look to functional programming and **mathematical rigor** for inspiration. For example, **static analysis** can help us ensure that extensions adhere to certain properties, while **debuggability** and **observability** are essential for maintaining a high level of trust in the system.
+
+## Substrates
+
+<!-- TODO -->
+
+### Data-Oriented Consistent Approach
+
+When designing extensible systems, it's crucial to build on **sound data-oriented primitives**. By focusing on more flexible, composable interactions from the start, we can create systems that are easier to extend later on, without resorting to bolted-on complexity.
 
 ## Conclusion
 
