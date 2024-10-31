@@ -5,7 +5,7 @@ date: "2024-10-29"
 
 This post is a response to the first **[Malleable Systems Challenge Problem](https://forum.malleable.systems/t/a-new-community-activity-challenge-problems/196)**, which explores the theme of **[fearless extensibility](https://forum.malleable.systems/t/challenge-problem-fearless-extensibility/205)**. The challenge asks participants to think deeply about how we can achieve powerful extensibility in systems without introducing significant security and maintenance risks. In this post, I’ll be exploring several dimensions of the problem and proposing ideas for balancing the benefits of extensibility with the inherent challenges.
 
-Inspired by [Technical dimensions of programming systems](https://tomasp.net/techdims/) and [Technical Dimensions of Feedback in Live Programming Systems](https://joshuahhh.com/dims-of-feedback/), I aim to outline different dimensions of extensibility to facilitate comparison between designs and foster discussions around malleable systems. This is not intended to be a comprehensive list but will evolve over time. If you have any thoughts or suggestions, feel free to reach out and connect with me.
+Inspired by [Technical dimensions of programming systems](https://tomasp.net/techdims/) and [Technical Dimensions of Feedback in Live Programming Systems](https://joshuahhh.com/dims-of-feedback/), I aim to outline different dimensions of extensibility to facilitate comparison between designs and foster discussions around malleable systems. This is not intended to be a comprehensive list but will be a live document that will evolve over time. If you have any thoughts or suggestions, feel free to reach out and connect with me.
 
 ## Open vs. Closed Extensibility
 
@@ -50,12 +50,12 @@ I am obviously biased given my background, but I believe we can look to function
 
 ## Substrates
 
-<!-- TODO -->
+Jonathan Edwards introduced **substrates** to me during his [LIVE Keynote](https://www.youtube.com/watch?v=4GOeYylCMJI&t=2286s) at [SPLASH](https://2024.splashcon.org/) this month. He gives some criteria as to what define a software substrate. My interpretation is that **substrates** are the computational model and framing in which systems are defined along with that model being exposed to a user so programming is using. So in a sense they define the data model as well as how computation itself can be represented in a system. Possible substrates could include POSIX, spreadsheets, objects, actors, or functional paradigms. With regards to extensibility it's important to design these substrates in such a way that it allows for the extensible properties we'd like to have.
 
-### Data-Oriented Consistent Approach
+### Embedding
 
-When designing extensible systems, it's crucial to build on **sound data-oriented primitives**. By focusing on more flexible, composable interactions from the start, we can create systems that are easier to extend later on, without resorting to bolted-on complexity.
+When building extensible systems, it’s critical to ground them in **clear, well-defined primitives**. Designing systems with composable, flexible interactions from the outset ensures that extensibility can be smoothly incorporated later, rather than having complexity bolted on after the fact. Effective extensibility deeply embeds into the structure of the **substrates** rather than existing as an isolated layer on top. This allows extensions to integrate seamlessly into the system, enabling them to express their own data models and computations in a natural and coherent way. In short, for true **composition** to thrive, the substrate must be expressive enough to accommodate extensions without breaking its core structure or creating unnecessary friction.
 
 ## Conclusion
 
-Designing extensible systems is a complex challenge, but by focusing on **intentional extensibility**, **trust**, and **compositionality**, we can create systems that empower users while minimizing risks. Throughout this series, we'll dive deeper into these concepts and explore real-world examples of systems that have successfully balanced these concerns.
+Designing extensible systems is a complex challenge. The ideas above are clearly incomplete but I hope can be a jumping off point for a discussion about what we value in the future.
