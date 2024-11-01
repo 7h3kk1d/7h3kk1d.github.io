@@ -46,11 +46,16 @@ The challenge of compositionality lies in ensuring that extensions can interoper
 
 ### Making Extensible Systems Composable
 
-I am obviously biased given my background, but I believe we can look to functional programming and **mathematical rigor** for inspiration. For example, **static analysis** can help us ensure that extensions adhere to certain properties, while **debuggability** and **observability** are essential for maintaining a high level of trust in the system.
+We can look to functional programming and **mathematical rigor** for inspiration. For example, **static analysis** can help us ensure that extensions adhere to certain properties, while **debuggability** and **observability** are essential for maintaining a high level of trust in the system.
 
 ## Substrates
 
-Jonathan Edwards introduced **substrates** to me during his [LIVE Keynote](https://www.youtube.com/watch?v=4GOeYylCMJI&t=2286s) at [SPLASH](https://2024.splashcon.org/) this month. He gives some criteria as to what define a software substrate. My interpretation is that **substrates** are the computational model and framing in which systems are defined along with that model being exposed to a user so programming is using. So in a sense they define the data model as well as how computation itself can be represented in a system. Possible substrates could include POSIX, spreadsheets, objects, actors, or functional paradigms. With regards to extensibility it's important to design these substrates in such a way that it allows for the extensible properties we'd like to have.
+Jonathan Edwards introduced **substrates** to me during his [LIVE Keynote](https://www.youtube.com/watch?v=4GOeYylCMJI&t=2286s) at [SPLASH](https://2024.splashcon.org/) this month.
+ He gives some criteria as to what define a software substrate. My interpretation is that **substrates** are the computational model and framing in which systems are defined.
+It is paramount that the user interacts in terms of the model so that programming the system is the same as using it.
+So in a sense they define the data model as well as how computation itself can be represented in a system.
+Historical substrates  include POSIX, spreadsheets, objects, actors, and functional paradigms.
+With regards to extensibility it's important to design these substrates in such a way that it allows for the extensible properties we'd like to have.
 
 ### Embedding
 
