@@ -4,7 +4,7 @@ export const about =   <div>
 <h1>
   About Me
 </h1>
-<img src={"https://gravatar.com/avatar/" + emailHash +"?s=300"} alt="Gravatar Profile Pic" style={{ float: 'right', marginLeft: '20px' }}></img>
+<img src={"https://gravatar.com/avatar/" + emailHash +"?s=300"} alt="Gravatar Profile Pic" style={{ float: 'right', marginLeft: '20px', borderRadius: '50%' }}></img>
 <p>
   I'm a researcher in the <a href="https://neurocy.notion.site/Future-of-Programming-Lab-241d162461a04064ae1fd9ae32bf4cb1">Future of Programming Lab</a> at the University of Michigan,
   where my work focuses on programming languages, specifically <a href="https://hazel.org/">Hazel</a>, a live functional programming language.
