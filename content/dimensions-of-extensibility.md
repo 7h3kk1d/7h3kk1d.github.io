@@ -1,6 +1,6 @@
 ---
-title: "Dimensions of Extensibility"
-date: "2024-10-29"
+title: 'Dimensions of Extensibility'
+date: '2024-10-29'
 ---
 
 This post is a response to the first **[Malleable Systems Challenge Problem](https://forum.malleable.systems/t/a-new-community-activity-challenge-problems/196)**, which explores the theme of **[fearless extensibility](https://forum.malleable.systems/t/challenge-problem-fearless-extensibility/205)**. The challenge asks participants to think deeply about how we can achieve powerful extensibility in systems without introducing significant security and maintenance risks. In this post, I’ll be exploring several dimensions of the problem and proposing ideas for balancing the benefits of extensibility with the inherent challenges.
@@ -51,10 +51,10 @@ We can look to functional programming and **mathematical rigor** for inspiration
 ## Substrates
 
 Jonathan Edwards introduced **substrates** to me during his [LIVE Keynote](https://www.youtube.com/watch?v=4GOeYylCMJI&t=2286s) at [SPLASH](https://2024.splashcon.org/) this month.
- He gives some criteria as to what define a software substrate. My interpretation is that **substrates** are the computational model and framing in which systems are defined.
+He gives some criteria as to what define a software substrate. My interpretation is that **substrates** are the computational model and framing in which systems are defined.
 It is paramount that the user interacts in terms of the model so that programming the system is the same as using it.
 So in a sense they define the data model as well as how computation itself can be represented in a system.
-Historical substrates  include POSIX, spreadsheets, objects, actors, and functional paradigms.
+Historical substrates include POSIX, spreadsheets, objects, actors, and functional paradigms.
 With regards to extensibility it's important to design these substrates in such a way that it allows for the extensible properties we'd like to have.
 
 ### Embedding
