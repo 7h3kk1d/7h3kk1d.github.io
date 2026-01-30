@@ -337,6 +337,12 @@ blockquote {
 
 .social-dropdown-menu li {
   margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.social-dropdown-menu li:last-child {
+  border-bottom: none;
 }
 
 .social-link {
@@ -346,12 +352,16 @@ blockquote {
   padding: 0.5rem 1rem;
   color: var(--color-text);
   text-decoration: none;
+  text-shadow: none;
+  background-image: none;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .social-link:hover {
   background-color: var(--color-link);
   color: var(--color-bg);
+  text-shadow: none;
+  background-image: none;
 }
 
 .social-link svg {
