@@ -3,6 +3,7 @@ import Helmet from 'react-helmet'
 import { StaticQuery, graphql } from 'gatsby'
 import { Link } from 'gatsby-link'
 import ThemeToggle from './theme-toggle'
+import SocialDropdown from './social-dropdown'
 
 const ListLink = (props) => (
   <li style={{ display: `inline-block`, marginRight: `1rem` }}>
@@ -69,12 +70,7 @@ const layout = ({ children, title }) => (
                   <ListLink to="/">Home</ListLink>
                   <ListLink to="/about">About</ListLink>
                   <ListLink to="/cv">CV</ListLink>
-                  <ListLink to="https://twitter.com/abanduk">Twitter</ListLink>
-                  <ListLink to="https://fosstodon.org/@thekkid">
-                    Mastodon
-                  </ListLink>
-                  <ListLink to="https://github.com/7h3kk1d">GitHub</ListLink>
-                  <ListLink to="mailto:alexander@bandukwala.me">Email</ListLink>
+                  <SocialDropdown />
                   <li style={{ display: 'inline-block', marginLeft: '1rem' }}>
                     <ThemeToggle />
                   </li>

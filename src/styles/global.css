@@ -290,3 +290,70 @@ blockquote {
   cx: 18px;
   cy: 6px;
 }
+
+/* Social Dropdown */
+.social-dropdown {
+  position: relative;
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+.social-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-link);
+  transition: color 0.2s ease;
+}
+
+.social-dropdown-trigger:hover {
+  color: var(--color-link-hover);
+}
+
+.social-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  background: var(--color-bg);
+  border: 1px solid var(--color-text);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  z-index: 100;
+}
+
+.social-dropdown:hover .social-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.social-dropdown-menu li {
+  margin: 0;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.social-link:hover {
+  background-color: var(--color-link);
+  color: var(--color-bg);
+}
+
+.social-link svg {
+  flex-shrink: 0;
+}
