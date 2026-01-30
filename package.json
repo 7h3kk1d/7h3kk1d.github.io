@@ -35,7 +35,8 @@
   "license": "MIT",
   "scripts": {
     "deploy": "gatsby build && gh-pages -d public -b master",
-    "build": "gatsby build"
+    "build": "gatsby build",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "gh-pages": "^5.0.0",
