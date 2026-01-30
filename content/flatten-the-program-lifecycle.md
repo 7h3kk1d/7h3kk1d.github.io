@@ -1,14 +1,13 @@
 ---
-title: "Flatten the Program Lifecycle"
-date: "2023-01-02"
+title: 'Flatten the Program Lifecycle'
+date: '2023-01-02'
 ---
-
 
 > This post represents a change in how I have reasoned about software and I think could be of some value to others. I am not claiming that any of the information is novel but I still don’t think it has gained full mind share.
 
 > Sidenote: I began writing this about a year ago and since then Jack Rusher has released a wonderful talk [Stop Writing Dead Programs](https://www.youtube.com/watch?v=8Ab3ArE8W3s) which addresses some similar concerns.
 
-I think the traditional way we break down the [Program Lifecycle](https://en.wikipedia.org/wiki/Program_lifecycle_phase)  is keeping us from making radical improvements in the field of Computing. The Program Lifecycle for those unfamiliar is the set of stages a program goes through in order from source to completion:
+I think the traditional way we break down the [Program Lifecycle](https://en.wikipedia.org/wiki/Program_lifecycle_phase) is keeping us from making radical improvements in the field of Computing. The Program Lifecycle for those unfamiliar is the set of stages a program goes through in order from source to completion:
 
 ### Simplified Program Lifecycle:
 
@@ -18,7 +17,7 @@ I think the traditional way we break down the [Program Lifecycle](https://en.wik
 
 I’m aware there are also interpreted programming environments that aren’t compiled in a traditional sense; we’re going to circle back to that.
 
-Dividing up the program lifecycle into these disjoint stages is limiting the design space of programming and therefore interactive computing. One area in which this program lifecycle is missing is the context in which the program is executed. The first piece of context is *when* the program plans to be executed. Broadly I think this can be split into two camps:
+Dividing up the program lifecycle into these disjoint stages is limiting the design space of programming and therefore interactive computing. One area in which this program lifecycle is missing is the context in which the program is executed. The first piece of context is _when_ the program plans to be executed. Broadly I think this can be split into two camps:
 
 - Classical Programming (Programming for the future)
 - Interactive Computation (Programming for the now)
@@ -29,7 +28,7 @@ Classical programming is the domain most programmers are familiar with and that 
 
 This goes back to the beginning of programming when programmers would write programs by hand and then submit them in batches for a mainframe to process. Most of our programming is still done in this style.
 
-For many domains this delay between describing a computation and the actual computing is intentional. The obvious case is still [Batch Processing](https://en.wikipedia.org/wiki/Batch_processing) where some computation is intentionally scheduled or queued to run at a later time. This can both be done for resource utilization reasons (run this computation during off-peak hours) or because some later input will be available at the scheduled time (run a report at the end of the month). 
+For many domains this delay between describing a computation and the actual computing is intentional. The obvious case is still [Batch Processing](https://en.wikipedia.org/wiki/Batch_processing) where some computation is intentionally scheduled or queued to run at a later time. This can both be done for resource utilization reasons (run this computation during off-peak hours) or because some later input will be available at the scheduled time (run a report at the end of the month).
 
 A related case where it’s necessary to consider a computation deferred is the case where it’s run on a machine other than the one it was initially written on. If you plan on distributing a computation over a cluster of machines or just running it on another one as is often the case in scientific computing you have lost all the interactivity from the editing stage. You can recover some of this interactivity by transmitting data back and forth between machines but it will always be desirable to submit a computation to the external machine and not block on that operation.
 
@@ -58,13 +57,14 @@ Some examples:
 - REPL usage
 - Jupyter Notebooks
 
-The advantages of *Interactive Computing* should be obvious to anyone familiar with modern software but have also been written about at length by more knowledgeable sources than myself. If you are looking for further reading in the space I would suggest looking into the field of *Human-Computer Interaction,* the writings of [Don Norman](https://jnd.org/) (especially his work into the [Gulf of Execution](https://en.wikipedia.org/wiki/Gulf_of_execution) and [Gulf of Evaluation](https://en.wikipedia.org/wiki/Gulf_of_evaluation)) and for inspiration, in what’s possible in the medium I suggest exploring the works of [Bret Victor](http://worrydream.com/).
+The advantages of _Interactive Computing_ should be obvious to anyone familiar with modern software but have also been written about at length by more knowledgeable sources than myself. If you are looking for further reading in the space I would suggest looking into the field of _Human-Computer Interaction,_ the writings of [Don Norman](https://jnd.org/) (especially his work into the [Gulf of Execution](https://en.wikipedia.org/wiki/Gulf_of_execution) and [Gulf of Evaluation](https://en.wikipedia.org/wiki/Gulf_of_evaluation)) and for inspiration, in what’s possible in the medium I suggest exploring the works of [Bret Victor](http://worrydream.com/).
 
-Most of the above examples probably don't seem very interesting or “programmer-esque” with the exception of the calculator, spreadsheet, notebooks, and the REPL. These are interesting because they're more straightforwardly performing similar computations to the ones we do in *Classical Programming* except the context is fully known and the result is wanted immediately. In the REPL/spreadsheet case, we may even want to create computations in more of the classical style but we do so in an *interactive* fashion.
+Most of the above examples probably don't seem very interesting or “programmer-esque” with the exception of the calculator, spreadsheet, notebooks, and the REPL. These are interesting because they're more straightforwardly performing similar computations to the ones we do in _Classical Programming_ except the context is fully known and the result is wanted immediately. In the REPL/spreadsheet case, we may even want to create computations in more of the classical style but we do so in an _interactive_ fashion.
 
 The reason that this is still interesting from the lens of programming is that most of these constraints that we’ve imposed on the interactive computing domains are entirely artificial. Much of the software that we use in an interactive setting would benefit greatly if we had access to more powerful tools during the context of use. Imagine a world where you could perform live programmatic operations on your email inbox; for example, you could get a list of everyone who sent you an email more than a week ago for whom you haven’t responded and automatically generate a reply apologizing for the delay. Currently, these problems require software development knowledge and the use of specialized expert tools separate from the originating application.
 
 ## False Dichotomies
+
 A lot of the supposed tradeoffs that cause flame wars are really just people trying to cross this chasm.
 
 ### Compiled vs Interpreted Languages
@@ -73,7 +73,7 @@ Interpreted languages are programming languages that are executed directly from 
 
 First, since compilation is skipped in interpreted language the time to begin some form of execution generally has lower latency since the interpreter doesn’t have to fully consume the program but just run instructions as they occur. This can lead to interpreted languages feeling more interactive than their compiled counterparts.
 
-On the other hand, since compiled languages have a full compilation phase that consumes the entire program they can generally use this phase to both improve performance as well as find potential errors that the programmer may have made during *edit time*.
+On the other hand, since compiled languages have a full compilation phase that consumes the entire program they can generally use this phase to both improve performance as well as find potential errors that the programmer may have made during _edit time_.
 
 ### Data Exploration via notebooks
 
@@ -92,9 +92,9 @@ To be clear this is not meant to be an endorsement or admonishment of notebooks 
 I have been using the term runtime throughout this in the colloquial sense. It’s probably important to be more precise to avoid confusion.
 A [**runtime system** or **runtime environment**](https://en.wikipedia.org/wiki/Runtime_system) is the collection of software resources bundled together to run a program. It’s essentially the software for a given programming language that is used to run a program. For example, this could be the JRE for java or the Python interpreter for Python.
 
-The [runtime phase](https://en.wikipedia.org/wiki/Runtime_(program_lifecycle_phase)) of the lifecycle, which is what we generally referred to in the rest of the post, refers to the stage in which the program is actually executed. Wikipedia specifically says "in which the code is being executed on the computer's central processing unit”. Unfortunately this does not necessarily match it’s colloquial usage.
+The [runtime phase](<https://en.wikipedia.org/wiki/Runtime_(program_lifecycle_phase)>) of the lifecycle, which is what we generally referred to in the rest of the post, refers to the stage in which the program is actually executed. Wikipedia specifically says "in which the code is being executed on the computer's central processing unit”. Unfortunately this does not necessarily match it’s colloquial usage.
 
-For example when someone says they like REPL driven development because it allows for them to interact with their code *at runtime* what they generally mean is they want the ability to interact directly with the *runtime environment* and execute code on the fly, not that a certain piece of code is currently being executed on the CPU.
+For example when someone says they like REPL driven development because it allows for them to interact with their code _at runtime_ what they generally mean is they want the ability to interact directly with the _runtime environment_ and execute code on the fly, not that a certain piece of code is currently being executed on the CPU.
 
 Similarly, if we think of the following python program:
 
@@ -109,22 +109,23 @@ time.sleep(60)
 
 This program executes an infinite loop inside a conditional that evaluates to false and then waits for a minute. In general while we “run” this program we would say it exists at runtime yet lines 4-5 are never going to be “run” and for the vast majority of the program nothing will be executing on the CPU because the program will be sleeping waiting for an interrupt from the kernel.
 
-I would like to claim that this definition of *runtime* is not what people actually mean. Alternatively, you could suppose that it could mean that the code was either parsed or loaded into memory but I think these are implementation details not capturing the essence of what we mean by the phrase.
+I would like to claim that this definition of _runtime_ is not what people actually mean. Alternatively, you could suppose that it could mean that the code was either parsed or loaded into memory but I think these are implementation details not capturing the essence of what we mean by the phrase.
 
-The definition that I would like to adopt is that *runtime* is the phase in which the language’s *runtime system* has access to the computation. Said another way this means that the language’s runtime system could run or interact with the code. The important distinction here is it does not matter what code if any is actually “executed” but rather that there’s some language support for the code at its current state.
+The definition that I would like to adopt is that _runtime_ is the phase in which the language’s _runtime system_ has access to the computation. Said another way this means that the language’s runtime system could run or interact with the code. The important distinction here is it does not matter what code if any is actually “executed” but rather that there’s some language support for the code at its current state.
 
 ## Affordances
 
 So what is the problem we actually care about?
 
-I posit that the problem we’re trying to solve in these two contexts is good *affordances*. Don Norman defines affordance to be the relation between some agent and an object. In our case, the affordance we care about is the interaction between someone and their computing environment.
+I posit that the problem we’re trying to solve in these two contexts is good _affordances_. Don Norman defines affordance to be the relation between some agent and an object. In our case, the affordance we care about is the interaction between someone and their computing environment.
 
-The current divide between programming and software usage provides different affordances for programmers and users respectively. Classical Programmer affordances for example happen at *edit time* since that’s the stage of the program lifecycle in which the programmer interacts with the system. User affordances however occur during the *use* of the system.
+The current divide between programming and software usage provides different affordances for programmers and users respectively. Classical Programmer affordances for example happen at _edit time_ since that’s the stage of the program lifecycle in which the programmer interacts with the system. User affordances however occur during the _use_ of the system.
 
 Affordances are generally quite good in end-user applications. Well-designed applications provide contextual menus that provide actions that are available given the current state and data. Additionally, they can show potential operations that are not currently possible but could be in another context (such as menu items being “greyed out”).
 
 <!-- TODO Get images fixed -->
-![Ubuntu non-editable text context menu](/images/contextmenu.png) 
+
+![Ubuntu non-editable text context menu](/images/contextmenu.png)
 
 This context menu example is not shown as an example of great interaction design but rather how interactions with the software are better enabled when the affordances are provided making it clear what actions are possible.
 
@@ -133,16 +134,17 @@ Programming tools on the other hand usually have quite poor affordances. Code is
 On the other hand programming tools often give you the ability to create robust solutions that are capable of solving large-scale problems as well as building tools in a way that’s usually unfeasible in “end-user” applications.
 
 ## Flatten the lifecycle
+
 <figure>
 <figcaption>I came across Omar’s tweet while I was writing this and it more succinctly conveys what I’m trying to describe</figcaption>
 
 <!-- Use gatsby-plugin-twitter -->
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">(in our programming language, it&#39;s always runtime)</p>&mdash; Omar Rizwan (@rsnous) <a href="https://twitter.com/rsnous/status/1495560244696600582?ref_src=twsrc%5Etfw">February 21, 2022</a></blockquote> 
-</figure> 
+</figure>
 
-So now that we’ve talked a bit about both the divide of computer interaction as well as some of the unfortunate gaps, let’s turn to what we can do about it. I believe that flattening the *program lifecycle* is the ultimate design solution that’s necessary to resolve these issues.
+So now that we’ve talked a bit about both the divide of computer interaction as well as some of the unfortunate gaps, let’s turn to what we can do about it. I believe that flattening the _program lifecycle_ is the ultimate design solution that’s necessary to resolve these issues.
 
-What do I mean by *flattening* the program lifecycle?
+What do I mean by _flattening_ the program lifecycle?
 
 As we said earlier the simplified program lifecycle consists of:
 
@@ -158,9 +160,9 @@ The natural consequence of this is your code being managed by the runtime rather
 
 This is in no way an original idea and has been referred to before as [Interactive Programming](https://en.wikipedia.org/wiki/Interactive_programming), a paradigm embodied by the [Smalltalk](https://en.wikipedia.org/wiki/Smalltalk) system. This technique hasn’t had a big enough influence on most mass-market programming languages today. I think we’re primed for an interactive programming renaissance so I would like to put forward some possible benefits that it could bring.
 
-Interactive computing becomes a much more interesting experience when utilizing a language built for *Interactive Programming.* The user interface could be adapted to particular problem domains like most traditional applications yet you’d still have access to all of the rich semantics expected in a programming language. Very much in the spirit of older Smalltalk systems [Glamorous Toolkit](https://gtoolkit.com/) has been making progress in this space. 
+Interactive computing becomes a much more interesting experience when utilizing a language built for _Interactive Programming._ The user interface could be adapted to particular problem domains like most traditional applications yet you’d still have access to all of the rich semantics expected in a programming language. Very much in the spirit of older Smalltalk systems [Glamorous Toolkit](https://gtoolkit.com/) has been making progress in this space.
 
-We can also finally realize our dream of having stronger context-aware affordances for our computing. In an interactive session, failures could manifest themselves as messages to the user. On the other hand, if they were defining a reusable component the runtime could utilize static analysis to manifest the *potential* for errors during editing rather than waiting for them to fail during the context of use. Right now our tools are making us choose a side of the interactive/programming chasm and I think this will help us bridge the gap.
+We can also finally realize our dream of having stronger context-aware affordances for our computing. In an interactive session, failures could manifest themselves as messages to the user. On the other hand, if they were defining a reusable component the runtime could utilize static analysis to manifest the _potential_ for errors during editing rather than waiting for them to fail during the context of use. Right now our tools are making us choose a side of the interactive/programming chasm and I think this will help us bridge the gap.
 
 We talked about program transformation earlier. One criticism of automated program refactoring tools in traditional IDEs is they are usually computationally expensive and have high latency since it requires parsing and writing an entirety of a codebase out to disk. In an interactive system refactoring would be much quicker since actions would be on an already parsed AST (Abstract Syntax Tree) and would not require an explicit parse/serialization step. More importantly, though these refactors could often be performed asynchronously essentially solving the latency issue since a user could perform a refactor and keep interacting with the system while the runtime changed affected code in the background. This isn’t possible in today’s systems since the codebase needs to be in an atomic state between refactors but an interactive runtime could have multiple copies of the AST at once. This is much closer to how end-user applications have been developed for years; when performing an update we don’t serialize the entire application state to disk but rather issue an update to some database changing the necessary state.
 
@@ -170,6 +172,6 @@ Another example of the type of power that’s available with a fully interactive
 
 Language extension is another pain point of current programming languages. Language designers have to be very careful when adding new features to a language not just because of the potential semantic implications but also because of the potential implications for overlapping syntax as well as readability. If the runtime handled code persistence it could also handle modifying the code when upgrading language versions. Even semantic changes to the language could often include migrations to adapt existing code.
 
-These are just a few ideas that become possible when we start programming in a more interactive manner. I’m hoping that we see an uptick in these *Programming Systems* in the near future as we’re seeing an increased demand for developer tooling as well as a huge increase in the number of people interfacing with these tools.
+These are just a few ideas that become possible when we start programming in a more interactive manner. I’m hoping that we see an uptick in these _Programming Systems_ in the near future as we’re seeing an increased demand for developer tooling as well as a huge increase in the number of people interfacing with these tools.
 
 I plan on releasing follow-up posts in the future addressing more possibilities in the future of programming systems.
