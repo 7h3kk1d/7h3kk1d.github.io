@@ -2,6 +2,7 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import { StaticQuery, graphql } from 'gatsby'
 import { Link } from 'gatsby-link'
+import ThemeToggle from './theme-toggle'
 
 const ListLink = (props) => (
   <li style={{ display: `inline-block`, marginRight: `1rem` }}>
@@ -56,7 +57,15 @@ const layout = ({ children, title }) => (
                     {data.site.siteMetadata.title}
                   </h3>
                 </Link>
-                <ul style={{ listStyle: `none`, float: `right` }}>
+                <ul
+                  style={{
+                    listStyle: `none`,
+                    float: `right`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    margin: 0,
+                  }}
+                >
                   <ListLink to="/">Home</ListLink>
                   <ListLink to="/about">About</ListLink>
                   <ListLink to="/cv">CV</ListLink>
@@ -66,6 +75,9 @@ const layout = ({ children, title }) => (
                   </ListLink>
                   <ListLink to="https://github.com/7h3kk1d">GitHub</ListLink>
                   <ListLink to="mailto:alexander@bandukwala.me">Email</ListLink>
+                  <li style={{ display: 'inline-block', marginLeft: '1rem' }}>
+                    <ThemeToggle />
+                  </li>
                 </ul>
               </div>
             </header>

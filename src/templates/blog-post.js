@@ -10,10 +10,10 @@ const blogPost = ({ data }) => {
       <div>
         <h1 style={{ display: `inline-block` }}>{post.frontmatter.title}</h1>
         <h4
+          className="post-date"
           style={{
             marginBottom: rhythm(1 / 2),
             marginTop: rhythm(1 / 8),
-            color: '#CCC',
           }}
         >
           {post.frontmatter.date}

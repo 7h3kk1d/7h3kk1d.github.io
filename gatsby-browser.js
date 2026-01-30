@@ -5,5 +5,6 @@
  */
 
 // You can delete this file if you're not using it
+import './src/styles/global.css'
 import './src/styles/blog.css'
 require('prismjs/themes/prism-solarizedlight.css')
