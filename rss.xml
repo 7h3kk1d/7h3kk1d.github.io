@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Alexander Bandukwala]]></title><description><![CDATA[Alexander Bandukwala's personal website]]></description><link>https://bandukwala.me</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 31 Jan 2026 16:11:10 GMT</lastBuildDate><item><title><![CDATA[Dimensions of Extensibility]]></title><description><![CDATA[This post is a response to the first Malleable Systems Challenge Problem, which explores the theme of fearless extensibility. The challenge…]]></description><link>https://bandukwala.me/dimensions-of-extensibility/</link><guid isPermaLink="false">https://bandukwala.me/dimensions-of-extensibility/</guid><pubDate>Tue, 29 Oct 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;This post is a response to the first &lt;strong&gt;&lt;a href=&quot;https://forum.malleable.systems/t/a-new-community-activity-challenge-problems/196&quot;&gt;Malleable Systems Challenge Problem&lt;/a&gt;&lt;/strong&gt;, which explores the theme of &lt;strong&gt;&lt;a href=&quot;https://forum.malleable.systems/t/challenge-problem-fearless-extensibility/205&quot;&gt;fearless extensibility&lt;/a&gt;&lt;/strong&gt;. The challenge asks participants to think deeply about how we can achieve powerful extensibility in systems without introducing significant security and maintenance risks. In this post, I’ll be exploring several dimensions of the problem and proposing ideas for balancing the benefits of extensibility with the inherent challenges.&lt;/p&gt;
+&lt;p&gt;Inspired by &lt;a href=&quot;https://tomasp.net/techdims/&quot;&gt;Technical dimensions of programming systems&lt;/a&gt; and &lt;a href=&quot;https://joshuahhh.com/dims-of-feedback/&quot;&gt;Technical Dimensions of Feedback in Live Programming Systems&lt;/a&gt;, I aim to outline different dimensions of extensibility to facilitate comparison between designs and foster discussions around malleable systems. This is not intended to be a comprehensive list but will be a live document that will evolve over time. If you have any thoughts or suggestions, feel free to reach out and connect with me.&lt;/p&gt;
+&lt;h2&gt;Open vs. Closed Extensibility&lt;/h2&gt;
+&lt;p&gt;A key distinction in the design of extensible systems is between open and closed extensibility, drawing inspiration from the &lt;a href=&quot;https://en.wikipedia.org/wiki/Open%E2%80%93closed_principle&quot;&gt;open/closed&lt;/a&gt; principle of object-oriented design.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Open Extensibility:&lt;/strong&gt; Users extend the system by modifying the existing system, directly modifying source code, using undocumented APIs, or breaking through other implementation details. These modifications may lead to maintenance headaches, as they are more likely to break with future updates.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Closed Extensibility:&lt;/strong&gt; Systems are designed with explicit extension points and interfaces that encourage safe, structured extension. These points are documented and supported by the system&apos;s maintainers. Unfortunately this means that extension can only be as powerful as these points allow and therefore may be limited in power by an authors original design.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Moving from Open to Closed Extensibility&lt;/h3&gt;
+&lt;p&gt;How can we migrate from open to closed extensibility? Is there a way to allow users to extend systems locally and then easily upstream their changes into a more general case?&lt;/p&gt;
+&lt;p&gt;One possible approach is to create a clear &lt;strong&gt;migration path&lt;/strong&gt; for user extensions, where user-created local modifications can be incorporated into official APIs or extension points over time.&lt;/p&gt;
+&lt;h2&gt;Trust and Authority&lt;/h2&gt;
+&lt;p&gt;Another key issue in extensibility is &lt;strong&gt;trust&lt;/strong&gt;. When allowing third-party extensions, how can we trust that the code won&apos;t break the system or introduce security vulnerabilities?&lt;/p&gt;
+&lt;h3&gt;Establishing Trust in Extensible Systems&lt;/h3&gt;
+&lt;p&gt;One potential solution is to build &lt;strong&gt;shared software sources&lt;/strong&gt;, such as package managers or app stores, where extensions are vetted and reviewed by the community. Additionally, &lt;strong&gt;cryptographic authorities&lt;/strong&gt; can help verify that code has been reviewed and approved by trusted parties.&lt;/p&gt;
+&lt;p&gt;Beyond that, we should use &lt;strong&gt;static analysis&lt;/strong&gt; and &lt;strong&gt;programming language techniques&lt;/strong&gt; to restrict what extensible components can do. For example, can we ensure that an extension cannot read from the file system or access the network unless explicitly allowed?&lt;/p&gt;
+&lt;p&gt;Another concept to explore here is &lt;a href=&quot;https://en.wikipedia.org/wiki/Object-capability_model&quot;&gt;&lt;strong&gt;capability-based security (OCAP)&lt;/strong&gt;&lt;/a&gt;, which emphasizes controlling what resources (or capabilities) an extension is allowed to access.&lt;/p&gt;
+&lt;h2&gt;Orthogonality&lt;/h2&gt;
+&lt;p&gt;A crucial aspect of designing extensible systems is ensuring that orthogonal extensions do not interfere with each other. &lt;strong&gt;Non-interference&lt;/strong&gt; means that multiple extensions can coexist without breaking or altering each other’s behavior in normal operation, preserving the stability and predictability of the system. &lt;strong&gt;Orthogonality&lt;/strong&gt; is the property of extensions that obviously &lt;em&gt;should not&lt;/em&gt; affect each other.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A styling extension for a web browser and a tab manager would be examples of &lt;strong&gt;orthogonal&lt;/strong&gt; extensions since you would not expect any confluence of behavior when having both.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;Compositionality&lt;/h2&gt;
+&lt;p&gt;While orthogonality focuses on ensuring that independent extensions do not interfere, &lt;strong&gt;compositionality&lt;/strong&gt; goes a step further by enabling multiple extensions to work together in a predictable and structured way. Compositional systems allow extensions to combine and build on each other’s functionality, often producing more powerful results than any single extension alone.&lt;/p&gt;
+&lt;p&gt;The challenge of compositionality lies in ensuring that extensions can interoperate smoothly, without unexpected interactions or conflicts. To achieve this, systems need well-defined interfaces and extension points that provide predictable behavior when used in combination. In addition they may also need ways for end-users to handle intrinsic conflicts themselves.&lt;/p&gt;
+&lt;h3&gt;Making Extensible Systems Composable&lt;/h3&gt;
+&lt;p&gt;We can look to functional programming and &lt;strong&gt;mathematical rigor&lt;/strong&gt; for inspiration. For example, &lt;strong&gt;static analysis&lt;/strong&gt; can help us ensure that extensions adhere to certain properties, while &lt;strong&gt;debuggability&lt;/strong&gt; and &lt;strong&gt;observability&lt;/strong&gt; are essential for maintaining a high level of trust in the system.&lt;/p&gt;
+&lt;h2&gt;Substrates&lt;/h2&gt;
+&lt;p&gt;Jonathan Edwards introduced &lt;strong&gt;substrates&lt;/strong&gt; to me during his &lt;a href=&quot;https://www.youtube.com/watch?v=4GOeYylCMJI&amp;#x26;t=2286s&quot;&gt;LIVE Keynote&lt;/a&gt; at &lt;a href=&quot;https://2024.splashcon.org/&quot;&gt;SPLASH&lt;/a&gt; this month.
+He gives some criteria as to what define a software substrate. My interpretation is that &lt;strong&gt;substrates&lt;/strong&gt; are the computational model and framing in which systems are defined.
+It is paramount that the user interacts in terms of the model so that programming the system is the same as using it.
+So in a sense they define the data model as well as how computation itself can be represented in a system.
+Historical substrates include POSIX, spreadsheets, objects, actors, and functional paradigms.
+With regards to extensibility it&apos;s important to design these substrates in such a way that it allows for the extensible properties we&apos;d like to have.&lt;/p&gt;
+&lt;h3&gt;Embedding&lt;/h3&gt;
+&lt;p&gt;When building extensible systems, it’s critical to ground them in &lt;strong&gt;clear, well-defined primitives&lt;/strong&gt;. Designing systems with composable, flexible interactions from the outset ensures that extensibility can be smoothly incorporated later, rather than having complexity bolted on after the fact. Effective extensibility deeply embeds into the structure of the &lt;strong&gt;substrates&lt;/strong&gt; rather than existing as an isolated layer on top. This allows extensions to integrate seamlessly into the system, enabling them to express their own data models and computations in a natural and coherent way. In short, for true &lt;strong&gt;composition&lt;/strong&gt; to thrive, the substrate must be expressive enough to accommodate extensions without breaking its core structure or creating unnecessary friction.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Designing extensible systems is a complex challenge. The ideas above are clearly incomplete but I hope can be a jumping off point for a discussion about what we value in the future.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[On Compositional Window Management]]></title><description><![CDATA[As someone interested in providing more agency in our computing environment I am on the lookout for pieces of our current computing…]]></description><link>https://bandukwala.me/on-compositional-window-management/</link><guid isPermaLink="false">https://bandukwala.me/on-compositional-window-management/</guid><pubDate>Sat, 11 Feb 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!--
+
+&lt;a title=&quot;Wikimedia Foundation, CC BY-SA 3.0 &lt;[https://creativecommons.org/licenses/by-sa/3.0&amp;gt;,](https://creativecommons.org/licenses/by-sa/3.0&amp;gt;,) via Wikimedia Commons&quot; href=&quot;[https://commons.wikimedia.org/wiki/File:Windowmanager_twm.png](https://commons.wikimedia.org/wiki/File:Windowmanager_twm.png)&quot;&gt;&lt;img width=&quot;256&quot; alt=&quot;Windowmanager twm&quot; src=&quot;[https://upload.wikimedia.org/wikipedia/commons/6/63/Windowmanager_twm.png](https://upload.wikimedia.org/wikipedia/commons/6/63/Windowmanager_twm.png)&quot;&gt;&lt;/a&gt;
+
+[https://commons.wikimedia.org/wiki/File:I3_window_manager_screenshot.png](https://commons.wikimedia.org/wiki/File:I3_window_manager_screenshot.png)
+
+# Draft --&gt;
+&lt;p&gt;As someone interested in providing more agency in our computing environment I am on the lookout for pieces of our current computing environments that can be enriched to provide a more &lt;a href=&quot;https://malleable.systems/&quot;&gt;malleable&lt;/a&gt; experience. Window management is an area that I keep coming back to given how prevalent the domain is. I will provide a recap of what window management is, how it’s used today, and how modern applications have evolved to deal with current deficiencies. Then I’ll provide a compositional approach for window management to move towards and discuss how I think this could make applications more malleable.&lt;/p&gt;
+&lt;h2&gt;Where we’re at&lt;/h2&gt;
+&lt;p&gt;Window management is one of the least valued categories of software given how heavily used it is. Window managers control what is visible when you use a computer, yet in most cases they are inflexible and extremely limited in the scope for which they operate, relinquishing their responsibility to domain-specific applications causing a fragmented experience. I believe that we can do much better, and that composition is a critical component to improve.&lt;/p&gt;
+&lt;p&gt;&lt;figure class=&quot;gatsby-resp-image-figure&quot; style=&quot;&quot;&gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 418px; &quot;
+    &gt;
+      &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 75%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAPCAIAAABr+ngCAAAACXBIWXMAAAsTAAALEwEAmpwYAAADWklEQVR42m2Q22/TBhTG/X8gHrbxMLQ97GmTJsEkHmCTxuvQVDYundA2UIFVLb2soS3TBmiCdmM0aboSmqRp07ipE8e3tOSy1CFpmsaJcw+J41vshCSlQCegjmemvbFzfvp0dKRPn/QBOuLLXmSon7jxjUd3Bh45C490w7qvoaEuaOCUa7gbvnoW1p2Dr1339xnCPXe8uttenaaG8A/6SC8wRpycocB75aCnVIGzBT8v+DkhwP+Hdvs4juSb5tjUqLdnyL18GYEuOhd+Xh2e3uh7bfbJcKITe/r3rqqob05HW1XFUs5rQc+gD7sUQM7j0Pia2xgZA0aJLrIZyKmF1vNdRVH3Osob7O0pauwRwbTrn7ls+xen3rbezQrsSmoCGPd2gW2LS4XE9tN/kzv/k62oVGWNaUmfrFjeWjK8v2hMseXl5C1gCP2+L7Aw+NA+FsQnwv6bYd8N0ncr7LtOrvUH0IHga64EsQu4rWcVOgEvHYGtH8zr4+WCZfMn4La330MQHgK1I64FHIfwlWUUdCAu+AEOotCyF7MhsJOA3QTiIgPHnObDsPWQdTpWzM/FxoC7vkE6Ec/RsUg8GYzns1Q0GSfz6WQxm6Hi4Vh6cyOZSFObTD6TY0qHQNMBcOaA6bc1OjQbHQFmwqOlUtm7ukqS6+uhYKv1WJJbcr3Zam9zYlOWG3W5zvANQWiSdOaoc+4d0PiuWT+KXp4MfQdM/TUscGIylYxGo/fnzNUqw3NisfioVCxoTq0uRVFevlK01oQnO5+7bQfBmfcshqtYz83AaWDC18syHEUlYBi+bzLVJFls7FSEZplvCY1nzWedxs4rRmxJ9Z2tau0jx719S1P7TX/0ubvHH5wAfsG/3YjEMAy1Wq2hUEiS67XtjtDu1J+8lLZf8I1dvvGcLvJ0nt3MMb+v+38M4FdgaMD11SB+HBjHT6XpTHQjkqC2NERJkh+3OVGSZVGscYLA1iSeZSuixEuS2KiJDZ6v0Llh6IvzrsPAxcXjma10MZvnqxzHsNUyW8jmc3RaU+2ZS2e1mulEMk2lNFIJKhHfij2kLjk+7bIfBI5Ofqi3/Wp235lH9HbM4MANDmLajhsWUL0V0c+jBk3t3j8XiVkNG2Y0gpNzK/qTlo+Pze77B8o/nN6o/vdJAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;An example of TWM, a stacking window manager&quot;
+        title=&quot;&quot;
+        src=&quot;/static/b7616c50c22cd66517d4117c523fa6f2/d7398/twm.png&quot;
+        srcset=&quot;/static/b7616c50c22cd66517d4117c523fa6f2/12f09/twm.png 148w,
+/static/b7616c50c22cd66517d4117c523fa6f2/e4a3f/twm.png 295w,
+/static/b7616c50c22cd66517d4117c523fa6f2/d7398/twm.png 418w&quot;
+        sizes=&quot;(max-width: 418px) 100vw, 418px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+    &lt;/span&gt;
+    &lt;figcaption class=&quot;gatsby-resp-image-figcaption&quot;&gt;An example of TWM, a stacking window manager&lt;/figcaption&gt;
+  &lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Windows are the graphical containers provided by operating systems for end-user applications to embed themselves. In some sense, windows are the fundamental building block of the desktop operating system; without windows, every application would be in charge of the full rendering of the desktop and you could only use one application at a time. Mobile operating systems, such as Android and iOS have also been heavily motivated by the window metaphor, even if you don’t usually see many windows on the screen simultaneously the interactions that the OS provides show “apps” in self-contained usually rectangular GUI layouts meant to resemble windows of the desktop.&lt;/p&gt;
+&lt;p&gt;The window manager is a critical component of the operating system that controls the placement and organization of windows on the screen. The most common type of window manager is the &lt;a href=&quot;https://en.wikipedia.org/wiki/Stacking_window_manager&quot;&gt;floating window manager&lt;/a&gt;, which allows multiple windows to be displayed on the screen simultaneously as freeform rectangles that can be moved or resized within a fixed-size 2D canvas. This is the type of window manager used in traditional desktop environments such as Microsoft Windows, macOS, GNOME, and KDE. Floating window managers provide users with a range of customization options, including the ability to arrange windows in semantically meaningful positions, resize windows to fit content or reflect relative importance, and overlap windows to allow for shifting focus while maintaining peripheral awareness.&lt;/p&gt;
+&lt;p&gt;&lt;figure class=&quot;gatsby-resp-image-figure&quot; style=&quot;&quot;&gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 590px; &quot;
+    &gt;
+      &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 62.83783783783784%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAIAAAAmMtkJAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB6ElEQVR42oWS25KbMAyGhcEHwGcbDCSBTHYDm+wQ0m77AL3o+79SlXTaq05Xo9HIY3/yL9lw2O+ndup88sYqqaSUVV1XVSWE6Pv+dDqllLquM8YcDgdcTk87PQ18bWPhnNCd8tE7b10tKloUhJAYI57D6L2v63ocx/P5fDweh2HAchih7oIKLa9UxlnGGEHngnAOhCCDAMLOOTyN2G63QyHW2rIsUR3I16FdljDs47CrmoY7B0IAbhASQvgLYwu/BSulkKSUMsZACZa8c1obKWmes6KAP4ZycSJYAiXghagTI84iz3Ns6gHL6G3TysrlpYAiB0rRM4wAtm2HccTK1hjvXds2giNCOcOZ5JiAOb355sW5SYe+ch3RFurqIRtAffne/fg5Ldt4/Uivt3C8usPip8szmcPLBvx6kusq3y7y+s4vFzbPYp7L/Z5xXjCRoUJUmRcYISNPz3AcWFq4BDEFHEbqUghRa+WsDcZrrbG3gjL4pyEPwHWEPg3d0I/TqJ3hpSjxj+BPUQpfomD8Exjv6W1KVWtyLQirCS8zKrKCoLqCfgI3+JTD3LXH0B5i2seQTKkUKwXnlIv/waaBy9f7dbtfbtu8rct2W799rPdtXpZ1XUNssG3GBRPlw7mg7FHxkVAmQ/oFhFwt6JIVtz8AAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;The i3 tiling window manager with 3 terminals open and a status bar open at the bottom&quot;
+        title=&quot;&quot;
+        src=&quot;/static/e147485a08f198dee31032ab2ff30d0d/fcda8/i3.png&quot;
+        srcset=&quot;/static/e147485a08f198dee31032ab2ff30d0d/12f09/i3.png 148w,
+/static/e147485a08f198dee31032ab2ff30d0d/e4a3f/i3.png 295w,
+/static/e147485a08f198dee31032ab2ff30d0d/fcda8/i3.png 590w,
+/static/e147485a08f198dee31032ab2ff30d0d/efc66/i3.png 885w,
+/static/e147485a08f198dee31032ab2ff30d0d/c83ae/i3.png 1180w,
+/static/e147485a08f198dee31032ab2ff30d0d/21b4d/i3.png 1280w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+    &lt;/span&gt;
+    &lt;figcaption class=&quot;gatsby-resp-image-figcaption&quot;&gt;The i3 tiling window manager with 3 terminals open and a status bar open at the bottom&lt;/figcaption&gt;
+  &lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Tiling_window_manager&quot;&gt;Tiling window managers&lt;/a&gt; are another form of window management that’s quite common. Some examples of popular tiling window managers are &lt;a href=&quot;https://i3wm.org/&quot;&gt;i3&lt;/a&gt;, &lt;a href=&quot;https://github.com/baskerville/bspwm&quot;&gt;bspwm&lt;/a&gt;, &lt;a href=&quot;https://xmonad.org/&quot;&gt;xmonad&lt;/a&gt;, and &lt;a href=&quot;https://i3wm.org/&quot;&gt;awesome&lt;/a&gt;. The main idea behind tiling window managers is that the windows should take up the entire available screen without overlapping. This is accomplished by arranging windows into several “tiles” that fill up to represent the entire screen while not requiring users to manually resize or rearrange windows to maximize screen space as they would in a floating window manager. These tiles can still be rearranged or resized but the remaining tiles automatically reflow around to continue maximizing space. Power users will note that all of the major desktop environments mentioned above have added some form of tiling to their floating window managers; for example, Microsoft Windows supports splitting the desktop into two applications by dragging to the left or right side and macOS supports a side-by-side view for full-screen applications.&lt;/p&gt;
+&lt;p&gt;Another way in which existing window managers have evolved is the introduction of &lt;a href=&quot;https://en.wikipedia.org/wiki/Virtual_desktop&quot;&gt;Virtual Desktops&lt;/a&gt;. Virtual desktops introduce copies of the traditional desktop metaphor so that users can switch between multiple desktops while maintaining window layouts and states when working on different tasks. I’m glad to see that some effort is happening in this space. Still, I can’t help but think window management is just an afterthought in the Operating System and is not considered a primary part of the interface open for exploration.&lt;/p&gt;
+&lt;p&gt;&lt;figure class=&quot;gatsby-resp-image-figure&quot; style=&quot;&quot;&gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 590px; &quot;
+    &gt;
+      &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 62.83783783783784%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAACXBIWXMAAAsTAAALEwEAmpwYAAADlElEQVR42j2TW0ybZRjHv/brgbZQoJSDo9ByaIFyKAXKDuzEMggxMbpoZmI0JlPj4WLRcDPNFokxwqJGtxCDwICNqJtjm0wOzug07sIr3YVxAmMcCqWlpTDKsB2H/XzXC7/kzZv3+b7n9/8/7/c8ktFiQZGSjGwyoTWb0WVmos/KIknE0/LyyHI42OF0kmm3k5ybS6KIP36vSTejSkuL5ykMBpR6HepkI5LSko3aZkNbUIAsEqScHKRCO7KzlMTqGhI9HhKqqkiorETrdsfjSiGSWFaKvrgIrRBVulzkNzZirqlGUtmsaAoLURcX82JzM2fO99H6ZQenu7v4pLeX0+fO0dbVycc93bR1dtLa0cGpz89gqa8nUQhIwsyJ8xe46Vug8uT7AihgCRUuVJVuvh0dZSsaZXNzEx7x/7O9tc3W5iOxb8XPPv8i9meOYKiri7tr6enh96kZDr53CilZwDTVHjS79tA1cJWAz0d4dY2F0AqB8Br/xh4S29hgdT3GcmSdmNCa8gcpPHoUQ/0htCLvjc4uvKEl3jz7BVLe3n3Inlo0+w/QNTiKyMXrn+b2xF+MBRaYj4RYXF9hYjYkQGv8efsOv/z6G85XX8PQ2ISidievnG3HG1zi2KefIZU0NiDVCIcH6+keHImXdGngMl9f+oaZ5SX+nhonEFnm7uwSU8EYl9vbaW85QdlbxzE0PYlidx1HPmrj1p0xnm35ACm/tlyo7EK9bz99Qz+w8XCbf+YW+GPyHtOBOe76vAK4Ihysc8+/TnBti0n/EsUvH4sDdXvqSHv3JBUXBzC904yUUmQXdyhKFtDua0NEHmzgDy8yMTfN+NwsY/NzzAun4/MRIbRK8H6USd8ijhdeQn+oAb24w+Snnsbx+nGMDU1Ials+WvFj1O4qvhr+MV5yKBJhJnwfbzjMbNDPavQBwZUYgeUoa9FtvIEQxc89j273XgxVnnhzS1oNCp0OSbbaRB/aRR86efvDVq7c+In+kVF6rw/Tf/17+gevcXFkhL7vbnBh+Geu3rxF3+AQ1sON6F1udCWlyOkZyCmp8SXJlhxUuWJShFPZmo9C7BpHCcbySkyuKsxuD+nChcldg7F6J4YKMTXOcpLKXOjFd1pbHnKqCaXRiDLp8ejtyEaVbUGdY0VvK8BY4CDFXkJaqYsMVzVZAviEAGaJlVHhxiziqUVODPl2Eqx5aHJyUWdkojKnI5vT+Q8Cak6aEdErPwAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Gnome Shell 3.14 with 4 virtual desktops open&quot;
+        title=&quot;&quot;
+        src=&quot;/static/ca577f7d72165b4ef17875c1b671c41b/fcda8/gnome_shell.png&quot;
+        srcset=&quot;/static/ca577f7d72165b4ef17875c1b671c41b/12f09/gnome_shell.png 148w,
+/static/ca577f7d72165b4ef17875c1b671c41b/e4a3f/gnome_shell.png 295w,
+/static/ca577f7d72165b4ef17875c1b671c41b/fcda8/gnome_shell.png 590w,
+/static/ca577f7d72165b4ef17875c1b671c41b/efc66/gnome_shell.png 885w,
+/static/ca577f7d72165b4ef17875c1b671c41b/c83ae/gnome_shell.png 1180w,
+/static/ca577f7d72165b4ef17875c1b671c41b/07a9c/gnome_shell.png 1440w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+    &lt;/span&gt;
+    &lt;figcaption class=&quot;gatsby-resp-image-figcaption&quot;&gt;Gnome Shell 3.14 with 4 virtual desktops open&lt;/figcaption&gt;
+  &lt;/figure&gt;&lt;/p&gt;
+&lt;h2&gt;Leave it up to the application&lt;/h2&gt;
+&lt;p&gt;Given the lack of extensibility or capability in the operating system&apos;s window management, end-user applications have gone through the effort to implement their own forms of window management. The most obvious example is &lt;a href=&quot;https://en.wikipedia.org/wiki/Tab_(interface)&quot;&gt;tabs&lt;/a&gt;. Web browsers, modern IDEs, and text editors almost universally support tabs; Even &lt;a href=&quot;https://www.pcmag.com/news/latest-windows-11-update-adds-tabs-to-file-explorer&quot;&gt;Windows file explorer is getting tabs&lt;/a&gt;. Tabs are a great interface feature that allows users to switch between panes quickly while taking up very little room. Once you begin looking for tabs you see them show up in all sorts of forms in many different applications. Instant messaging apps such as Slack, Discord, or Element use horizontal tabs to separate different channels of communication. Email applications often separate inboxes by tabs.&lt;/p&gt;
+&lt;p&gt;&lt;figure class=&quot;gatsby-resp-image-figure&quot; style=&quot;&quot;&gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 590px; &quot;
+    &gt;
+      &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 8.783783783783782%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAACCAYAAABYBvyLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAgUlEQVR42h2NWRKCMBQEOYYWYhGWbCKRAAnRD73/pdpX/E3VTPdUSg3kVOh7ix4dOb9R7YjRnm1NNDfF9AjMz8j10hCXHe9n6rpljenc3ZtOcmYQR2V1oBw/rAk4u1DyV4pJoEjaP3TKimzjFZKAowgPOYhyakRS8C7Qd+7MRs/8Ab8zPCzsK2FfAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Some tabs I had open at the time of writing this article&quot;
+        title=&quot;&quot;
+        src=&quot;/static/f6d4330d5862c9953c067890bd317f13/fcda8/tabs.png&quot;
+        srcset=&quot;/static/f6d4330d5862c9953c067890bd317f13/12f09/tabs.png 148w,
+/static/f6d4330d5862c9953c067890bd317f13/e4a3f/tabs.png 295w,
+/static/f6d4330d5862c9953c067890bd317f13/fcda8/tabs.png 590w,
+/static/f6d4330d5862c9953c067890bd317f13/efc66/tabs.png 885w,
+/static/f6d4330d5862c9953c067890bd317f13/c83ae/tabs.png 1180w,
+/static/f6d4330d5862c9953c067890bd317f13/36eca/tabs.png 1526w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+    &lt;/span&gt;
+    &lt;figcaption class=&quot;gatsby-resp-image-figcaption&quot;&gt;Some tabs I had open at the time of writing this article&lt;/figcaption&gt;
+  &lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Since tabs are not provided as an operating system or window management feature, all of these applications are forced to write their own distinct version. This creates more work for the application developers, forces inconsistencies in the interfaces, and most importantly breaks interoperability. It would be perfectly reasonable to want a window with tabs for PDFs, images, and rich document files. Still, you would be forced to open them in a single application that supports all the file types and implemented tabbing. The most common solution to this problem is to just use web apps and recover tabbing by using browser tabs. This is really just giving up and allowing for rich tabs to be a web-only feature; &lt;strong&gt;we should be able to utilize tabs for any application and combine tabs between them&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Terminal text editors like Emacs and Vim have long supported split windows in order to access multiple buffers on screen at once. Modern IDEs, such as VS Code, have continued this feature allowing for a single editing pane to be split horizontally or vertically. This in-app windowing functionality is eerily familiar to the tiling window managers that were discussed above. The only difference is this is done within the context of a single application window. Unfortunately, similar to tabs, they also suffer from non-interoperability**. Another unfortunate side effect of implementing the tiling internal to the application is that now users have to learn a distinct set of keyboard shortcuts and interactions to manage the windows or splits**.&lt;/p&gt;
+&lt;p&gt;&lt;figure class=&quot;gatsby-resp-image-figure&quot; style=&quot;&quot;&gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 590px; &quot;
+    &gt;
+      &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 60.810810810810814%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAYAAABiDJ37AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA/UlEQVR42q2S7U6DMBSGexVOtn4BkqyDAkXqb5PhbmD3fx+mYo+nwjTggiTbjycFes6TnreQxr74qjagy+obdcgn6KqGEvcr00CNzPcvHPIC9nvlSNlYL6WEOI5BCImICZxzZHgOdYF5zYAExrgjVak9Y2xsXGapLkgppXjCZ7tauMSPELO5r9DU9Srh9dx+Cdmix5G2bVcJkyQBpRRkWYYXmOB7OiFNn8LqiNba3zruMAEfRi6K4k5CcRHiCcP/diMCM6QhQ6Nzz7ePIHYR8BFxBUm3f77xWQ+LNo7k3fmDtl2/Q2j71jPb9Q/m+C+b5tjTsSf0Mnv6jMzr+xdfM00fHVzD4AAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Text editor VSCode with in-editor splits and tabs.&quot;
+        title=&quot;&quot;
+        src=&quot;/static/c9e607305412989e59809a3b193972f2/fcda8/vscodesplits.png&quot;
+        srcset=&quot;/static/c9e607305412989e59809a3b193972f2/12f09/vscodesplits.png 148w,
+/static/c9e607305412989e59809a3b193972f2/e4a3f/vscodesplits.png 295w,
+/static/c9e607305412989e59809a3b193972f2/fcda8/vscodesplits.png 590w,
+/static/c9e607305412989e59809a3b193972f2/efc66/vscodesplits.png 885w,
+/static/c9e607305412989e59809a3b193972f2/c83ae/vscodesplits.png 1180w,
+/static/c9e607305412989e59809a3b193972f2/d2e7a/vscodesplits.png 3844w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+    &lt;/span&gt;
+    &lt;figcaption class=&quot;gatsby-resp-image-figcaption&quot;&gt;Text editor VSCode with in-editor splits and tabs.&lt;/figcaption&gt;
+  &lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Professional media creation applications have been implementing their own window management for years. Tools like Photoshop, DaVinci Resolve, and Blender have many panels that can be visible on the screen at once. Their internal window managers support features such as docking onto sidebars, tabs, and even floating panels. Given that these tools are aimed at professional use they can be more difficult for novice users. The sophistication of these tools may seem cluttered or unnecessary, but they have given great power and agency to power users to customize their workspaces to their benefit. I would like to imagine a world where all kinds of workflows could benefit from these docking/panel interfaces. Instead of browser extensions being locked into the bookmark bar if they could be given panels that could be docked on the sides of the browser.&lt;/p&gt;
+&lt;p&gt;&lt;figure class=&quot;gatsby-resp-image-figure&quot; style=&quot;&quot;&gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 590px; &quot;
+    &gt;
+      &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 56.08108108108109%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wgARCAALABQDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAEDBP/EABQBAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhADEAAAAeS4UA//xAAYEAACAwAAAAAAAAAAAAAAAAABAgATIP/aAAgBAQABBQIKhlaZ/8QAFBEBAAAAAAAAAAAAAAAAAAAAEP/aAAgBAwEBPwE//8QAFBEBAAAAAAAAAAAAAAAAAAAAEP/aAAgBAgEBPwE//8QAGRAAAQUAAAAAAAAAAAAAAAAAAQACESAy/9oACAEBAAY/ApLitmv/xAAaEAEAAwADAAAAAAAAAAAAAAABABFBEFGR/9oACAEBAAE/ITER6CZ+xKrYTeP/2gAMAwEAAgADAAAAEOMP/8QAFBEBAAAAAAAAAAAAAAAAAAAAEP/aAAgBAwEBPxA//8QAFBEBAAAAAAAAAAAAAAAAAAAAEP/aAAgBAgEBPxA//8QAGxABAAMBAAMAAAAAAAAAAAAAAQARITFRobH/2gAIAQEAAT8QZgsoJ9l97Xwnu4jFszhDQEOyHCf/2Q==&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;From Blender.org:
+A screenshot of the Blender 3D Graphics Software application which has lots of information on the screen with many menus and toolbars&quot;
+        title=&quot;&quot;
+        src=&quot;/static/f90f48b56f761379e5a5078613130060/1c72d/blender.jpg&quot;
+        srcset=&quot;/static/f90f48b56f761379e5a5078613130060/a80bd/blender.jpg 148w,
+/static/f90f48b56f761379e5a5078613130060/1c91a/blender.jpg 295w,
+/static/f90f48b56f761379e5a5078613130060/1c72d/blender.jpg 590w,
+/static/f90f48b56f761379e5a5078613130060/a8a14/blender.jpg 885w,
+/static/f90f48b56f761379e5a5078613130060/fbd2c/blender.jpg 1180w,
+/static/f90f48b56f761379e5a5078613130060/eea4a/blender.jpg 1280w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+    &lt;/span&gt;
+    &lt;figcaption class=&quot;gatsby-resp-image-figcaption&quot;&gt;From Blender.org:
+A screenshot of the Blender 3D Graphics Software application which has lots of information on the screen with many menus and toolbars&lt;/figcaption&gt;
+  &lt;/figure&gt;&lt;/p&gt;
+&lt;div style=&quot;float: right&quot;&gt;
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;I wish there was an option for desktop WMs to be infinite canvas. All the WM features need to nest though to feel really good.&lt;/p&gt;&amp;mdash; Alexander Bandukwala (@abanduk) &lt;a href=&quot;https://twitter.com/abanduk/status/1595494856524238849?ref_src=twsrc%5Etfw&quot;&gt;November 23, 2022&lt;/a&gt;&lt;/blockquote&gt; &lt;script async src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+&lt;/div&gt;
+&lt;p&gt;The last example of in-app window management may be slightly counterintuitive. &lt;a href=&quot;https://infinitecanvas.tools/&quot;&gt;Infinite canvases&lt;/a&gt; have been taking off in recent years with applications such as &lt;a href=&quot;https://museapp.com/&quot;&gt;Muse&lt;/a&gt;, &lt;a href=&quot;https://miro.com/&quot;&gt;Miro&lt;/a&gt;, and &lt;a href=&quot;https://www.apple.com/newsroom/2022/12/apple-launches-freeform-a-powerful-new-app-designed-for-creative-collaboration/&quot;&gt;Apple’s Freeform&lt;/a&gt;. An infinite canvas application can be thought of as an arbitrarily large whiteboard space that allows you to represent content spatially. Usually, this involves a drag-and-drop interface often accompanied by some drawing and text functionality. This should seem familiar since it’s very similar to the floating window managers mentioned above. Both are attempting to allow users to layout their work arbitrarily in 2D space by resizing and drag-and-drop. Infinite canvases however have a much more expansive feature set given that the canvas extends infinitely in every direction; plus they allow users to zoom in and out to assist in navigation. Desktop floating window managers should adopt these features allowing users to have many floating windows open without having to fit them all on their limited screen space. Instead, you can just arrange your open windows in an infinite 2D space and zoom around as needed. I can imagine a workflow where personal tasks are located in a topographical region distant from work tasks, so at the end of the workday, a user could shift their focus from work to personal use. In addition, there’s no reason the desktop window manager couldn’t allow for arbitrary drawing/text alongside traditional application windows. Even if not intended to be a desktop window manager I think &lt;a href=&quot;https://ultra.tf/&quot;&gt;Ultra&lt;/a&gt;, a multi-media canvas, can give a glimpse of the feeling a more infinite floating window manager would provide.&lt;/p&gt;
+&lt;p&gt;&lt;figure class=&quot;gatsby-resp-image-figure&quot; style=&quot;&quot;&gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 590px; &quot;
+    &gt;
+      &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 56.08108108108109%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAALCAYAAAB/Ca1DAAAACXBIWXMAAAsTAAALEwEAmpwYAAAChElEQVR42l2SzU8TURTFG2NpSTtlvt5M25npdDrTT4FiClgpiBIxkNgNJLghwYouXBgqbVMbXbgzQcW4gRAXxqAr3PAXsCAhMSYmJi5kq3EjW9zQxfHNa4rBSW7mzc3c3zv33OtxrBQikShkWQIhMhRFYUEIYSHREImCPl7ARKmI6sMVNFuPsVJdhaZp4DiO1nbqVFWFR1VUelBgaDq0qMmShAJisRg0XUcuEUMx54DQC29Oj+Hb5z24z9HRb5RKJeTzedi2fQr1SJKMbMpCzknC1LPQYzZ4LoBkIgk1bGCk30F5ahRCKIgXL18x2J828OPXT+zs7LDvZrMJv99PO41QIG2pP27CoGqSw+O4MHId+eHLiGcM3Cinkcnq8Pf2Iuj34O6zN9j9tIfdD48wv3AL77bfM2Cr1YLP5+sACZUZpS07yQzswSIUEsHk1VnkxlO4NO1AyUUxV3mNwStPMVu5jbfbZTy53wfveT82NzcZsFGv/1Po9p6wE8gPDcGMO9A1A3HDApEIZJ5AtQ08//gFd6pfcc7Hof7AQXN1DNGIiYGBfkxNXUM6nYYkSZ2huEaGw2Fmai+9heOC4Pk+KKqbV2EaBnTLgkEHJvAcJFmk042yCYuCgGAwCFEUGYwNRaDJQqGApaUlLC4uYnn5Hubm5k9/cFdHFHiEIyrs0TJEswjbSeHw8Du2trZYm66g7rp5XDOr1Sra7TaOj4+ZJ/v7+wzU3S2Zng0jhvnJBYzbE7BMC2tra6hUKmfUMWBPTw8ajQYDnZycsPfBwcFZILXDVTJcuIhUsrNzXq8XgUDgDIwBQ6EQZmZm2MTW19exsbGBWq12Cux67Ba6aroL/H+rXeBfQsZ21/nCu3oAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Screenshot of Ultra, a multimedia smart canvas with several websites open on an overlapping infinite canvas&quot;
+        title=&quot;&quot;
+        src=&quot;/static/9c4da02e0209d913d3582874d8ae4a12/fcda8/ultra.png&quot;
+        srcset=&quot;/static/9c4da02e0209d913d3582874d8ae4a12/12f09/ultra.png 148w,
+/static/9c4da02e0209d913d3582874d8ae4a12/e4a3f/ultra.png 295w,
+/static/9c4da02e0209d913d3582874d8ae4a12/fcda8/ultra.png 590w,
+/static/9c4da02e0209d913d3582874d8ae4a12/efc66/ultra.png 885w,
+/static/9c4da02e0209d913d3582874d8ae4a12/c83ae/ultra.png 1180w,
+/static/9c4da02e0209d913d3582874d8ae4a12/f41ed/ultra.png 3820w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+    &lt;/span&gt;
+    &lt;figcaption class=&quot;gatsby-resp-image-figcaption&quot;&gt;Screenshot of Ultra, a multimedia smart canvas with several websites open on an overlapping infinite canvas&lt;/figcaption&gt;
+  &lt;/figure&gt;&lt;/p&gt;
+&lt;h2&gt;Composition&lt;/h2&gt;
+&lt;p&gt;My biggest critique of traditional window managers is their lack of composition. Composition allows for building something out of constituent components. Window managers today are built with predetermined workflows and do not allow for arbitrary recombination.&lt;/p&gt;
+&lt;p&gt;I would like to put forward a new view on window management. Instead of window managers providing a preset window managing layout, they should ship a variety of window managing &lt;em&gt;containers&lt;/em&gt; that allow for arbitrary nesting and reuse. An example under this system could be a top-level default desktop made up of a tabbed layout, where each tab represents a different persona, such as work, play, social, etc, then each of those tabs could have layouts more carefully curated to their specific use-case. The Work tab could be configured in a predefined tiling layout, Play could be a floating infinite canvas to incentivize the idea of exploration and creativity, and Social could be represented as a timeline. Then because we can compose all the way down, inside the Work tiling layout you could have a project tracker pane that had a tab for each project allowing you to easily drill down into the details of a particular project.&lt;/p&gt;
+&lt;p&gt;Alternatively, another user may choose to keep their top-level container as an infinite canvas, then have many other windows on the canvas that each has their own configurations. If the user was a software developer for example they could have a single split window for source code and the running application which lived somewhere in the infinite canvas near the project requirements and surrounding context.&lt;/p&gt;
+&lt;p&gt;The following are some ideas for containers that should be available in such a system:&lt;/p&gt;
+&lt;h4&gt;Tabbed Window&lt;/h4&gt;
+&lt;p&gt;A window with named tabs that change which inner window is being displayed&lt;/p&gt;
+&lt;h4&gt;Split Windows/Tiling&lt;/h4&gt;
+&lt;p&gt;A window composed of 2 or more sub-windows arranged in a tiling fashion.&lt;/p&gt;
+&lt;h4&gt;Infinite Canvas&lt;/h4&gt;
+&lt;p&gt;The infinite replacement of our traditional floating window manager with the addition of drawing and text overlaying the canvas&lt;/p&gt;
+&lt;h4&gt;Fixed-size Canvas&lt;/h4&gt;
+&lt;p&gt;There’s still value in a canvas you don’t have to traverse so you would still offer a floating window manager fixed to the screen size.&lt;/p&gt;
+&lt;h4&gt;Grid or gallery view&lt;/h4&gt;
+&lt;p&gt;Similar to tiling but windows are represented in consistent rows/columns&lt;/p&gt;
+&lt;h4&gt;Panel and docking bars&lt;/h4&gt;
+&lt;p&gt;A container that adds a panel bar so that windows can be docked inside the panel and hidden away if needed.&lt;/p&gt;
+&lt;h4&gt;Document view&lt;/h4&gt;
+&lt;p&gt;A more outlandish option would be a document view where the window would represent something akin to a linearized document like Notion or Google Docs. Sub-windows would behave similarly to inline blocks or images in a text document. You could write an essay and have a fully featured application inline the document. This would unlock a new sort of literate computing environment.&lt;/p&gt;
+&lt;p&gt;These suggestions are just a starting point. In an idealized system, new containers would be easy to add extending the system as needed. The main idea is that the window manager should be thought of as decomposing windows into sub-windows as opposed to being a single fixed layer.&lt;/p&gt;
+&lt;h2&gt;Down into the applications&lt;/h2&gt;
+&lt;p&gt;The suggestions above would help with organizing application windows significantly, yet it would not do much to help with intra-application concerns. As discussed above, applications can have very rich internal window managers: e.g. Photoshop and its tool panels. We would like for them to be able to adopt the operating system’s window management features listed above, but It’s too large of a lift to break these tools into separate applications in order for them to adopt the operating system’s window manager.&lt;/p&gt;
+&lt;p&gt;Instead, the operating system’s window manager APIs should be rich enough for applications to describe these multi-window arrangements. This on its own is not a novel concept; &lt;a href=&quot;https://www.gimp.org/&quot;&gt;GIMP&lt;/a&gt; has had a multi-window interface for years. One issue with the older multi-window interfaces is that since windows could not compose and the built-in window management features were so meager, users would have to be very careful to manage the windows themselves. This is what led to the applications reimplementing their own WM features internally.&lt;/p&gt;
+&lt;p&gt;What we would like is for the operating system to provide APIs allowing for applications to describe their semantic structure and default window layout, and then represent this to the user using the system-wide window controls. This would allow for a form of deep embedding of the software into the operating system which would feel both more intuitive while also being more powerful. Using the native window management features would be an easier experience for users because there would be less context switching between applications, e.g., you’d no longer have to remember how tabs or window splitting worked on an app-by-app basis. It would then be more powerful because you’d get interoperability between the windows from different applications. Additionally, there would be richer features available since you’re not restricted to the set of WM features the application designer provided.&lt;/p&gt;
+&lt;h2&gt;Doesn’t homogeneity cause stagnation&lt;/h2&gt;
+&lt;p&gt;The most obvious criticism of such a vision is that using a singular WM across all of the computing experience would result in a lack of competition and stagnation in the space. After all, in some sense, that’s what has already happened and has caused the proliferation of competition in applications.&lt;/p&gt;
+&lt;p&gt;However, there’s no reason for the space to be static. The operating system could allow for new containers or WM features to be installed, causing a marketplace for WM features. I believe this would cause even more innovation in the space since those improving window management don’t also have to be working in the context of a single application.&lt;/p&gt;
+&lt;p&gt;Applications that have a very unique use case, could even ship their own containers, which if conforming to the operating system APIs would preserve all the power/interop while allowing for the necessary customization.&lt;/p&gt;
+&lt;p&gt;Overall I feel like the current state is stagnant enough I’m not overly concerned with making it worse.&lt;/p&gt;
+&lt;h2&gt;Persistence&lt;/h2&gt;
+&lt;p&gt;Another advantage that web browsers have over the traditional desktop operating system is persistence. In general, if you reboot your system and open your web browser you’d expect for all your tabs to remain in a similar order. You may be logged out of some websites and some temporary data lost, but the overall state of your environment is recoverable.&lt;/p&gt;
+&lt;p&gt;In traditional desktops after a reboot most of the window state is lost and irrecoverable. OS X has begun reopening applications on reboot, and even attempting to reconstruct some window positioning. But given that desktop applications don’t have URLs the specific application state is usually lost.&lt;/p&gt;
+&lt;p&gt;I have many more thoughts on application persistence, so I’ll be saving them for a more in-depth future post.&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;Hopefully, I’ve expressed how important the domain of window management is, in that it is pervasive in computer usage overall. The existing tools mentioned above have provided many great ideas and utility, but the lack of flexibility in the space has caused real problems. As mentioned, application developers have had to extend into the domain causing both increased engineering effort as well as suboptimal user experiences. Composing window managers as a solution would help alleviate many problems while allowing for innovation in the design space. This rich window management toolkit would also allow for deeper embedding into applications allowing for better inter-application organization and a more &lt;a href=&quot;https://malleable.systems/&quot;&gt;malleable&lt;/a&gt; computing interface.&lt;/p&gt;
+&lt;h2&gt;Further Reading&lt;/h2&gt;
+&lt;p&gt;This is a concept I’ve been ideating on for a long time. Probably since I first used GIMP and multiple monitors back in 2007. There have been a few places of inspiration that have helped me refine my thinking in the area that I think would be useful for anyone interested:&lt;/p&gt;
+&lt;h3&gt;Smalltalk/MVC&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;http://worrydream.com/EarlyHistoryOfSmalltalk/&quot;&gt;Smalltalk&lt;/a&gt; and the people at Xerox PARC invented windows and the &lt;a href=&quot;https://en.wikipedia.org/wiki/WIMP_(computing)&quot;&gt;WIMP&lt;/a&gt; (windows, icons, mouse, pointer) interface. Reading about and observing the usage of older Smalltalk systems has given me the perspective that applications would use windowing much more than today.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller&quot;&gt;MVC&lt;/a&gt; (model-view-controller) is a software architectural pattern, not coincidentally, also developed at PARC. With MVC you’re allowed to have separate views over the same data (model) which is what originally got me to think about window managers as just separate views into the same content.&lt;/p&gt;
+&lt;h3&gt;Alexander Obenauer&lt;/h3&gt;
+&lt;p&gt;Alexander is an independent researcher looking into the “&lt;a href=&quot;https://wonderos.org/&quot;&gt;operating system of the future&lt;/a&gt;”. His lab notes on &lt;a href=&quot;https://alexanderobenauer.com/labnotes/006/&quot;&gt;views&lt;/a&gt; are very related to the above topic. His overall vision is more all-encompassing than the one I’ve put forth and I would implore everyone to read his &lt;a href=&quot;https://alexanderobenauer.com/labnotes/000/&quot;&gt;labnotes&lt;/a&gt;.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Flatten the Program Lifecycle]]></title><description><![CDATA[This post represents a change in how I have reasoned about software and I think could be of some value to others. I am not claiming that any…]]></description><link>https://bandukwala.me/flatten-the-program-lifecycle/</link><guid isPermaLink="false">https://bandukwala.me/flatten-the-program-lifecycle/</guid><pubDate>Mon, 02 Jan 2023 00:00:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;p&gt;This post represents a change in how I have reasoned about software and I think could be of some value to others. I am not claiming that any of the information is novel but I still don’t think it has gained full mind share.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Sidenote: I began writing this about a year ago and since then Jack Rusher has released a wonderful talk &lt;a href=&quot;https://www.youtube.com/watch?v=8Ab3ArE8W3s&quot;&gt;Stop Writing Dead Programs&lt;/a&gt; which addresses some similar concerns.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I think the traditional way we break down the &lt;a href=&quot;https://en.wikipedia.org/wiki/Program_lifecycle_phase&quot;&gt;Program Lifecycle&lt;/a&gt; is keeping us from making radical improvements in the field of Computing. The Program Lifecycle for those unfamiliar is the set of stages a program goes through in order from source to completion:&lt;/p&gt;
+&lt;h3&gt;Simplified Program Lifecycle:&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;Edit Time - A person types source code into an editor&lt;/li&gt;
+&lt;li&gt;Compile Time - Source code is turned into machine code by a compiler&lt;/li&gt;
+&lt;li&gt;Run Time - The software is executed&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;I’m aware there are also interpreted programming environments that aren’t compiled in a traditional sense; we’re going to circle back to that.&lt;/p&gt;
+&lt;p&gt;Dividing up the program lifecycle into these disjoint stages is limiting the design space of programming and therefore interactive computing. One area in which this program lifecycle is missing is the context in which the program is executed. The first piece of context is &lt;em&gt;when&lt;/em&gt; the program plans to be executed. Broadly I think this can be split into two camps:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Classical Programming (Programming for the future)&lt;/li&gt;
+&lt;li&gt;Interactive Computation (Programming for the now)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Classical Programming&lt;/h2&gt;
+&lt;p&gt;Classical programming is the domain most programmers are familiar with and that most of the tooling and theory we’ve developed are built for. This is programming with the intent of describing a computation and having it run at some later point.&lt;/p&gt;
+&lt;p&gt;This goes back to the beginning of programming when programmers would write programs by hand and then submit them in batches for a mainframe to process. Most of our programming is still done in this style.&lt;/p&gt;
+&lt;p&gt;For many domains this delay between describing a computation and the actual computing is intentional. The obvious case is still &lt;a href=&quot;https://en.wikipedia.org/wiki/Batch_processing&quot;&gt;Batch Processing&lt;/a&gt; where some computation is intentionally scheduled or queued to run at a later time. This can both be done for resource utilization reasons (run this computation during off-peak hours) or because some later input will be available at the scheduled time (run a report at the end of the month).&lt;/p&gt;
+&lt;p&gt;A related case where it’s necessary to consider a computation deferred is the case where it’s run on a machine other than the one it was initially written on. If you plan on distributing a computation over a cluster of machines or just running it on another one as is often the case in scientific computing you have lost all the interactivity from the editing stage. You can recover some of this interactivity by transmitting data back and forth between machines but it will always be desirable to submit a computation to the external machine and not block on that operation.&lt;/p&gt;
+&lt;p&gt;Even in situations where you don’t intentionally want to defer computation you can still be forced into this situation as is the case when handling external events. If you want to write a program that can listen to a socket or receive emails, you will be programming for some event that happens after the fact; potentially when you’re away from a computer altogether.&lt;/p&gt;
+&lt;p&gt;The most interesting form of delayed computation is programming for reuse. Often when we are programming we’re not trying to calculate a single value or perform a side effect; we’re trying to write something that can be used over and over to calculate disparate values or perform differing side effects. This does not preclude you from using an interactive environment to write these reusable components but the component at the end is intended to survive past the context of the developer&apos;s interactive session. This is distinct from the previous cases in which the program could get run in a single different context from the one the programmer wrote it in; in this case, the program could get run in MULTIPLE different contexts many of which could be unknown by the initial programmer.&lt;/p&gt;
+&lt;p&gt;Lastly, I would like to suggest that even in an interactive computing context if the computation to be run has multiple components and takes a significant time to run that’s indistinguishable from a program that gets run at a later time.&lt;/p&gt;
+&lt;h2&gt;Interactive Computing&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There is no bright line delineation between Classical Programming and Interactive Computing. A REPL that is running an expensive function is the same case referenced above as a long-running batch job. I would like to not get hung up on this fact.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Interactive computing is any sort of computation that is intended to happen during use. More colloquially we usually say this is “using software” in contrast to “writing software”. This categorization is quite broad as it encapsulates most use today.&lt;/p&gt;
+&lt;p&gt;Some examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Traditional calculator usage&lt;/li&gt;
+&lt;li&gt;Word Processing&lt;/li&gt;
+&lt;li&gt;Spreadsheets&lt;/li&gt;
+&lt;li&gt;Photoshop/Image Processing Applications&lt;/li&gt;
+&lt;li&gt;3D modeling&lt;/li&gt;
+&lt;li&gt;Web Browsing&lt;/li&gt;
+&lt;li&gt;Video games&lt;/li&gt;
+&lt;li&gt;Video playback&lt;/li&gt;
+&lt;li&gt;REPL usage&lt;/li&gt;
+&lt;li&gt;Jupyter Notebooks&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The advantages of &lt;em&gt;Interactive Computing&lt;/em&gt; should be obvious to anyone familiar with modern software but have also been written about at length by more knowledgeable sources than myself. If you are looking for further reading in the space I would suggest looking into the field of &lt;em&gt;Human-Computer Interaction,&lt;/em&gt; the writings of &lt;a href=&quot;https://jnd.org/&quot;&gt;Don Norman&lt;/a&gt; (especially his work into the &lt;a href=&quot;https://en.wikipedia.org/wiki/Gulf_of_execution&quot;&gt;Gulf of Execution&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org/wiki/Gulf_of_evaluation&quot;&gt;Gulf of Evaluation&lt;/a&gt;) and for inspiration, in what’s possible in the medium I suggest exploring the works of &lt;a href=&quot;http://worrydream.com/&quot;&gt;Bret Victor&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Most of the above examples probably don&apos;t seem very interesting or “programmer-esque” with the exception of the calculator, spreadsheet, notebooks, and the REPL. These are interesting because they&apos;re more straightforwardly performing similar computations to the ones we do in &lt;em&gt;Classical Programming&lt;/em&gt; except the context is fully known and the result is wanted immediately. In the REPL/spreadsheet case, we may even want to create computations in more of the classical style but we do so in an &lt;em&gt;interactive&lt;/em&gt; fashion.&lt;/p&gt;
+&lt;p&gt;The reason that this is still interesting from the lens of programming is that most of these constraints that we’ve imposed on the interactive computing domains are entirely artificial. Much of the software that we use in an interactive setting would benefit greatly if we had access to more powerful tools during the context of use. Imagine a world where you could perform live programmatic operations on your email inbox; for example, you could get a list of everyone who sent you an email more than a week ago for whom you haven’t responded and automatically generate a reply apologizing for the delay. Currently, these problems require software development knowledge and the use of specialized expert tools separate from the originating application.&lt;/p&gt;
+&lt;h2&gt;False Dichotomies&lt;/h2&gt;
+&lt;p&gt;A lot of the supposed tradeoffs that cause flame wars are really just people trying to cross this chasm.&lt;/p&gt;
+&lt;h3&gt;Compiled vs Interpreted Languages&lt;/h3&gt;
+&lt;p&gt;Interpreted languages are programming languages that are executed directly from source at runtime rather than going through a secondary compilation step. This is more of a classification of the runtime system rather than the language itself; a single language could be run in an interpreter or compiled into a binary. Interpretation essentially combines the compilation and runtime steps into one with some interesting consequences.&lt;/p&gt;
+&lt;p&gt;First, since compilation is skipped in interpreted language the time to begin some form of execution generally has lower latency since the interpreter doesn’t have to fully consume the program but just run instructions as they occur. This can lead to interpreted languages feeling more interactive than their compiled counterparts.&lt;/p&gt;
+&lt;p&gt;On the other hand, since compiled languages have a full compilation phase that consumes the entire program they can generally use this phase to both improve performance as well as find potential errors that the programmer may have made during &lt;em&gt;edit time&lt;/em&gt;.&lt;/p&gt;
+&lt;h3&gt;Data Exploration via notebooks&lt;/h3&gt;
+&lt;p&gt;There have been many talks on the &lt;a href=&quot;https://www.youtube.com/watch?v=9Q6sLbz37gk&quot;&gt;pros&lt;/a&gt; and &lt;a href=&quot;https://www.youtube.com/watch?v=7jiPeIFXb6U&quot;&gt;cons&lt;/a&gt; of using programming notebooks such as &lt;a href=&quot;https://jupyter.org/&quot;&gt;Jupyter&lt;/a&gt;. Programming notebooks are an exploratory form of programming environment that is used for a form of live data analysis and experimentation.&lt;/p&gt;
+&lt;p&gt;This is an especially interesting case for us because these environments are using tools traditionally meant for classical programming but targeting a use case that is explicitly interactive and exploratory in nature.&lt;/p&gt;
+&lt;p&gt;One of the frequent complaints about Jupyter notebooks is the order in which code cells have been run and what data has been loaded is an implicit and hidden state of the environment. This can make it confusing for the user to understand what is going on at any moment. This doesn’t happen with classical programming tools because every time you start a program all the state is built from scratch. In non-programming applications, this happens less often because the applications are built from the ground with the goal of making state management a clear priority while exposing important states to users.&lt;/p&gt;
+&lt;p&gt;Another common complaint is that notebook-driven development does not follow traditionally good software engineering methodologies or practices. Clearly if the goal was just data exploration and short-term experimentation this wouldn’t be an issue. But by the nature of having an environment available to develop analyses that can be shared and reused, the desire for additional robustness becomes invaluable.&lt;/p&gt;
+&lt;p&gt;To be clear this is not meant to be an endorsement or admonishment of notebooks but rather to acknowledge the unfortunate tradeoffs that their potential audiences are forced to make.&lt;/p&gt;
+&lt;h2&gt;What do we mean by runtime anyways?&lt;/h2&gt;
+&lt;p&gt;I have been using the term runtime throughout this in the colloquial sense. It’s probably important to be more precise to avoid confusion.
+A &lt;a href=&quot;https://en.wikipedia.org/wiki/Runtime_system&quot;&gt;&lt;strong&gt;runtime system&lt;/strong&gt; or &lt;strong&gt;runtime environment&lt;/strong&gt;&lt;/a&gt; is the collection of software resources bundled together to run a program. It’s essentially the software for a given programming language that is used to run a program. For example, this could be the JRE for java or the Python interpreter for Python.&lt;/p&gt;
+&lt;p&gt;The &lt;a href=&quot;https://en.wikipedia.org/wiki/Runtime_(program_lifecycle_phase)&quot;&gt;runtime phase&lt;/a&gt; of the lifecycle, which is what we generally referred to in the rest of the post, refers to the stage in which the program is actually executed. Wikipedia specifically says &quot;in which the code is being executed on the computer&apos;s central processing unit”. Unfortunately this does not necessarily match it’s colloquial usage.&lt;/p&gt;
+&lt;p&gt;For example when someone says they like REPL driven development because it allows for them to interact with their code &lt;em&gt;at runtime&lt;/em&gt; what they generally mean is they want the ability to interact directly with the &lt;em&gt;runtime environment&lt;/em&gt; and execute code on the fly, not that a certain piece of code is currently being executed on the CPU.&lt;/p&gt;
+&lt;p&gt;Similarly, if we think of the following python program:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;python&quot;&gt;&lt;pre class=&quot;language-python&quot;&gt;&lt;code class=&quot;language-python&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;import&lt;/span&gt; time
+
+&lt;span class=&quot;token keyword&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;token number&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;token boolean&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token comment&quot;&gt;# Infinite Loop&lt;/span&gt;
+        &lt;span class=&quot;token keyword&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&quot;Stuck Forever&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+time&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;sleep&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This program executes an infinite loop inside a conditional that evaluates to false and then waits for a minute. In general while we “run” this program we would say it exists at runtime yet lines 4-5 are never going to be “run” and for the vast majority of the program nothing will be executing on the CPU because the program will be sleeping waiting for an interrupt from the kernel.&lt;/p&gt;
+&lt;p&gt;I would like to claim that this definition of &lt;em&gt;runtime&lt;/em&gt; is not what people actually mean. Alternatively, you could suppose that it could mean that the code was either parsed or loaded into memory but I think these are implementation details not capturing the essence of what we mean by the phrase.&lt;/p&gt;
+&lt;p&gt;The definition that I would like to adopt is that &lt;em&gt;runtime&lt;/em&gt; is the phase in which the language’s &lt;em&gt;runtime system&lt;/em&gt; has access to the computation. Said another way this means that the language’s runtime system could run or interact with the code. The important distinction here is it does not matter what code if any is actually “executed” but rather that there’s some language support for the code at its current state.&lt;/p&gt;
+&lt;h2&gt;Affordances&lt;/h2&gt;
+&lt;p&gt;So what is the problem we actually care about?&lt;/p&gt;
+&lt;p&gt;I posit that the problem we’re trying to solve in these two contexts is good &lt;em&gt;affordances&lt;/em&gt;. Don Norman defines affordance to be the relation between some agent and an object. In our case, the affordance we care about is the interaction between someone and their computing environment.&lt;/p&gt;
+&lt;p&gt;The current divide between programming and software usage provides different affordances for programmers and users respectively. Classical Programmer affordances for example happen at &lt;em&gt;edit time&lt;/em&gt; since that’s the stage of the program lifecycle in which the programmer interacts with the system. User affordances however occur during the &lt;em&gt;use&lt;/em&gt; of the system.&lt;/p&gt;
+&lt;p&gt;Affordances are generally quite good in end-user applications. Well-designed applications provide contextual menus that provide actions that are available given the current state and data. Additionally, they can show potential operations that are not currently possible but could be in another context (such as menu items being “greyed out”).&lt;/p&gt;
+&lt;!-- TODO Get images fixed --&gt;
+&lt;p&gt;&lt;img src=&quot;/images/contextmenu.png&quot; alt=&quot;Ubuntu non-editable text context menu&quot;&gt;&lt;/p&gt;
+&lt;p&gt;This context menu example is not shown as an example of great interaction design but rather how interactions with the software are better enabled when the affordances are provided making it clear what actions are possible.&lt;/p&gt;
+&lt;p&gt;Programming tools on the other hand usually have quite poor affordances. Code is usually typed into a text editor which has minimal understanding of the particular language semantics and external state is entirely unrepresented. Particularly good development environments have syntax highlighting and support refactoring capabilities but this is usually implemented completely separately from the language’s runtime duplicating a lot of the parsing and semantic understanding. Many IDEs also come bundled with debugging capabilities and methods to run the software but these are often completely orthogonal to the editing experience. You generally edit the code in a plain static text environment then iterate through the running program using a step-debugger and have separate affordances available there. Even dealing with errors during execution is quite a poor experience in most environments.&lt;/p&gt;
+&lt;p&gt;On the other hand programming tools often give you the ability to create robust solutions that are capable of solving large-scale problems as well as building tools in a way that’s usually unfeasible in “end-user” applications.&lt;/p&gt;
+&lt;h2&gt;Flatten the lifecycle&lt;/h2&gt;
+&lt;figure&gt;
+&lt;figcaption&gt;I came across Omar’s tweet while I was writing this and it more succinctly conveys what I’m trying to describe&lt;/figcaption&gt;
+&lt;!-- Use gatsby-plugin-twitter --&gt;
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;(in our programming language, it&amp;#39;s always runtime)&lt;/p&gt;&amp;mdash; Omar Rizwan (@rsnous) &lt;a href=&quot;https://twitter.com/rsnous/status/1495560244696600582?ref_src=twsrc%5Etfw&quot;&gt;February 21, 2022&lt;/a&gt;&lt;/blockquote&gt; 
+&lt;/figure&gt;
+&lt;p&gt;So now that we’ve talked a bit about both the divide of computer interaction as well as some of the unfortunate gaps, let’s turn to what we can do about it. I believe that flattening the &lt;em&gt;program lifecycle&lt;/em&gt; is the ultimate design solution that’s necessary to resolve these issues.&lt;/p&gt;
+&lt;p&gt;What do I mean by &lt;em&gt;flattening&lt;/em&gt; the program lifecycle?&lt;/p&gt;
+&lt;p&gt;As we said earlier the simplified program lifecycle consists of:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Edit Time&lt;/li&gt;
+&lt;li&gt;Compile Time&lt;/li&gt;
+&lt;li&gt;Run Time&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Flattening the lifecycle means there would be one stage that consists of all 3 of these components. What this looks like in practice is utilizing the language runtime to provide better interactions when programming.&lt;/p&gt;
+&lt;p&gt;This should not be very surprising as &lt;a href=&quot;https://en.wikipedia.org/wiki/Language_Server_Protocol&quot;&gt;Language Servers&lt;/a&gt; have become dominant in recent years drastically increasing the effectiveness of IDEs by providing language-specific editing functionality to traditional editors. Unfortunately due to historical reasons these language servers are not generally part of the runtime but are a separate utility with much of the runtime/compiler logic duplicated. If we were to instead design our languages with this goal in mind the compiler, language server, and runtime should unify.&lt;/p&gt;
+&lt;p&gt;The natural consequence of this is your code being managed by the runtime rather than static files on a filesystem. This allows for program transformations without the need for the runtime to reparse all of the files and reinterpret the contents. Today with REPL-driven environments the REPL has the state of some code that has been evaluated but this can be different than the current state of the editor. So the programmer has to do some effort in making sure they’re reasoning about both of these states correctly. If the runtime were in charge of the code’s persistence then we could edit code with interactions of the runtime and there would be no way to have this dissonance. Calling back to our Jupyter example there are also certain application states that are difficult to represent in textual sources, such as images, large data frames, or databases; these would be much easier to store inside of an application runtime.&lt;/p&gt;
+&lt;p&gt;This is in no way an original idea and has been referred to before as &lt;a href=&quot;https://en.wikipedia.org/wiki/Interactive_programming&quot;&gt;Interactive Programming&lt;/a&gt;, a paradigm embodied by the &lt;a href=&quot;https://en.wikipedia.org/wiki/Smalltalk&quot;&gt;Smalltalk&lt;/a&gt; system. This technique hasn’t had a big enough influence on most mass-market programming languages today. I think we’re primed for an interactive programming renaissance so I would like to put forward some possible benefits that it could bring.&lt;/p&gt;
+&lt;p&gt;Interactive computing becomes a much more interesting experience when utilizing a language built for &lt;em&gt;Interactive Programming.&lt;/em&gt; The user interface could be adapted to particular problem domains like most traditional applications yet you’d still have access to all of the rich semantics expected in a programming language. Very much in the spirit of older Smalltalk systems &lt;a href=&quot;https://gtoolkit.com/&quot;&gt;Glamorous Toolkit&lt;/a&gt; has been making progress in this space.&lt;/p&gt;
+&lt;p&gt;We can also finally realize our dream of having stronger context-aware affordances for our computing. In an interactive session, failures could manifest themselves as messages to the user. On the other hand, if they were defining a reusable component the runtime could utilize static analysis to manifest the &lt;em&gt;potential&lt;/em&gt; for errors during editing rather than waiting for them to fail during the context of use. Right now our tools are making us choose a side of the interactive/programming chasm and I think this will help us bridge the gap.&lt;/p&gt;
+&lt;p&gt;We talked about program transformation earlier. One criticism of automated program refactoring tools in traditional IDEs is they are usually computationally expensive and have high latency since it requires parsing and writing an entirety of a codebase out to disk. In an interactive system refactoring would be much quicker since actions would be on an already parsed AST (Abstract Syntax Tree) and would not require an explicit parse/serialization step. More importantly, though these refactors could often be performed asynchronously essentially solving the latency issue since a user could perform a refactor and keep interacting with the system while the runtime changed affected code in the background. This isn’t possible in today’s systems since the codebase needs to be in an atomic state between refactors but an interactive runtime could have multiple copies of the AST at once. This is much closer to how end-user applications have been developed for years; when performing an update we don’t serialize the entire application state to disk but rather issue an update to some database changing the necessary state.&lt;/p&gt;
+&lt;p&gt;One major concern of compiled programming environments is the lack of interactivity due to compile times. Compilation can be a notoriously slow experience. Fortunately for interactive systems, since the editing is happening through runtime interactions the codebase never needs to be fully recompiled during programming. The only code that needs to be recompiled is whatever was affected by the most recent editor interaction. Most of the time this would be adding a new expression or modifying an existing one. Adding a new expression is obviously easy to compile efficiently. Compiling an existing expression and downstream dependencies is also much easier since the runtime has access to the full dependency tree without having to scan the source code.&lt;/p&gt;
+&lt;p&gt;Another example of the type of power that’s available with a fully interactive programming system is the ability to provide more interfaces for programming. If programs were stored by the runtime and not by a textual representation they can easily be internationalized increasing accessibility to many more demographics. You could imagine having the same type of support for internationalization in your programming language that people expect from commercial software. &lt;a href=&quot;https://www.unison-lang.org/&quot;&gt;Unison&lt;/a&gt; has a very interesting runtime that stores code by the hash of its AST which separates naming from the code completely allowing both seamless renaming as well as internationalization trivially.&lt;/p&gt;
+&lt;p&gt;Language extension is another pain point of current programming languages. Language designers have to be very careful when adding new features to a language not just because of the potential semantic implications but also because of the potential implications for overlapping syntax as well as readability. If the runtime handled code persistence it could also handle modifying the code when upgrading language versions. Even semantic changes to the language could often include migrations to adapt existing code.&lt;/p&gt;
+&lt;p&gt;These are just a few ideas that become possible when we start programming in a more interactive manner. I’m hoping that we see an uptick in these &lt;em&gt;Programming Systems&lt;/em&gt; in the near future as we’re seeing an increased demand for developer tooling as well as a huge increase in the number of people interfacing with these tools.&lt;/p&gt;
+&lt;p&gt;I plan on releasing follow-up posts in the future addressing more possibilities in the future of programming systems.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Continuous Delivery]]></title><description><![CDATA[Seems as if I only have time to write a post after major lifestyle changes. Working from home due to COVID-19 has presented me with a bit of…]]></description><link>https://bandukwala.me/continuous-delivery/</link><guid isPermaLink="false">https://bandukwala.me/continuous-delivery/</guid><pubDate>Sun, 29 Mar 2020 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;Seems as if I only have time to write a post after major lifestyle changes. Working from home due to COVID-19 has presented me with a bit of time to worok on some personal projects (this blog include). So the first thing I did was update the blog to gatsby v2 which was mostly mechanical dependency updates and a few major breaking changes documented &lt;a href=&quot;https://www.gatsbyjs.org/docs/migrating-from-v1-to-v2/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The next goal in order to speed up development is to get some form of CI/CD set up because I was manually deploying this every time I would tweak something or even add a new post. Since this site is hosted on &lt;a href=&quot;https://pages.github.com/&quot;&gt;GitHub Pages&lt;/a&gt; I decided it would probably be best to implement CD using &lt;a href=&quot;https://github.com/features/actions&quot;&gt;GitHub Actions&lt;/a&gt;. Luckily there is already an action created to autopublish Gatsby sites to GitHub Pages &lt;a href=&quot;https://github.com/marketplace/actions/gatsby-publish&quot;&gt;here&lt;/a&gt;. So hopefully now that the dev workflow is quicker I will be able to update more often.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Initial Post]]></title><description><![CDATA[Now that I have some free time off from school I've decided to rebuild the blog. I'm using Gatsby with markdown pages for content. Over the…]]></description><link>https://bandukwala.me/initial-post/</link><guid isPermaLink="false">https://bandukwala.me/initial-post/</guid><pubDate>Thu, 31 May 2018 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;Now that I have some free time off from school I&apos;ve decided to rebuild the blog. I&apos;m using &lt;a href=&quot;https://www.gatsbyjs.org/&quot;&gt;Gatsby&lt;/a&gt; with markdown pages for content.&lt;/p&gt;
+&lt;p&gt;Over the next few weeks I have a few features I&apos;d like to add before I consider it in a &lt;em&gt;done&lt;/em&gt; state.&lt;/p&gt;
+&lt;h4&gt;Todo:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;RSS&lt;/li&gt;
+&lt;li&gt;Search&lt;/li&gt;
+&lt;li&gt;Tagging&lt;/li&gt;
+&lt;li&gt;Convert inline CSS to &lt;a href=&quot;https://www.styled-components.com/&quot;&gt;Styled Components&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Comments&lt;/li&gt;
+&lt;li&gt;Sharing&lt;/li&gt;
+&lt;li&gt;Hopefully some better styling&lt;/li&gt;
+&lt;/ul&gt;</content:encoded></item></channel></rss>
