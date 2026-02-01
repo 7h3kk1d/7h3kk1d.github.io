@@ -34,6 +34,13 @@ module.exports = {
               showCaptions: true,
             },
           },
+          {
+            resolve: `gatsby-remark-autolink-headers`,
+            options: {
+              offsetY: `100`,
+              className: `heading-anchor`,
+            },
+          },
           `gatsby-remark-prismjs`,
         ],
       },
