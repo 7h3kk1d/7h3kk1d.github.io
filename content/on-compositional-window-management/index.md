@@ -1,6 +1,7 @@
 ---
 title: 'On Compositional Window Management'
 date: '2023-02-11'
+tags: ['malleable-systems', 'window-management', 'composition']
 ---
 
 <!--
