@@ -20,7 +20,11 @@ const blogPost = ({ data }) => {
 
   return (
     <Layout title={post.frontmatter.title}>
-      <div className={`blog-post-layout ${hasHeadings ? 'blog-post-layout--with-toc' : ''}`}>
+      <div
+        className={`blog-post-layout ${
+          hasHeadings ? 'blog-post-layout--with-toc' : ''
+        }`}
+      >
         <article className="blog-post-content">
           <h1 style={{ display: `inline-block` }}>{post.frontmatter.title}</h1>
           <h4
@@ -43,7 +47,9 @@ const blogPost = ({ data }) => {
           )}
           <div dangerouslySetInnerHTML={{ __html: post.html }} />
         </article>
-        {hasHeadings && <TableOfContents headings={headings} title={post.frontmatter.title} />}
+        {hasHeadings && (
+          <TableOfContents headings={headings} title={post.frontmatter.title} />
+        )}
       </div>
     </Layout>
   )
