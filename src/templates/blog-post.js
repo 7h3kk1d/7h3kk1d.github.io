@@ -52,7 +52,11 @@ const blogPost = ({ data }) => {
           <BlueskyCommentsSection postUri={post.frontmatter.blueskyPostUri} />
         </article>
         {hasHeadings && (
-          <TableOfContents headings={headings} title={post.frontmatter.title} />
+          <TableOfContents
+            headings={headings}
+            title={post.frontmatter.title}
+            hasComments={!!post.frontmatter.blueskyPostUri}
+          />
         )}
       </div>
     </Layout>

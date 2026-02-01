@@ -21,7 +21,7 @@ const BlueskyCommentsSection = ({ postUri }) => {
 
   return (
     <section className="bluesky-comments-section">
-      <h2>Comments</h2>
+      <h2 id="comments">Comments</h2>
       <p className="bluesky-comments-cta">
         Join the conversation by{' '}
         <a href={postUri} target="_blank" rel="noopener noreferrer">
