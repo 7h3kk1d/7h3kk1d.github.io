@@ -30,11 +30,7 @@ const blogPost = ({ data }) => {
         {tags.length > 0 && (
           <div className="tags" style={{ marginBottom: rhythm(1) }}>
             {tags.map((tag) => (
-              <Link
-                key={tag}
-                to={`/tags/${kebabCase(tag)}/`}
-                className="tag"
-              >
+              <Link key={tag} to={`/tags/${kebabCase(tag)}/`} className="tag">
                 {tag}
               </Link>
             ))}

@@ -42,11 +42,7 @@ const IndexPage = ({ data }) => (
           {node.frontmatter.tags && node.frontmatter.tags.length > 0 && (
             <div className="tags" style={{ marginTop: rhythm(-0.5) }}>
               {node.frontmatter.tags.map((tag) => (
-                <Link
-                  key={tag}
-                  to={`/tags/${kebabCase(tag)}/`}
-                  className="tag"
-                >
+                <Link key={tag} to={`/tags/${kebabCase(tag)}/`} className="tag">
                   {tag}
                 </Link>
               ))}
