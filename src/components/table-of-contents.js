@@ -39,7 +39,7 @@ const findActiveSection = (nestedHeadings, activeId) => {
   return null
 }
 
-const TableOfContents = ({ headings, title }) => {
+const TableOfContents = ({ headings, title, hasComments }) => {
   const [activeId, setActiveId] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -180,6 +180,19 @@ const TableOfContents = ({ headings, title }) => {
               </li>
             )
           })}
+          {hasComments && (
+            <li className="toc__section">
+              <a
+                href="#comments"
+                className={`toc__link toc__link--depth-2 ${
+                  activeId === 'comments' ? 'toc__link--active' : ''
+                }`}
+                onClick={(e) => handleClick(e, 'comments')}
+              >
+                Comments
+              </a>
+            </li>
+          )}
         </ul>
       </nav>
     </aside>
