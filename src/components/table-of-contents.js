@@ -44,7 +44,10 @@ const TableOfContents = ({ headings, title }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  const nestedHeadings = useMemo(() => buildNestedHeadings(headings), [headings])
+  const nestedHeadings = useMemo(
+    () => buildNestedHeadings(headings),
+    [headings]
+  )
   const activeSectionId = useMemo(
     () => findActiveSection(nestedHeadings, activeId),
     [nestedHeadings, activeId]
@@ -93,7 +96,9 @@ const TableOfContents = ({ headings, title }) => {
   }
 
   return (
-    <aside className={`toc-container ${isExpanded ? 'toc-container--expanded' : ''}`}>
+    <aside
+      className={`toc-container ${isExpanded ? 'toc-container--expanded' : ''}`}
+    >
       <button
         className="toc-toggle"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -102,7 +107,9 @@ const TableOfContents = ({ headings, title }) => {
       >
         <span>Table of Contents</span>
         <svg
-          className={`toc-toggle__chevron ${isExpanded ? 'toc-toggle__chevron--expanded' : ''}`}
+          className={`toc-toggle__chevron ${
+            isExpanded ? 'toc-toggle__chevron--expanded' : ''
+          }`}
           width="12"
           height="12"
           viewBox="0 0 12 12"
@@ -149,7 +156,9 @@ const TableOfContents = ({ headings, title }) => {
                       >
                         <a
                           href={`#${child.id}`}
-                          className={`toc__link toc__link--depth-${child.depth} ${
+                          className={`toc__link toc__link--depth-${
+                            child.depth
+                          } ${
                             activeId === child.id ? 'toc__link--active' : ''
                           }`}
                           onClick={(e) => handleClick(e, child.id)}
