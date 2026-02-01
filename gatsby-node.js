@@ -8,6 +8,16 @@ const kebabCase = (str) =>
     .replace(/\s+/g, '-')
     .replace(/[^\w-]+/g, '')
 
+// Explicitly define optional frontmatter fields
+exports.createSchemaCustomization = ({ actions }) => {
+  const { createTypes } = actions
+  createTypes(`
+    type MarkdownRemarkFrontmatter {
+      blueskyPostUri: String
+    }
+  `)
+}
+
 exports.onCreateNode = ({ node, getNode, actions }) => {
   const { createNodeField } = actions
   if (node.internal.type === `MarkdownRemark`) {

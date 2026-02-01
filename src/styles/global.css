@@ -628,3 +628,66 @@ h4:hover .heading-anchor {
     display: none;
   }
 }
+
+/* ========================================
+   Bluesky Comments Section
+   ======================================== */
+
+.bluesky-comments-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-text-secondary);
+}
+
+.bluesky-comments-section h2 {
+  margin-bottom: 0.5rem;
+}
+
+.bluesky-comments-cta {
+  margin-bottom: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.bluesky-comments-empty {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Remove theme blockquote styling from Bluesky comments */
+.bluesky-comments-section blockquote {
+  border-left: none;
+  margin-left: 0;
+  padding-left: 0;
+  font-style: normal;
+}
+
+/* Dark mode overrides for bluesky-comments package */
+[data-theme='dark'] .bsky-comment,
+[data-theme='dark'] .bsky-thread {
+  background-color: var(--color-code-bg);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bsky-author-name {
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .bsky-author-handle {
+  color: var(--color-text-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .bsky-comment,
+  :root:not([data-theme='light']) .bsky-thread {
+    background-color: var(--color-code-bg);
+    color: var(--color-text);
+  }
+
+  :root:not([data-theme='light']) .bsky-author-name {
+    color: var(--color-text);
+  }
+
+  :root:not([data-theme='light']) .bsky-author-handle {
+    color: var(--color-text-secondary);
+  }
+}
