@@ -126,7 +126,15 @@ const TableOfContents = ({ headings, title }) => {
         </svg>
       </button>
       <nav id="toc-nav" className="toc" aria-label="Table of contents">
-        <h4 className="toc__title">{title}</h4>
+        <h4 className="toc__title">
+          <a
+            href="#post-title"
+            className="toc__link"
+            onClick={(e) => handleClick(e, 'post-title')}
+          >
+            {title}
+          </a>
+        </h4>
         <ul className="toc__list">
           {nestedHeadings.map((section) => {
             const isSectionActive = activeSectionId === section.id
