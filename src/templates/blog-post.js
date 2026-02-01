@@ -27,7 +27,9 @@ const blogPost = ({ data }) => {
         }`}
       >
         <article className="blog-post-content">
-          <h1 style={{ display: `inline-block` }}>{post.frontmatter.title}</h1>
+          <h1 id="post-title" style={{ display: `inline-block` }}>
+            {post.frontmatter.title}
+          </h1>
           <h4
             className="post-date"
             style={{
