@@ -3,6 +3,7 @@ import { Link } from 'gatsby-link'
 import { rhythm } from '../utils/typography'
 import Layout from '../components/layout'
 import TableOfContents from '../components/table-of-contents'
+import BlueskyCommentsSection from '../components/bluesky-comments'
 import { graphql } from 'gatsby'
 
 // Helper function to convert tag to URL-friendly slug
@@ -46,6 +47,7 @@ const blogPost = ({ data }) => {
             </div>
           )}
           <div dangerouslySetInnerHTML={{ __html: post.html }} />
+          <BlueskyCommentsSection postUri={post.frontmatter.blueskyPostUri} />
         </article>
         {hasHeadings && (
           <TableOfContents headings={headings} title={post.frontmatter.title} />
@@ -69,6 +71,7 @@ export const query = graphql`
         title
         date(formatString: "DD MMMM, YYYY")
         tags
+        blueskyPostUri
       }
     }
   }
