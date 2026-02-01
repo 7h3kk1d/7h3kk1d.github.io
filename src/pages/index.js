@@ -5,6 +5,14 @@ import Layout from '../components/layout'
 import { graphql } from 'gatsby'
 import { about } from '../components/about'
 import { research } from '../components/research'
+
+// Helper function to convert tag to URL-friendly slug
+const kebabCase = (str) =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+
 const IndexPage = ({ data }) => (
   <Layout>
     <div>{about}</div>
@@ -31,6 +39,19 @@ const IndexPage = ({ data }) => (
             </h3>
             <p>{node.excerpt}</p>
           </Link>
+          {node.frontmatter.tags && node.frontmatter.tags.length > 0 && (
+            <div className="tags" style={{ marginTop: rhythm(-0.5) }}>
+              {node.frontmatter.tags.map((tag) => (
+                <Link
+                  key={tag}
+                  to={`/tags/${kebabCase(tag)}/`}
+                  className="tag"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -47,6 +68,7 @@ export const query = graphql`
           frontmatter {
             title
             date(formatString: "YYYY/MM/DD")
+            tags
           }
           fields {
             slug

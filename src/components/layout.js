@@ -69,6 +69,7 @@ const layout = ({ children, title }) => (
                 >
                   <ListLink to="/">Home</ListLink>
                   <ListLink to="/about">About</ListLink>
+                  <ListLink to="/tags">Tags</ListLink>
                   <ListLink to="/cv">CV</ListLink>
                   <SocialDropdown />
                   <li style={{ display: 'inline-block', marginLeft: '1rem' }}>

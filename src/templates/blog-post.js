@@ -1,10 +1,19 @@
 import React from 'react'
+import { Link } from 'gatsby-link'
 import { rhythm } from '../utils/typography'
 import Layout from '../components/layout'
 import { graphql } from 'gatsby'
 
+// Helper function to convert tag to URL-friendly slug
+const kebabCase = (str) =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+
 const blogPost = ({ data }) => {
   const post = data.markdownRemark
+  const tags = post.frontmatter.tags || []
   return (
     <Layout title={post.frontmatter.title}>
       <div>
@@ -12,12 +21,25 @@ const blogPost = ({ data }) => {
         <h4
           className="post-date"
           style={{
-            marginBottom: rhythm(1 / 2),
+            marginBottom: rhythm(1 / 4),
             marginTop: rhythm(1 / 8),
           }}
         >
           {post.frontmatter.date}
         </h4>
+        {tags.length > 0 && (
+          <div className="tags" style={{ marginBottom: rhythm(1) }}>
+            {tags.map((tag) => (
+              <Link
+                key={tag}
+                to={`/tags/${kebabCase(tag)}/`}
+                className="tag"
+              >
+                {tag}
+              </Link>
+            ))}
+          </div>
+        )}
         <div dangerouslySetInnerHTML={{ __html: post.html }} />
       </div>
     </Layout>
@@ -32,6 +54,7 @@ export const query = graphql`
       frontmatter {
         title
         date(formatString: "DD MMMM, YYYY")
+        tags
       }
     }
   }

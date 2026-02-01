@@ -1,6 +1,7 @@
 ---
 title: 'Initial Post'
 date: '2018-05-31'
+tags: ['meta']
 ---
 
 Now that I have some free time off from school I've decided to rebuild the blog. I'm using [Gatsby](https://www.gatsbyjs.org/) with markdown pages for content.
