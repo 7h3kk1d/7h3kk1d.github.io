@@ -4,6 +4,7 @@ import { StaticQuery, graphql } from 'gatsby'
 import { Link } from 'gatsby-link'
 import ThemeToggle from './theme-toggle'
 import SocialDropdown from './social-dropdown'
+import Search from './search'
 
 const ListLink = (props) => (
   <li style={{ display: `inline-block`, marginRight: `1rem` }}>
@@ -72,6 +73,7 @@ const layout = ({ children, title }) => (
                   <ListLink to="/tags">Tags</ListLink>
                   <ListLink to="/cv">CV</ListLink>
                   <SocialDropdown />
+                  <Search />
                   <li style={{ display: 'inline-block', marginLeft: '1rem' }}>
                     <ThemeToggle />
                   </li>
