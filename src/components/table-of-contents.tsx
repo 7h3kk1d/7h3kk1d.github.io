@@ -1,22 +1,32 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 
-// Build a nested structure grouping headings by their parent h2 section
-const buildNestedHeadings = (headings) => {
-  const nested = []
-  let currentSection = null
+interface Heading {
+  depth: number
+  slug: string
+  text: string
+}
+
+interface NestedHeading {
+  depth: number
+  id: string
+  value: string
+  children: { depth: number; id: string; value: string }[]
+}
+
+const buildNestedHeadings = (headings: Heading[]): NestedHeading[] => {
+  const nested: NestedHeading[] = []
+  let currentSection: NestedHeading | null = null
 
   headings.forEach((heading) => {
+    const item = { depth: heading.depth, id: heading.slug, value: heading.text }
     if (heading.depth === 2) {
-      // Start a new section
-      currentSection = { ...heading, children: [] }
+      currentSection = { ...item, children: [] }
       nested.push(currentSection)
     } else if (heading.depth === 3 || heading.depth === 4) {
-      // Add as child of current section
       if (currentSection) {
-        currentSection.children.push(heading)
+        currentSection.children.push(item)
       } else {
-        // No parent h2, treat as top-level
-        nested.push({ ...heading, children: [] })
+        nested.push({ ...item, children: [] })
       }
     }
   })
@@ -24,22 +34,28 @@ const buildNestedHeadings = (headings) => {
   return nested
 }
 
-// Find which section contains the active heading
-const findActiveSection = (nestedHeadings, activeId) => {
+const findActiveSection = (
+  nestedHeadings: NestedHeading[],
+  activeId: string
+) => {
   for (const section of nestedHeadings) {
-    if (section.id === activeId) {
-      return section.id
-    }
+    if (section.id === activeId) return section.id
     for (const child of section.children) {
-      if (child.id === activeId) {
-        return section.id
-      }
+      if (child.id === activeId) return section.id
     }
   }
   return null
 }
 
-const TableOfContents = ({ headings, title, hasComments }) => {
+const TableOfContents = ({
+  headings,
+  title,
+  hasComments,
+}: {
+  headings: Heading[]
+  title: string
+  hasComments: boolean
+}) => {
   const [activeId, setActiveId] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -77,20 +93,17 @@ const TableOfContents = ({ headings, title, hasComments }) => {
     return () => observer.disconnect()
   }, [])
 
-  const handleClick = useCallback((e, id) => {
+  const handleClick = useCallback((e: React.MouseEvent, id: string) => {
     e.preventDefault()
     const element = document.getElementById(id)
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
-      // Update URL hash without jumping
       window.history.pushState(null, '', `#${id}`)
       setActiveId(id)
-      // Collapse on mobile after click
       setIsExpanded(false)
     }
   }, [])
 
-  // Don't render anything if no headings or not mounted (SSR safety)
   if (!mounted || !headings || headings.length === 0) {
     return null
   }

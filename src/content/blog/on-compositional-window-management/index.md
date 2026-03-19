@@ -3,6 +3,7 @@ title: 'On Compositional Window Management'
 date: '2023-02-11'
 tags: ['malleable-systems', 'window-management', 'composition']
 blueskyPostUri: 'https://bsky.app/profile/bandukwala.me/post/3mdr7ywnxic2v'
+description: 'Window management is one of the least valued categories of software given how heavily used it is. I explore how composing window managers could make applications more malleable.'
 ---
 
 <!--

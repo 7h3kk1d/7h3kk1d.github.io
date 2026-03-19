@@ -2,6 +2,7 @@
 title: 'Flatten the Program Lifecycle'
 date: '2023-01-02'
 tags: ['programming', 'live-programming', 'malleable-systems']
+description: 'The traditional way we break down the Program Lifecycle is keeping us from making radical improvements in Computing. Flattening the lifecycle by unifying edit time, compile time, and run time could bridge the gap between programming and interactive computing.'
 ---
 
 > This post represents a change in how I have reasoned about software and I think could be of some value to others. I am not claiming that any of the information is novel but I still don’t think it has gained full mind share.

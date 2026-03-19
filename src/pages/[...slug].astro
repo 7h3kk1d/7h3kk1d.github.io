@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import TableOfContents from '../components/table-of-contents'
+import BlueskyCommentsSection from '../components/bluesky-comments'
+import { getCollection, render } from 'astro:content'
+
+const kebabCase = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog')
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }))
+}
+
+const { post } = Astro.props
+const { Content, headings } = await render(post)
+const tags = post.data.tags || []
+const hasHeadings = headings.length > 0
+const formattedDate = new Date(post.data.date).toLocaleDateString('en-GB', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+})
+---
+
+<BaseLayout title={post.data.title}>
+  <div
+    class={`blog-post-layout ${hasHeadings ? 'blog-post-layout--with-toc' : ''}`}
+  >
+    <article class="blog-post-content">
+      <h1 id="post-title" style="display: inline-block;">
+        {post.data.title}
+      </h1>
+      <h4
+        class="post-date"
+        style="margin-bottom: 0.40625rem; margin-top: 0.203125rem;"
+      >
+        {formattedDate}
+      </h4>
+      {
+        tags.length > 0 && (
+          <div class="tags" style="margin-bottom: 1.625rem;">
+            {tags.map((tag: string) => (
+              <a href={`/tags/${kebabCase(tag)}/`} class="tag">
+                {tag}
+              </a>
+            ))}
+          </div>
+        )
+      }
+      <Content />
+      <BlueskyCommentsSection
+        client:visible
+        postUri={post.data.blueskyPostUri}
+      />
+    </article>
+    {
+      hasHeadings && (
+        <TableOfContents
+          client:visible
+          headings={headings}
+          title={post.data.title}
+          hasComments={!!post.data.blueskyPostUri}
+        />
+      )
+    }
+  </div>
+</BaseLayout>

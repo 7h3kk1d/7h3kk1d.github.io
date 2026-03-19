@@ -1,21 +1,8 @@
-import React, { useEffect, useState } from 'react'
 import { BlueskyComments } from 'bluesky-comments'
 import 'bluesky-comments/bluesky-comments.css'
 
-const BlueskyCommentsSection = ({ postUri }) => {
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  // Return nothing if no URI provided
+const BlueskyCommentsSection = ({ postUri }: { postUri?: string }) => {
   if (!postUri) {
-    return null
-  }
-
-  // SSR guard: only render on client
-  if (!isClient) {
     return null
   }
 

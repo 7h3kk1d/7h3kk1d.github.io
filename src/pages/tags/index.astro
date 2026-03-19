@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getCollection } from 'astro:content'
+
+const kebabCase = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+
+const allPosts = await getCollection('blog')
+const tagCounts: Record<string, number> = {}
+allPosts.forEach((post) => {
+  ;(post.data.tags || []).forEach((tag: string) => {
+    tagCounts[tag] = (tagCounts[tag] || 0) + 1
+  })
+})
+const tags = Object.entries(tagCounts).sort(([a], [b]) => a.localeCompare(b))
+---
+
+<BaseLayout title="Tags">
+  <div>
+    <h1>All Tags</h1>
+    <div class="tags-container" style="margin-top: 1.625rem;">
+      {
+        tags.map(([tag, count]) => (
+          <a href={`/tags/${kebabCase(tag)}/`} class="tag">
+            {tag} ({count})
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

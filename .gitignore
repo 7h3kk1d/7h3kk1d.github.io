@@ -1,8 +1,10 @@
-# Project dependencies
-.cache
+# Dependencies
 node_modules
-yarn-error.log
 
-# Build directory
-/public
+# Build output
+dist
+
+# Astro
+.astro
+
 .DS_Store
