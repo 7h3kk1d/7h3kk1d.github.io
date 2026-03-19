@@ -59,7 +59,7 @@ const tagHeader = `${totalCount} post${totalCount === 1 ? '' : 's'} tagged with 
   <div>
     <h1>{tagHeader}</h1>
     <a href="/tags" class="all-tags-link">&larr; All tags</a>
-    <div style="margin-top: 1.625rem;">
+    <div style="margin-top: 1.58rem;">
       {
         posts.map((post: any) => (
           <div>
@@ -67,7 +67,7 @@ const tagHeader = `${totalCount} post${totalCount === 1 ? '' : 's'} tagged with 
               href={`/${post.id}/`}
               style="text-decoration: none; color: inherit;"
             >
-              <h3 style="margin-bottom: 0.203125rem; margin-top: 2.03125rem;">
+              <h3 style="margin-bottom: 0.1975rem; margin-top: 1.975rem;">
                 {post.title}{' '}
                 <span style="color: lightgray;">- {post.date}</span>
               </h3>

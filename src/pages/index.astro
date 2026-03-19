@@ -78,14 +78,14 @@ const gravatarUrl = `https://gravatar.com/avatar/${emailHash}?s=300`
             href={`/${post.id}/`}
             style="text-decoration: none; color: inherit;"
           >
-            <h3 style="text-decoration: none; margin-bottom: 0.203125rem; margin-top: 2.03125rem;">
+            <h3 style="text-decoration: none; margin-bottom: 0.1975rem; margin-top: 1.975rem;">
               {post.data.title}{' '}
               <span style="color: lightgray;">- {post.formattedDate}</span>
             </h3>
             <p>{post.data.description}</p>
           </a>
           {post.data.tags && post.data.tags.length > 0 && (
-            <div class="tags" style="margin-top: -0.8125rem;">
+            <div class="tags" style="margin-top: -0.79rem;">
               {post.data.tags.map((tag: string) => (
                 <a href={`/tags/${kebabCase(tag)}/`} class="tag">
                   {tag}

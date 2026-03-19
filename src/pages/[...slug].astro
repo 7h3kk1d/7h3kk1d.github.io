@@ -39,13 +39,13 @@ const formattedDate = new Date(post.data.date).toLocaleDateString('en-GB', {
       </h1>
       <h4
         class="post-date"
-        style="margin-bottom: 0.40625rem; margin-top: 0.203125rem;"
+        style="margin-bottom: 0.395rem; margin-top: 0.1975rem;"
       >
         {formattedDate}
       </h4>
       {
         tags.length > 0 && (
-          <div class="tags" style="margin-bottom: 1.625rem;">
+          <div class="tags" style="margin-bottom: 1.58rem;">
             {tags.map((tag: string) => (
               <a href={`/tags/${kebabCase(tag)}/`} class="tag">
                 {tag}
@@ -63,7 +63,7 @@ const formattedDate = new Date(post.data.date).toLocaleDateString('en-GB', {
     {
       hasHeadings && (
         <TableOfContents
-          client:visible
+          client:load
           headings={headings}
           title={post.data.title}
           hasComments={!!post.data.blueskyPostUri}
