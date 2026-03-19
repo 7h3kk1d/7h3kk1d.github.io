@@ -2,6 +2,7 @@
 title: 'Continuous Delivery'
 date: '2020-03-29'
 tags: ['devops', 'ci-cd', 'github-actions']
+description: 'Updating the blog to Gatsby v2 and setting up CI/CD with GitHub Actions for automatic deployment to GitHub Pages.'
 ---
 
 Seems as if I only have time to write a post after major lifestyle changes. Working from home due to COVID-19 has presented me with a bit of time to worok on some personal projects (this blog include). So the first thing I did was update the blog to gatsby v2 which was mostly mechanical dependency updates and a few major breaking changes documented [here](https://www.gatsbyjs.org/docs/migrating-from-v1-to-v2/).

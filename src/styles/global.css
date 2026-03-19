@@ -50,7 +50,9 @@
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 a {
@@ -173,134 +175,18 @@ blockquote {
   margin-bottom: 1rem;
 }
 
-/* Dark mode Prism.js theme override */
-[data-theme='dark'] .gatsby-highlight,
-[data-theme='dark'] pre[class*='language-'],
-[data-theme='dark'] code[class*='language-'] {
-  background-color: var(--color-code-bg);
-  color: var(--color-code-text);
+/* Shiki dark mode override — switch to dark theme colors */
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .gatsby-highlight,
-  :root:not([data-theme='light']) pre[class*='language-'],
-  :root:not([data-theme='light']) code[class*='language-'] {
-    background-color: var(--color-code-bg);
-    color: var(--color-code-text);
-  }
-}
-
-/* Dark Prism syntax highlighting */
-[data-theme='dark'] .token.comment,
-[data-theme='dark'] .token.prolog,
-[data-theme='dark'] .token.doctype,
-[data-theme='dark'] .token.cdata {
-  color: #7c7c7c;
-}
-
-[data-theme='dark'] .token.punctuation {
-  color: #c5c8c6;
-}
-
-[data-theme='dark'] .token.property,
-[data-theme='dark'] .token.tag,
-[data-theme='dark'] .token.boolean,
-[data-theme='dark'] .token.number,
-[data-theme='dark'] .token.constant,
-[data-theme='dark'] .token.symbol,
-[data-theme='dark'] .token.deleted {
-  color: #f92672;
-}
-
-[data-theme='dark'] .token.selector,
-[data-theme='dark'] .token.attr-name,
-[data-theme='dark'] .token.string,
-[data-theme='dark'] .token.char,
-[data-theme='dark'] .token.builtin,
-[data-theme='dark'] .token.inserted {
-  color: #a6e22e;
-}
-
-[data-theme='dark'] .token.operator,
-[data-theme='dark'] .token.entity,
-[data-theme='dark'] .token.url,
-[data-theme='dark'] .language-css .token.string,
-[data-theme='dark'] .style .token.string {
-  color: #e6db74;
-}
-
-[data-theme='dark'] .token.atrule,
-[data-theme='dark'] .token.attr-value,
-[data-theme='dark'] .token.keyword {
-  color: #66d9ef;
-}
-
-[data-theme='dark'] .token.function,
-[data-theme='dark'] .token.class-name {
-  color: #fd971f;
-}
-
-[data-theme='dark'] .token.regex,
-[data-theme='dark'] .token.important,
-[data-theme='dark'] .token.variable {
-  color: #fd971f;
-}
-
-/* Apply same dark theme for system preference */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .token.comment,
-  :root:not([data-theme='light']) .token.prolog,
-  :root:not([data-theme='light']) .token.doctype,
-  :root:not([data-theme='light']) .token.cdata {
-    color: #7c7c7c;
-  }
-
-  :root:not([data-theme='light']) .token.punctuation {
-    color: #c5c8c6;
-  }
-
-  :root:not([data-theme='light']) .token.property,
-  :root:not([data-theme='light']) .token.tag,
-  :root:not([data-theme='light']) .token.boolean,
-  :root:not([data-theme='light']) .token.number,
-  :root:not([data-theme='light']) .token.constant,
-  :root:not([data-theme='light']) .token.symbol,
-  :root:not([data-theme='light']) .token.deleted {
-    color: #f92672;
-  }
-
-  :root:not([data-theme='light']) .token.selector,
-  :root:not([data-theme='light']) .token.attr-name,
-  :root:not([data-theme='light']) .token.string,
-  :root:not([data-theme='light']) .token.char,
-  :root:not([data-theme='light']) .token.builtin,
-  :root:not([data-theme='light']) .token.inserted {
-    color: #a6e22e;
-  }
-
-  :root:not([data-theme='light']) .token.operator,
-  :root:not([data-theme='light']) .token.entity,
-  :root:not([data-theme='light']) .token.url,
-  :root:not([data-theme='light']) .language-css .token.string,
-  :root:not([data-theme='light']) .style .token.string {
-    color: #e6db74;
-  }
-
-  :root:not([data-theme='light']) .token.atrule,
-  :root:not([data-theme='light']) .token.attr-value,
-  :root:not([data-theme='light']) .token.keyword {
-    color: #66d9ef;
-  }
-
-  :root:not([data-theme='light']) .token.function,
-  :root:not([data-theme='light']) .token.class-name {
-    color: #fd971f;
-  }
-
-  :root:not([data-theme='light']) .token.regex,
-  :root:not([data-theme='light']) .token.important,
-  :root:not([data-theme='light']) .token.variable {
-    color: #fd971f;
+  :root:not([data-theme='light']) .astro-code,
+  :root:not([data-theme='light']) .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
   }
 }
 
@@ -326,7 +212,9 @@ blockquote {
 
 .theme-toggle__rays {
   transform-origin: center;
-  transition: transform 0.5s ease, opacity 0.3s ease;
+  transition:
+    transform 0.5s ease,
+    opacity 0.3s ease;
 }
 
 .theme-toggle__circle {
@@ -336,7 +224,10 @@ blockquote {
 
 .theme-toggle__mask {
   transform-origin: center;
-  transition: transform 0.5s ease, cx 0.5s ease, cy 0.5s ease;
+  transition:
+    transform 0.5s ease,
+    cx 0.5s ease,
+    cy 0.5s ease;
   transform: scale(0);
 }
 
@@ -390,7 +281,10 @@ blockquote {
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
-  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    visibility 0.15s;
   z-index: 100;
 }
 
@@ -419,7 +313,9 @@ blockquote {
   text-decoration: none;
   text-shadow: none;
   background-image: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .social-link:hover {
@@ -449,7 +345,9 @@ blockquote {
   font-size: 0.85rem;
   width: 140px;
   outline: none;
-  transition: border-color 0.2s ease, width 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    width 0.2s ease;
 }
 
 .search-input::placeholder {
@@ -491,7 +389,9 @@ blockquote {
   text-decoration: none;
   text-shadow: none;
   background-image: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .search-result-item a:hover {
@@ -626,7 +526,10 @@ blockquote {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.2s ease,
+    padding 0.3s ease;
 }
 
 .toc__sublist--expanded {
@@ -656,7 +559,9 @@ blockquote {
   text-shadow: none;
   background-image: none;
   line-height: 1.4;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .toc__link:hover {
@@ -711,7 +616,9 @@ h4:hover .heading-anchor {
   .toc {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
+    transition:
+      max-height 0.3s ease,
+      padding 0.3s ease;
     padding: 0 1rem;
     border: 1px solid var(--color-text-secondary);
     border-top: none;

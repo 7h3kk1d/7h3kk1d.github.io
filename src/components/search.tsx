@@ -1,38 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { useStaticQuery, graphql, Link } from 'gatsby'
+import { useState, useRef, useEffect } from 'react'
 
-const Search = () => {
-  const data = useStaticQuery(graphql`
-    query SearchIndexQuery {
-      allMarkdownRemark(sort: { frontmatter: { date: DESC } }) {
-        nodes {
-          frontmatter {
-            title
-            date(formatString: "YYYY/MM/DD")
-            tags
-          }
-          fields {
-            slug
-          }
-          excerpt(pruneLength: 200)
-        }
-      }
-    }
-  `)
+interface Post {
+  title: string
+  date: string
+  tags: string[]
+  slug: string
+  excerpt: string
+}
 
+const Search = ({ posts }: { posts: Post[] }) => {
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
-  const containerRef = useRef(null)
-
-  const posts = data.allMarkdownRemark.nodes
+  const containerRef = useRef<HTMLLIElement>(null)
 
   const results =
     query.length > 0
       ? posts.filter((post) => {
           const q = query.toLowerCase()
-          const title = (post.frontmatter.title || '').toLowerCase()
+          const title = (post.title || '').toLowerCase()
           const excerpt = (post.excerpt || '').toLowerCase()
-          const tags = (post.frontmatter.tags || []).map((t) => t.toLowerCase())
+          const tags = (post.tags || []).map((t) => t.toLowerCase())
           return (
             title.includes(q) ||
             excerpt.includes(q) ||
@@ -42,8 +29,11 @@ const Search = () => {
       : []
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false)
       }
     }
@@ -51,10 +41,10 @@ const Search = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       setIsOpen(false)
-      e.target.blur()
+      ;(e.target as HTMLInputElement).blur()
     }
   }
 
@@ -77,21 +67,17 @@ const Search = () => {
         <ul className="search-results">
           {results.length > 0 ? (
             results.map((post) => (
-              <li key={post.fields.slug} className="search-result-item">
-                <Link
-                  to={post.fields.slug}
+              <li key={post.slug} className="search-result-item">
+                <a
+                  href={post.slug}
                   onClick={() => {
                     setIsOpen(false)
                     setQuery('')
                   }}
                 >
-                  <span className="search-result-title">
-                    {post.frontmatter.title}
-                  </span>
-                  <span className="search-result-date">
-                    {post.frontmatter.date}
-                  </span>
-                </Link>
+                  <span className="search-result-title">{post.title}</span>
+                  <span className="search-result-date">{post.date}</span>
+                </a>
               </li>
             ))
           ) : (

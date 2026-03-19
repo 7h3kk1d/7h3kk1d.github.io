@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getCollection } from 'astro:content'
+
+const kebabCase = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+
+const stripMarkdown = (text: string) =>
+  text.replace(/[#*_`\[\]()>~|-]/g, '').slice(0, 200) + '...'
+
+export async function getStaticPaths() {
+  const kebabCase = (str: string) =>
+    str
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+
+  const allPosts = await getCollection('blog')
+  const tagMap = new Map<string, { tag: string; posts: typeof allPosts }>()
+
+  allPosts.forEach((post) => {
+    ;(post.data.tags || []).forEach((tag: string) => {
+      const slug = kebabCase(tag)
+      if (!tagMap.has(slug)) {
+        tagMap.set(slug, { tag, posts: [] })
+      }
+      tagMap.get(slug)!.posts.push(post)
+    })
+  })
+
+  return Array.from(tagMap.entries()).map(([slug, { tag, posts }]) => ({
+    params: { tag: slug },
+    props: {
+      tag,
+      posts: posts
+        .sort(
+          (a, b) =>
+            new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+        )
+        .map((p) => ({
+          id: p.id,
+          title: p.data.title,
+          date: new Date(p.data.date).toLocaleDateString('en-CA'),
+          description: p.data.description,
+        })),
+    },
+  }))
+}
+
+const { tag, posts } = Astro.props
+const totalCount = posts.length
+const tagHeader = `${totalCount} post${totalCount === 1 ? '' : 's'} tagged with "${tag}"`
+---
+
+<BaseLayout title={tag}>
+  <div>
+    <h1>{tagHeader}</h1>
+    <a href="/tags" class="all-tags-link">&larr; All tags</a>
+    <div style="margin-top: 1.625rem;">
+      {
+        posts.map((post: any) => (
+          <div>
+            <a
+              href={`/${post.id}/`}
+              style="text-decoration: none; color: inherit;"
+            >
+              <h3 style="margin-bottom: 0.203125rem; margin-top: 2.03125rem;">
+                {post.title}{' '}
+                <span style="color: lightgray;">- {post.date}</span>
+              </h3>
+              <p>{post.description}</p>
+            </a>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

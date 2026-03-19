@@ -2,6 +2,7 @@
 title: 'Dimensions of Extensibility'
 date: '2024-10-29'
 tags: ['malleable-systems', 'extensibility', 'programming']
+description: 'A response to the first Malleable Systems Challenge Problem, exploring dimensions of extensibility including open vs. closed extensibility, trust and authority, orthogonality, compositionality, and substrates.'
 ---
 
 This post is a response to the first **[Malleable Systems Challenge Problem](https://forum.malleable.systems/t/a-new-community-activity-challenge-problems/196)**, which explores the theme of **[fearless extensibility](https://forum.malleable.systems/t/challenge-problem-fearless-extensibility/205)**. The challenge asks participants to think deeply about how we can achieve powerful extensibility in systems without introducing significant security and maintenance risks. In this post, I’ll be exploring several dimensions of the problem and proposing ideas for balancing the benefits of extensibility with the inherent challenges.
