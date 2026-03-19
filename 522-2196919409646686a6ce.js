@@ -1,1 +1,0 @@
-(self.webpackChunkabanduk_blog=self.webpackChunkabanduk_blog||[]).push([[522],{8522:function(){}}]);
