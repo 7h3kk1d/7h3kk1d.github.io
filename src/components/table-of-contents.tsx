@@ -18,7 +18,8 @@ const buildNestedHeadings = (headings: Heading[]): NestedHeading[] => {
   let currentSection: NestedHeading | null = null
 
   headings.forEach((heading) => {
-    const item = { depth: heading.depth, id: heading.slug, value: heading.text }
+    const text = heading.text.replace(/^#\s*/, '')
+    const item = { depth: heading.depth, id: heading.slug, value: text }
     if (heading.depth === 2) {
       currentSection = { ...item, children: [] }
       nested.push(currentSection)

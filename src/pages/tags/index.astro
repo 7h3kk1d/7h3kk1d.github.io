@@ -21,7 +21,7 @@ const tags = Object.entries(tagCounts).sort(([a], [b]) => a.localeCompare(b))
 <BaseLayout title="Tags">
   <div>
     <h1>All Tags</h1>
-    <div class="tags-container" style="margin-top: 1.625rem;">
+    <div class="tags-container" style="margin-top: 1.58rem;">
       {
         tags.map(([tag, count]) => (
           <a href={`/tags/${kebabCase(tag)}/`} class="tag">
