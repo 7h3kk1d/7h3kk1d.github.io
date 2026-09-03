@@ -7,6 +7,10 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 
 export default defineConfig({
   site: 'https://bandukwala.me',
+  // v7 defaults to JSX whitespace rules, which drop the line breaks that
+  // separate inline text from links in these pages. `true` keeps Astro's
+  // lossless HTML compression instead.
+  compressHTML: true,
   integrations: [react(), sitemap()],
   markdown: {
     shikiConfig: {
