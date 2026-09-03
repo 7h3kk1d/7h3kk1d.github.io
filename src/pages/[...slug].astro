@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import TableOfContents from '../components/table-of-contents'
 import BlueskyCommentsSection from '../components/bluesky-comments'
 import { getCollection, render } from 'astro:content'
+import { formatLongDate } from '../lib/dates'
 
 const kebabCase = (str: string) =>
   str
@@ -22,11 +23,7 @@ const { post } = Astro.props
 const { Content, headings } = await render(post)
 const tags = post.data.tags || []
 const hasHeadings = headings.length > 0
-const formattedDate = new Date(post.data.date).toLocaleDateString('en-GB', {
-  day: '2-digit',
-  month: 'long',
-  year: 'numeric',
-})
+const formattedDate = formatLongDate(post.data.date)
 ---
 
 <BaseLayout

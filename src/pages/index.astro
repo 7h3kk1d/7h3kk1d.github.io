@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getCollection } from 'astro:content'
 import { avatarUrl } from '../lib/site'
+import { formatIsoDate } from '../lib/dates'
 
 const kebabCase = (str: string) =>
   str
@@ -16,7 +17,7 @@ const posts = allPosts
   )
   .map((post) => ({
     ...post,
-    formattedDate: new Date(post.data.date).toLocaleDateString('en-CA'),
+    formattedDate: formatIsoDate(post.data.date),
   }))
 ---
 
