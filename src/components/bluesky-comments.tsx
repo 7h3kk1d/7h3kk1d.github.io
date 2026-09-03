@@ -1,11 +1,7 @@
 import { BlueskyComments } from 'bluesky-comments'
 import 'bluesky-comments/bluesky-comments.css'
 
-const BlueskyCommentsSection = ({ postUri }: { postUri?: string }) => {
-  if (!postUri) {
-    return null
-  }
-
+const BlueskyCommentsSection = ({ postUri }: { postUri: string }) => {
   return (
     <section className="bluesky-comments-section">
       <h2 id="comments">Comments</h2>
