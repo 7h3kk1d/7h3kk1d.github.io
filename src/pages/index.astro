@@ -61,12 +61,19 @@ const gravatarUrl = `https://gravatar.com/avatar/${emailHash}?s=300`
         >live, rich, composable, and collaborative planetary compute engine</a
       >. The goal is to help address the climate crisis by creating better tools
       for climate scientists to interface with data and enabling them to better
-      collaborate and share their work. This is currently taking the form of
-      providing more data-oriented features to Hazel, such as a more robust data
-      model and better support for tabular data. If you are interested in this
-      topic I would encourage you to watch
+      collaborate and share their work. If you are interested in this topic I
+      would encourage you to watch
       <a href="https://youtu.be/74mrJPBIuWU?si=JTziDQ_fitqbvC2h">my talk</a>
       from <a href="https://popl24.sigplan.org/home/propl-2024">PROPL 2024</a>.
+      That work is currently taking the form of providing more data-oriented
+      features to Hazel, such as first-class labeled tuples and better support
+      for tabular data. It is written up in our OOPSLA 2026 paper, <a
+        href="https://2026.splashcon.org/details/oopsla-2026/127/Interactive-Data-Analysis-with-Lively-Typed-Tables"
+        >Interactive Data Analysis with Lively Typed Tables</a
+      >, which introduces live typing: an enhancement to gradual typing that
+      feeds runtime observations back into type checking, making it possible to
+      type-check operations like pivot or unstack whose output columns are
+      determined by the data itself.
     </p>
   </div>
   <div>
