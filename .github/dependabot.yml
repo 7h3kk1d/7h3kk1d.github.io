@@ -1,0 +1,43 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+
+    # This repo has no direct-dependency version updates enabled; every
+    # Dependabot PR it receives is a security update for a transitive package.
+    # 0 keeps version updates off. Security updates are exempt from this limit
+    # and still open, using the group below. Raise it and uncomment the
+    # version-update groups to also track direct dependency releases.
+    open-pull-requests-limit: 0
+
+    groups:
+      # Roll every security advisory into one PR instead of one per package.
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - '*'
+
+      # Uncomment together with a non-zero limit above to also get grouped
+      # version updates. Majors stay ungrouped so a breaking bump like
+      # astro 5 -> 6 arrives as its own reviewable PR.
+      #
+      # npm-development:
+      #   applies-to: version-updates
+      #   dependency-type: development
+      #   patterns:
+      #     - '*'
+      #   update-types:
+      #     - minor
+      #     - patch
+      #
+      # npm-production:
+      #   applies-to: version-updates
+      #   dependency-type: production
+      #   patterns:
+      #     - '*'
+      #   update-types:
+      #     - minor
+      #     - patch
