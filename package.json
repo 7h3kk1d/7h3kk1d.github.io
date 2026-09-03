@@ -11,10 +11,10 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "astro": "^5.7.10",
-    "@astrojs/react": "^4.2.1",
+    "astro": "^7.1.1",
+    "@astrojs/react": "^6.0.5",
     "@astrojs/sitemap": "^3.3.1",
-    "@astrojs/rss": "^4.0.18",
+    "@astrojs/rss": "^4.0.19",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "bluesky-comments": "^0.13.1",
