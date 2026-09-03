@@ -55,7 +55,7 @@ const totalCount = posts.length
 const tagHeader = `${totalCount} post${totalCount === 1 ? '' : 's'} tagged with "${tag}"`
 ---
 
-<BaseLayout title={tag}>
+<BaseLayout title={tag} description={tagHeader}>
   <div>
     <h1>{tagHeader}</h1>
     <a href="/tags" class="all-tags-link">&larr; All tags</a>

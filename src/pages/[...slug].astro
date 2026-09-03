@@ -29,7 +29,12 @@ const formattedDate = new Date(post.data.date).toLocaleDateString('en-GB', {
 })
 ---
 
-<BaseLayout title={post.data.title}>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  publishedDate={post.data.date}
+>
   <div
     class={`blog-post-layout ${hasHeadings ? 'blog-post-layout--with-toc' : ''}`}
   >

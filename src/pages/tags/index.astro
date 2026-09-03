@@ -18,7 +18,10 @@ allPosts.forEach((post) => {
 const tags = Object.entries(tagCounts).sort(([a], [b]) => a.localeCompare(b))
 ---
 
-<BaseLayout title="Tags">
+<BaseLayout
+  title="Tags"
+  description="Every topic Alexander Bandukwala has written about, with a post count for each."
+>
   <div>
     <h1>All Tags</h1>
     <div class="tags-container" style="margin-top: 1.58rem;">
