@@ -60,10 +60,14 @@ const formattedDate = new Date(post.data.date).toLocaleDateString('en-GB', {
         )
       }
       <Content />
-      <BlueskyCommentsSection
-        client:visible
-        postUri={post.data.blueskyPostUri}
-      />
+      {
+        post.data.blueskyPostUri && (
+          <BlueskyCommentsSection
+            client:visible
+            postUri={post.data.blueskyPostUri}
+          />
+        )
+      }
     </article>
     {
       hasHeadings && (
