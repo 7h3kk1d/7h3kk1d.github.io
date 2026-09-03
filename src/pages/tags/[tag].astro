@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getCollection } from 'astro:content'
+import { formatIsoDate } from '../../lib/dates'
 
 const kebabCase = (str: string) =>
   str
@@ -43,7 +44,7 @@ export async function getStaticPaths() {
         .map((p) => ({
           id: p.id,
           title: p.data.title,
-          date: new Date(p.data.date).toLocaleDateString('en-CA'),
+          date: formatIsoDate(p.data.date),
           description: p.data.description,
         })),
     },
