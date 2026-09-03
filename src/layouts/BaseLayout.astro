@@ -6,15 +6,42 @@ import SocialDropdown from '../components/SocialDropdown.astro'
 import ThemeToggle from '../components/theme-toggle'
 import Search from '../components/search'
 import { getCollection } from 'astro:content'
+import {
+  siteTitle,
+  siteDescription,
+  socialImageUrl,
+  socialImageAlt,
+  twitterHandle,
+} from '../lib/site'
 
 interface Props {
   title?: string
+  /** Falls back to the site description. Set this on every page that has
+   * something more specific to say -- it is what search results and social
+   * cards show. */
+  description?: string
+  /** `article` for a blog post, `website` for everything else. */
+  ogType?: 'website' | 'article'
+  /** ISO date, only meaningful alongside `ogType="article"`. */
+  publishedDate?: string
+  /** For pages that stand in for many URLs, like the 404. */
+  noindex?: boolean
 }
 
-const { title } = Astro.props
-const siteTitle = 'Alexander Bandukwala'
-const siteDescription = "Alexander Bandukwala's personal website"
+const {
+  title,
+  description,
+  ogType = 'website',
+  publishedDate,
+  noindex = false,
+} = Astro.props
 const pageTitle = title ? `${title} | ${siteTitle}` : siteTitle
+const pageDescription = description ?? siteDescription
+// GitHub Pages serves 404.html for every missing path, so canonicalising it
+// would point all of them at /404/. Ask crawlers to skip it instead.
+const canonicalUrl = noindex
+  ? undefined
+  : new URL(Astro.url.pathname, Astro.site).href
 
 const allPosts = await getCollection('blog')
 const searchPosts = allPosts
@@ -34,15 +61,37 @@ const searchPosts = allPosts
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={siteDescription} />
-    <meta name="keywords" content="blog, programming" />
     <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="author" content={siteTitle} />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {noindex && <meta name="robots" content="noindex" />}
     <link
       rel="alternate"
       type="application/rss+xml"
       title={siteTitle}
       href="/rss.xml"
     />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={siteTitle} />
+    <meta property="og:title" content={title ?? siteTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:alt" content={socialImageAlt} />
+    {
+      ogType === 'article' && publishedDate && (
+        <meta
+          property="article:published_time"
+          content={new Date(publishedDate).toISOString()}
+        />
+      )
+    }
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content={twitterHandle} />
+    <meta name="twitter:creator" content={twitterHandle} />
     <script is:inline>
       ;(function () {
         function getInitialTheme() {

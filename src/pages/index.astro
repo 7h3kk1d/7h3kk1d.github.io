@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getCollection } from 'astro:content'
+import { avatarUrl } from '../lib/site'
 
 const kebabCase = (str: string) =>
   str
@@ -17,17 +18,13 @@ const posts = allPosts
     ...post,
     formattedDate: new Date(post.data.date).toLocaleDateString('en-CA'),
   }))
-
-const emailHash =
-  '676e09788c1fd1edcb6ee1d7dcd3de163f1d2613f0bb9c6b46ea73356545367a'
-const gravatarUrl = `https://gravatar.com/avatar/${emailHash}?s=300`
 ---
 
 <BaseLayout>
   <div>
     <h1>About Me</h1>
     <img
-      src={gravatarUrl}
+      src={avatarUrl}
       alt="Gravatar Profile Pic"
       style="float: right; margin-left: 20px; border-radius: 50%;"
     />
