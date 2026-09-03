@@ -14,7 +14,7 @@
     "astro": "^5.7.10",
     "@astrojs/react": "^4.2.1",
     "@astrojs/sitemap": "^3.3.1",
-    "@astrojs/rss": "^4.0.11",
+    "@astrojs/rss": "^4.0.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "bluesky-comments": "^0.13.1",
