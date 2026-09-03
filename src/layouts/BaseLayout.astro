@@ -13,6 +13,7 @@ import {
   socialImageAlt,
   twitterHandle,
 } from '../lib/site'
+import { formatIsoDate } from '../lib/dates'
 
 interface Props {
   title?: string
@@ -50,7 +51,7 @@ const searchPosts = allPosts
   )
   .map((post) => ({
     title: post.data.title,
-    date: new Date(post.data.date).toLocaleDateString('en-CA'),
+    date: formatIsoDate(post.data.date),
     tags: post.data.tags || [],
     slug: `/${post.id}/`,
     excerpt: post.data.description,
