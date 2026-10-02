@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+// The slides themselves live in the 7h3kk1d/talks repo, one folder per talk;
+// the deploy workflow copies those folders into dist/talks/ after the build,
+// so `slides` is the folder name there.
+const talks = [
+  {
+    title: 'Interactive Data Analysis with Lively Typed Tables',
+    venue: 'OOPSLA 2026',
+    slides: 'oopsla2026',
+  },
+]
+---
+
+<BaseLayout
+  title="Talks"
+  description="Slides from talks by Alexander Bandukwala, with live demos you can run in the browser."
+>
+  <div>
+    <h1>Talks</h1>
+    <ul>
+      {
+        talks.map((talk) => (
+          <li>
+            <a href={`/talks/${talk.slides}/`}>{talk.title}</a>, {talk.venue}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
