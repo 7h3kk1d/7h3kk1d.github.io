@@ -1,0 +1,2022 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interactive Data Analysis with Lively Typed Tables — OOPSLA 2026</title>
+<link rel="stylesheet" href="deck.css">
+<script>
+  /* Live Hazel embeds (slides 8, 14, 15, 16, 18). Need talk/serve.sh running — see
+     production.md §3. Set to false to use the static listing. */
+  window.__EMBED__ = true;
+  window.__EMBED_SRC__ = "embed/";
+</script>
+</head>
+<body>
+
+<!-- Talk-wide notes for ?script; each slide carries its own. -->
+<script type="text/markdown" id="talk-intro">
+## Interactive Data Analysis with Lively Typed Tables
+
+OOPSLA 2026 · Alexander Bandukwala, Cyrus Omar · University of Michigan's Future of Programming Lab
+
+**18-minute slot: 15 presentation, 3 questions.** The slide targets add up to **14:55**: the script at 150 words a minute (yesterday's rehearsal read it at about 135), plus the clicks and edits. Retimed 2026-09-29, after the day's cuts; the old targets summed to 14:00 but assumed over 200 words a minute and no time for the demos. @rich-probes, @lvs and @to-string were raised to their measured 1:45, 0:50 and 1:05 on 2026-09-30, and @benchmark and @study-design to 0:30 on 2026-10-01, and @schema-from-values cut to 0:55 on 2026-10-02 when its full-scan line moved to @richer-types. That leaves 5 seconds of slack, assuming three quarters of each demo's clicks happen while talking. Nine backup slides follow the summary for Q&A. Timings are elapsed at the end of each slide. In each slide's notes the Q&A facts (📌) come last.
+
+Spoken lines are quoted. Stage directions are *[bracketed italics]*. Passages in **bold** are where the exact wording matters — the claim is load-bearing, or a looser phrasing would overclaim something the paper walked back.
+
+This document is generated from the slides' own notes (`?script`); edit the notes in `deck/index.html`, not this page.
+</script>
+<script type="text/markdown" id="talk-outro">
+## Delivery notes
+
+**Never name a mark by color.** Say "the mark on `.tmean`" and point.
+
+**The scoreboard appears twice**, at @scoreboard (7:25) and @scoreboard-live (10:45). Those are your timing checkpoints, along with the end of @rich-probes (12:30). More than ~40 seconds off at any of them and you know where you drifted.
+
+**Three deliberate pauses:** after "a full scan of the dataset" (@richer-types), after "until live typing refined the types" (@to-string), and after "without anyone having to call `report`" (@never-ran).
+
+**If an embed fails:** set `window.__EMBED__ = false` and reload for the static listings on @to-string and @never-ran. @labeled-tuples, @lvs and @rich-probes have none — talk over the slide.
+
+## Cut to 15:00
+
+- @rich-probes — skip the Filter beat; say in one sentence that filtering and adding a column leave a hole. (−30s)
+- @future-work — the temporal limitation only; leave the rest to the slide. (−10s)
+- @related-work — the two closest only, type providers and Cuis, then livelits; the rest is on the slide. (−10s)
+- @study-design — the participants in one sentence; the questions and their tasks are on the slide. (−10s)
+- @notebook — two limits instead of three; keep the third. (−10s)
+- @labeled-tuples — skip the annotation edit on `c` and say the gradual half in a sentence; keep projecting `rs` as a table. (−15s)
+- @benchmark and @hazel-baseline — state the benchmark in one sentence; keep only the 17 and the label-is-not-a-value line. (−15s)
+
+**Never cut:** the scanning line at @schema-from-values, the turn at @scoreboard, "the unknown type is consistent with everything" at @to-string, the thunk at @never-ran, the rewritten source and the hole at @rich-probes, the scope statement at @study-adoption.
+
+## Backup slides
+
+Nine slides after the summary, no talk time. Jump to them with `End`, then `←`.
+
+- @b-structural-ops **Structural operations** — extension, projection and omission on labeled tuples, on known and unknown types; out of the main run for time, credited in the scoreboard footnotes.
+- @b-systems **Tabular systems compared** — the paper's table: Scala + IDE, Polynote, Jupyter + pandas and Hazel Lab against the five problems, each glossed.
+- @b-meet **Why meet, not join** — "Why the greatest lower bound?", with the precision lattice and `(Int,?) ⊓ (?,String)`.
+- @b-any **Hazel `?` vs TypeScript `any`** — "Isn't this just `any`?" `any` is absorbing; the unknown type is a placeholder that gets filled in.
+- @b-to-lvs **Typing `to_lvs`** — the four cases, including the pointwise meet that combines partial information.
+- @b-pinning **Invocation pinning** — the §2.5 two-dataset story.
+- @b-why-works **Why live typing works here** — every caller is in the same environment; purity; the cost scales with how statically typed you already are; and the library-author caveat.
+- @header-as-data **Column names as data** — the B2T2 `buildColumn` gradebook: columns computed from the header, which a rich enough type system could in principle handle. Cut from the main run for time.
+- @build-column **buildColumn, live typed** — a live Hazel answering @header-as-data: the new `average-quiz` column, named by a runtime string, typed `Float`. Step into it from @header-as-data so it has booted.
+
+## If you get 20 minutes
+
+- **Side-by-side static and live** — two editors, same program, live typing off and on. (+60s)
+- **Structural operations** — promote @b-structural-ops back, between @hazel-baseline and @lvs, and restore the "+ structural ops" row (20 · 4 · 30, and 35 after running) to both scoreboards. (+40s)
+- **Invocation pinning** — promote @b-pinning to the main run, after @rich-probes. (+45s)
+- **A separate limitations slide** — data in source doesn't scale, explicit type application, probes not yet composable with livelits. (+40s)
+- **The CSV loader** — how data gets into the program source, and the external schema problem. Pairs with @approach. (+40s)
+</script>
+
+<div id="stage">
+
+<!-- 1 ───────────────────────────────────────────────── title -->
+<section class="slide" data-id="title" data-title="Title — 0:15">
+  <img class="brandmark bottom" src="assets/cse-signature.svg"
+    alt="Computer Science and Engineering, University of Michigan">
+  <div class="spacer"></div>
+  <p class="kicker">OOPSLA 2026</p>
+  <h1>Interactive Data Analysis<br>with <span class="accent">Lively Typed Tables</span></h1>
+  <div class="title-rule" style="margin-top:36px"></div>
+  <p class="lead" style="margin-top:30px"><strong class="accent">Alexander Bandukwala</strong>
+    <span class="dim">· Cyrus Omar</span></p>
+  <p class="sub" style="margin-top:6px">University of Michigan's Future of Programming Lab</p>
+  <div class="spacer"></div>
+  <script type="text/markdown" class="notes">
+    > Hi, I'm Alexander Bandukwala, and this is joint work with Cyrus Omar at the University of
+    > Michigan's Future of Programming Lab. Today I'm here to talk to you about interactive data
+    > analysis with lively typed tables.
+
+    > 📎 ~15 seconds. Advance promptly.
+  </script>
+</section>
+
+<!-- motivation: exploratory data analysis today -->
+<section class="slide" data-id="notebook" data-title="Exploratory data analysis today — 1:40">
+  <h2 style="margin-bottom:10px">Exploratory data analysis today</h2>
+  <p class="lead" style="margin-bottom:28px">Exploring, cleaning and reshaping data in a <strong>live programming</strong> environment: <span class="dim" style="display:block">writing code and running it are interleaved.</span></p>
+  <div class="row" style="flex:1;gap:44px">
+    <div class="col" style="flex:0 0 54%">
+      <div class="nb">
+        <div class="cell fr" data-fr="1">
+          <div class="gut">In&nbsp;[1]:</div>
+          <div class="src"><span class="py-kw">import</span> pandas <span class="py-kw">as</span> pd
+df = pd.<span class="py-fn">read_csv</span>(<span class="py-str">"weather.csv"</span>)
+wide = df.<span class="py-fn">pivot</span>(index=<span class="py-str">"date"</span>,
+                columns=<span class="py-str">"element"</span>,
+                values=<span class="py-str">"value"</span>)</div>
+        </div>
+        <!-- Cell 2 is typed in two stages: `wide["` with the caret (until fragment 3), then
+             the finished line. The completer hangs off the line, under the caret, as
+             JupyterLab draws it; `open` lets it overflow the cell's rounded box. -->
+        <div class="cell open fr" data-fr="1">
+          <div class="gut">In&nbsp;[2]:</div>
+          <div class="src swap"><span class="layer" data-until="3">wide[<span class="py-str">"</span><span class="caret"></span></span><span class="fr" data-fr="3">wide[<span class="py-str">"tmean"</span>]</span></div>
+          <div class="popup fr" data-fr="2" data-until="3">
+            <div class="completer">
+              <div class="it sel">tmax</div>
+              <div class="it">tmin</div>
+            </div>
+          </div>
+        </div>
+        <div class="cell fr" data-fr="3">
+          <div class="gut">Out:</div>
+          <div class="out">Traceback (most recent call last)
+  File pandas/core/frame.py:3805, in
+    DataFrame.__getitem__(self, key)
+<span class="err">KeyError: 'tmean'</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col" style="display:flex;flex-direction:column;justify-content:center">
+      <p class="kicker fr" data-fr="3">but that feedback is</p>
+      <ul>
+        <li class="cross fr" data-fr="3"><strong>mostly autocomplete and
+          suggestions</strong><br><span class="sub">few diagnostics or error marks on the code</span></li>
+        <li class="cross fr" data-fr="4"><strong>based on the current runtime
+          state</strong><br><span class="sub">from the values the kernel holds, not the code</span></li>
+        <li class="cross fr" data-fr="5"><strong>only there for global
+          variables</strong><br><span class="sub">limited support inside of functions</span></li>
+        <li class="cross fr" data-fr="6"><strong>dependent on cell execution
+          order</strong><br><span class="sub">cells run or edited out of order give <span style="white-space:nowrap">non-reproducible</span> feedback for <span style="white-space:nowrap">analyses<sup>†</sup></span></span></li>
+      </ul>
+    </div>
+  </div>
+  <p class="fnote foot fr" data-fr="6"><sup>†</sup> Out-of-order execution in notebooks:
+    Pimentel et al., MSR 2019 &middot; Chattopadhyay et al., CHI 2020</p>
+  <script type="text/markdown" class="notes">
+    > First, I want to talk about exploratory data analysis. This is the phase in which analysts
+    > iteratively explore, transform, and visualize data to discover patterns and refine
+    > hypotheses. Importantly for our work, this traditionally happens in a **live programming**
+    > environment, where writing code and running it are interleaved.
+
+    *[CLICK — the two notebook cells. Cell two stops at `wide["`, with the caret.]*
+
+    > Here, we have a Jupyter notebook using Python and pandas. Cell one is reading in a CSV of
+    > weather readings and pivoting it on its `element` column, storing the resulting table in the
+    > variable `wide`. In cell two the user has started to try to access a column. If they were to
+    > press tab...
+
+    *[CLICK — the completion popup under the caret.]*
+
+    > ...they'd be offered suggestions based on the data inside of the `wide` table. So Jupyter
+    > does give you real feedback.
+
+    *[CLICK — "but that feedback is" and the first point. On the left, cell two fills in as
+    `wide["tmean"]`, the popup goes, and the traceback appears under it.]*
+
+    > But that feedback is **mostly limited to autocomplete and suggestions**, with little in the
+    > way of error marks inside the code. For example, on the left, if we were to ask for a
+    > non-existent column, nothing tells you until you run it.
+
+    *[CLICK — the second point.]*
+
+    > That's because this feedback is **based on the current runtime state** of the kernel and not
+    > the code structure.
+
+    *[CLICK — the third point.]*
+
+    > And therefore it's **only available for global variables** in the runtime, with limited
+    > support inside of functions.
+
+    *[CLICK — the fourth point and the footnote.]*
+
+    > And it **depends on the cell execution order**: if you run or edit cells out of order, you
+    > might get non-reproducible feedback.
+
+    > 📎 ~1:25. Concede the real capability first and mean it — overstating what notebooks can't
+    > do costs you credibility with everyone in the room who uses one daily.
+    >
+    > 🔑 The third point is the one the talk answers: notebooks give you completions computed from
+    > values, not error marks on the program. "Interleaved" pays off in live typing, which depends on
+    > the program having run.
+    >
+    > 📌 The footnote on the second point is the paper's out-of-order execution problem. Pimentel et
+    > al. re-ran the Jupyter notebooks on GitHub: about a quarter of those with a recorded execution
+    > order ran without error, and 4% reproduced their stored results. Chattopadhyay et al.'s nine
+    > pain points, from 20 interviews and a 156-person survey, include reproducing and reusing notebooks.
+  </script>
+</section>
+
+<!-- 5 ──────────────────────── schema determined by values -->
+<section class="slide" data-id="schema-from-values" data-title="Types for table schemas — 2:35">
+  <h2 style="margin-bottom:16px">Types for table schemas</h2>
+  <div class="row" style="flex:1;gap:40px;min-height:0">
+    <div class="col" style="flex:0 0 60%">
+      <div class="nb tight">
+        <div class="cell fr" data-fr="1">
+          <div class="gut">In&nbsp;[1]:</div>
+          <div class="src">df = pd<span class="js-p">.</span><span class="py-fn">read_csv</span><span class="js-p">(</span><span class="py-str">"weather.csv"</span><span class="js-p">)</span>
+df</div>
+        </div>
+        <div class="cell fr" data-fr="1">
+          <div class="gut">Out[1]:</div>
+          <div class="out">
+            <table class="gb tight">
+              <tr><th>date</th><th>element</th><th>value</th></tr>
+              <tr><td class="s">"2010-01-30"</td><td class="s spot" data-spot="3" id="sv-tmax">"tmax"</td><td>27.8</td></tr>
+              <tr><td class="s">"2010-01-30"</td><td class="s spot" data-spot="3" id="sv-tmin">"tmin"</td><td>14.5</td></tr>
+              <tr><td class="s">"2010-02-02"</td><td class="s spot" data-spot="3">"tmax"</td><td>27.3</td></tr>
+              <tr><td class="s">"2010-02-02"</td><td class="s spot" data-spot="3">"tmin"</td><td>14.4</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="cell fr" data-fr="2">
+          <div class="gut">In&nbsp;[2]:</div>
+          <div class="src">wide = df<span class="js-p">.</span><span class="py-fn">pivot</span><span class="js-p">(</span>index=<span class="py-str">"date"</span><span class="js-p">,</span>
+                columns=<span class="py-str">"element"</span><span class="js-p">,</span>
+                values=<span class="py-str">"value"</span><span class="js-p">)</span>
+wide</div>
+        </div>
+        <div class="cell fr" data-fr="2">
+          <div class="gut">Out[2]:</div>
+          <div class="out">
+            <table class="gb tight">
+              <tr><th>date</th><th class="spot" data-spot="3" id="sv-htmax">tmax</th><th class="spot" data-spot="3" id="sv-htmin">tmin</th></tr>
+              <tr><td class="s">"2010-01-30"</td><td>27.8</td><td>14.5</td></tr>
+              <tr><td class="s">"2010-02-02"</td><td>27.3</td><td>14.4</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="cell fr" data-fr="4">
+          <div class="gut">In&nbsp;[3]:</div>
+          <div class="src">wide<span class="js-p">[</span><span class="mk"><span class="py-str">"tmean"</span></span><span class="js-p">]</span></div>
+        </div>
+        <div class="cell fr" data-fr="4">
+          <div class="gut">Out[3]:</div>
+          <div class="out"><span class="err">KeyError: 'tmean'</span></div>
+        </div>
+        <!-- Arrows from the element values to the headers they became, drawn by
+             deck.js (drawArrows) from the cells' positions on every paint. -->
+        <svg class="arrows fr" data-fr="3" data-until="4" aria-hidden="true">
+          <defs><marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z"/></marker></defs>
+          <path data-from="#sv-tmax" data-to="#sv-htmax" data-bow="260" data-in="90"/>
+          <path data-from="#sv-tmin" data-to="#sv-htmin" data-bow="390" data-in="130"/>
+        </svg>
+      </div>
+    </div>
+    <div class="col" style="display:flex;flex-direction:column;justify-content:center;align-self:stretch">
+      <div class="ann-row fr" data-fr="2"><span class="q">1</span>
+        <span class="t">What columns does <code class="inl">wide</code> have?</span></div>
+      <p class="sub fr" data-fr="3" style="margin:-8px 0 26px 50px">
+        <strong>The column values are being promoted to the schema.</strong></p>
+      <div class="ann-row fr" data-fr="4"><span class="q">2</span>
+        <span class="t">Can <code class="inl">"tmean"</code> be rejected statically?</span></div>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > We would like to have static types that describe our table schemas. Then the editor services
+    > could be based off of those types. But that can be difficult. If we look into what that
+    > previous example is doing —
+
+    *[CLICK — `In [1]`: the readings as `read_csv` gives them.]*
+
+    > — looking at the weather CSV, we can see the readings come in a long format, where the
+    > `element` column describes the type of data we are receiving.
+
+    *[CLICK — `In [2]`: the same pivot, and its result. Question 1.]*
+
+    > After pivoting the table, there are two new columns. Where did these come from?
+
+    *[CLICK — `tmax` and `tmin` light up in both outputs, with arrows from the values to the
+    headers. Let them see it.]*
+
+    > `wide`'s column headers came from the unique values in the original table. So its **values
+    > are being promoted to the new schema.**
+
+    *[CLICK — `In [3]`, the `KeyError`, and question 2. Point at the header row of `Out[2]`, not at
+    the error.]*
+
+    > So, could anything reject this access statically, when the column names were never in the
+    > program?
+
+    *[Go straight to @richer-types; the full-scan point is made there.]*
+
+    > 📎 ~55 seconds. Don't re-tell the failure from @notebook; this slide explains why nothing could
+    > have caught it.
+  </script>
+</section>
+
+<!-- 6 ────── the type-level route, and why we don't take it -->
+<section class="slide" data-id="richer-types" data-title="The type-level route — 3:15">
+  <h2 style="margin-bottom:8px">Fancy type systems</h2>
+  <p class="sub" style="margin-bottom:24px">One answer is to make the type system richer</p>
+  <div class="row" style="gap:48px">
+    <div class="col" style="flex:0 0 50%">
+      <div class="cat-group">
+        <p class="zone-h">Type system features</p>
+        <ul class="cats">
+          <li><b>Record operations, row polymorphism</b>
+            <span class="cite">Cardelli &amp; Mitchell 1991 &middot; Wand 1987 &middot; Rémy 1994</span></li>
+          <li><b>Heterogeneous lists, dependent records</b>
+            <span class="cite">Kiselyov et al. 2004 &middot; Waszczuk et al. 2017</span></li>
+          <li><b>Match types, named tuples</b>
+            <span class="cite">Blanvillain et al. 2022 &middot; Odersky 2024</span></li>
+        </ul>
+      </div>
+      <div class="cat-group">
+        <p class="zone-h">Applied to tables</p>
+        <ul class="cats">
+          <li><b>Dependently typed tables</b>
+            <span class="cite">Lean: Rotella 2024 &middot; Idris: Wright et al. 2022</span></li>
+          <li><b>Typed Spark datasets</b>
+            <span class="cite">Scala: Frameless (Typelevel)</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col" style="display:flex;flex-direction:column;justify-content:center;align-self:stretch">
+      <p class="lead fr" data-fr="1">These are powerful: they can <strong>type the
+        operations</strong> tables need.</p>
+      <p class="lead markc fr" data-fr="2" style="margin-top:26px">But value-dependent operations
+        need <strong><span style="white-space:nowrap">a full scan</span>
+        <span style="white-space:nowrap">of the dataset</span></strong>.</p>
+      <p class="lead accent fr" data-fr="3" style="margin-top:28px">And in exploratory analysis,
+        <strong>you don't yet know what's in that data.</strong></p>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    *[Both lists are up from the start. Gesture down them; don't read them or the citations.]*
+
+    > So we might think the answer is a richer type system.
+
+    *[CLICK.]*
+
+    > These are great. And some combination of row typing and dependent types has been shown to
+    > **type the operations that tables need**.
+
+    *[CLICK.]*
+
+    > But value-dependent operations would need **a full scan of the dataset** to know which columns
+    > exist. Type providers, for example, do this by reading the full dataset at compile time.
+
+    *[CLICK. Slow down.]*
+
+    > But during the exploratory phase, analysts **don't yet know what's in the data.** So we'd be
+    > asking people to get their types right before they know what's in them.
+
+    > 📎 ~40 seconds. Move through the lists; the last line is the one to land, and the only place
+    > to slow down.
+    >
+    > 🔑 That last line is the deepest justification for the approach.
+    >
+    > ⚠️ Credit these properly — several people in the room will have built one. The contrast with
+    > ours starts on @approach.
+    >
+    > 📌 Row polymorphism would give many of the structural operations principal types; heterogeneous
+    > lists and dependent types can encode extensible records directly. The Lean and Idris libraries
+    > are both evaluated against B2T2, the benchmark we use; Frameless gives Spark datasets typed
+    > columns in Scala.
+    >
+    > 📌 Type providers (F#; Syme et al. 2012, Petricek et al. 2016) query the external source — a
+    > sample or the full dataset — at edit or compile time and generate static types, while the data
+    > stay external and load at runtime. The types hold only while the source matches what was
+    > inspected. The Gamma (Petricek) extends them to dot-driven exploration, but only along linear
+    > pipelines and only where concrete values exist; live typing works on any expression.
+  </script>
+</section>
+
+<!-- 7 ─────────────────────────────── our approach -->
+<section class="slide" data-id="approach" data-title="Our approach — 3:40">
+  <h2 style="margin-bottom:20px">Our approach</h2>
+  <div class="row" style="flex:1;gap:48px;min-height:0;align-items:stretch">
+    <div class="col" style="flex:0 0 55%;display:flex">
+      <ol class="chain" style="flex:1;display:grid;grid-template-rows:repeat(3,150px);align-content:center;align-items:start;gap:44px">
+        <li>Use <strong>static typing</strong> when convenient</li>
+        <li class="cost fr" data-fr="1">Fall back to <strong>gradual typing</strong> when our
+          static types are not enough
+          <span class="why">buys expressivity &middot; costs feedback</span></li>
+        <li class="pay fr" data-fr="2">Introduce <strong>live typing</strong>
+          <span class="why">provides the feedback static types cannot</span></li>
+      </ol>
+    </div>
+    <div class="col fr" data-fr="3" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="sysshot">
+        <img class="cap" src="assets/hazel-vanilla.jpg" alt="the Hazel editor">
+        <span class="nutwrap">
+          <img src="assets/hazel-logo.png" alt="">
+          <i class="eye l"></i><i class="eye r"></i>
+        </span>
+      </div>
+      <p class="sub" style="margin-top:20px;font-size:30px">We build on <strong>Hazel</strong>, a
+        live and gradually typed programming environment.</p>
+      <p class="sysname fr" data-fr="4" style="margin-top:22px">Hazel&nbsp;Lab
+        <span>Hazel + structural operations + live typing + rich probes</span></p>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > We're taking a different approach. We're going to use **static typing** when it's convenient.
+
+    *[CLICK — step 2.]*
+
+    > When the static types aren't enough, we're going to fall back to **gradual typing**, which
+    > buys us expressivity at the cost of static feedback.
+
+    *[CLICK — step 3.]*
+
+    > So we introduce **live typing**, which gives feedback when our static types cannot.
+
+    *[CLICK — the Hazel card.]*
+
+    > And all of this is built upon **Hazel**, a live and gradually typed programming environment.
+
+    *[CLICK — Hazel Lab.]*
+
+    > Our extension is called **Hazel Lab**.
+
+    > 📎 ~25 seconds. Land 2 and 3; the rest is scaffolding.
+    >
+    > ⚠️ The last click is the first time **Hazel Lab** is on screen — say the name. The screenshot is
+    > vanilla Hazel's own quick reference. Say "live typing", never "live type checking".
+    >
+    > 🔑 Data in the source, computing with column names, and rich probes were cut from this slide
+    > (2026-09-29). Rich probes are first named on @rich-probes; data ingestion is answered there.
+    >
+    > 📌 **Labeled tuples are Hazel's**, and so are live probes (Blinn 2025); the structural
+    > operations, live typing and rich probes are ours. Every reviewer pushed on this. From Hazel we
+    > get gradual typing, a bidirectional typechecker, labeled tuples, continuous reevaluation, purity
+    > and live probes.
+    >
+    > 📌 What "live" buys: holes stand for missing expressions, and programs with holes still run —
+    > the quick reference shows it.
+    >
+    > 📌 Type providers (F#) are the other answer to getting the data's shape into the types: they
+    > query the source at compile time. They're on @related-work.
+  </script>
+</section>
+
+<!-- labeled tuples, and tables as lists of them -->
+<section class="slide" data-id="labeled-tuples" data-title="Tables as lists of labeled tuples — 5:05">
+  <div class="row center" style="gap:16px;margin-bottom:14px">
+    <h2 style="margin:0;flex:1">Tables as lists of labeled tuples</h2>
+    <div class="ectl" data-embed-controls="tuples" data-embed-layout="wide" data-embed-font="32pt"
+      style="margin:0">
+      <span class="warn-msg"></span>
+      <button class="ebtn">Reset</button>
+    </div>
+  </div>
+  <div class="embed" data-embed="embed/" style="flex:1;min-height:0"></div>
+  <script type="text/markdown" class="notes">
+    > We're going to represent tables as lists of Hazel's **labeled tuples**.
+
+    *[Point at `Vec2`.]*
+
+    > Here, `Vec2` is a labeled tuple type with two ordered fields, `x` and `y`.
+
+    *[Point at `magnitude`, the call under it, its probe.]*
+
+    > `magnitude` is a function which should compute the length of a vector. Underneath it, we're
+    > calling this function. Off to the side, this box is a **live value probe**, which shows
+    > the dynamic values of the underlined call. Right now it shows a stuck expression.
+
+    > There's a bug in this function, but no static error: Hazel is **gradually typed**, and `v` is
+    > unannotated. If I add a type annotation to `v`...
+
+    *[Type `: Vec2` after `v`, then cursor on `v.z`.]*
+
+    > ...we now get a static error on this `v.z`, where it says the label doesn't exist. `z` is
+    > wrong, so let me change that to `x`.
+
+    *[`v.z` → `v.x`.]*
+
+    > And now the static error goes away, and the probe displays the correct value.
+
+    > So a table is just a list of labeled tuples, where **the element type of the list is the
+    > table's schema**. If I go down here and right-click this list and click
+    > **Add Table**...
+
+    *[Right-click `rs` ▸ **Add Table**.]*
+
+    > ...that displays the list as a table, directly in the source code.
+
+    *[Point at the map's probe.]*
+
+    > And mapping `magnitude` over the table gives us a list of lengths.
+
+    > 📎 ~1:25 with the projector and both edits (reworked 2026-09-29: the program opens broken and
+    > unannotated, and the demo is annotate then fix). If short, skip the projector and say the
+    > table half in a sentence.
+    >
+    > ⚠️ Opens broken: both probes stuck at the `.z`, the map's running off the right edge; Reset
+    > puts it back. Once you click in, the arrow keys are Hazel's; advance with the clicker, PageDown
+    > or Escape. The right-click menu on `rs` overflows the box and scrolls the code while it's
+    > open; if that's a problem, Option+L with the caret on the `[` does the same with no menu.
+    >
+    > ⚠️ Typing `: Vec2` into the parameter hasn't been tried on stage yet. If it misbehaves, press
+    > Reset, skip the annotation, and go straight to fixing `z`.
+    >
+    > 🔑 This is where probes are defined for the rest of the talk; @rich-probes says "the same
+    > kind of probe" and leans on it.
+    >
+    > 📌 **Labeled tuples are Hazel's, not ours.** Entries may also be unlabeled. `magnitude` uses
+    > Hazel's named-function syntax, `let f(x : T) = … in`, sugar for `let f = fun (x : T) -> …`.
+    >
+    > 📌 Broadcast projection (`rs.x` giving the column) is ours, which is why it isn't here; it's on
+    > @b-structural-ops.
+  </script>
+</section>
+
+<!-- the benchmark -->
+<section class="slide" data-id="benchmark" data-title="The benchmark — 5:35">
+  <h2 style="margin-bottom:4px">Brown Benchmark for Table Types</h2>
+  <p class="sub" style="margin-bottom:36px">B2T2 <span class="cite">Lu, Greenman &amp; Krishnamurthi
+    2022</span></p>
+  <p class="lead" style="margin-bottom:56px">Example tables, programs and error scenarios &mdash; and a
+    <strong>Table API</strong> of 49 operations.</p>
+  <div class="row" style="gap:48px;align-items:flex-start">
+    <div class="col" style="flex:0 0 36%">
+      <p class="lead fr" data-fr="1">Can our type system <strong>express</strong> the operation?</p>
+      <p class="lead fr" data-fr="2" style="margin-top:10px">Can it <strong>enforce</strong> its
+        constraints?</p>
+    </div>
+    <div class="col fr" data-fr="1">
+      <p class="kicker">one operation from the Table API</p>
+      <div class="spec big">
+        <div class="sig">tsort : <span class="t-bind">t1</span>:<span class="t-typ">Table</span>
+          &times; <span class="t-bind">c</span>:<span class="t-typ">ColName</span>
+          &times; <span class="t-bind">b</span>:<span class="t-typ">Bool</span>
+          <span class="t-op">&rarr;</span>
+          <span class="t-bind">t2</span>:<span class="t-typ">Table</span></div>
+        <div class="body fr" data-fr="2">
+          <div class="k">requires</div>
+          <div class="v"><span class="t-bind">c</span> ∈ header(<span class="t-bind">t1</span>)</div>
+          <div class="k">ensures</div>
+          <div class="v">schema(<span class="t-bind">t2</span>) = schema(<span class="t-bind">t1</span>)<br>nrows(<span class="t-bind">t2</span>)&nbsp; = nrows(<span class="t-bind">t1</span>)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <script type="text/markdown" class="notes">
+    > We evaluated this representation using the **Brown Benchmark for Table Types, B2T2**. It
+    > includes a **Table API of 49 operations**.
+
+    *[CLICK — the first question, and `tsort`'s signature.]*
+
+    > First, can our type system **express** each operation? Here, `tsort` sorts an arbitrary
+    > table by a column `c`, with a boolean for ascending or descending.
+
+    *[CLICK — the second question, and the constraints.]*
+
+    > Second, can it **enforce** the operation's constraints? For `tsort`: can you show statically
+    > that the column is in the table, and that the result keeps the same schema?
+
+    > ⚠️ Say the full name once — "the Brown Benchmark for Table Types, B2T2"; the slides use the
+    > short form after.
+    >
+    > 🔑 The requires/ensures split pays off at @scoreboard-live: live typing re-types a *result*, so
+    > it can recover postconditions about schema, but not preconditions, which constrain the inputs,
+    > or row counts, which the type system doesn't track.
+    >
+    > 📎 ~30 seconds: measured on solo takes (2026-10-01).
+    >
+    > 📌 B2T2 also has example tables, programs and error scenarios. The numbers are its **Table API** section: 49 signatures with requires and ensures. The
+    > error scenarios are a separate section, which we don't score.
+    >
+    > 📌 The signature names the inputs *and* the result — B2T2's own convention, which is what makes
+    > the constraints readable.
+  </script>
+</section>
+
+<!-- plain Hazel on the benchmark -->
+<section class="slide" data-id="hazel-baseline" data-title="B2T2: Hazel — 6:00">
+  <h2 style="margin-bottom:40px">B2T2: Hazel</h2>
+  <table class="score">
+    <tr><th></th>
+      <th class="grp">operations expressible</th>
+      <th class="grp">preconditions enforced</th>
+      <th class="grp">postconditions enforced</th></tr>
+    <tr><td class="lbl">Hazel</td>
+      <td class="num pop">17<span class="den">&thinsp;/&thinsp;49</span></td>
+      <td class="num">4<span class="den">&thinsp;/&thinsp;72</span></td>
+      <td class="num">29<span class="den">&thinsp;/&thinsp;142</span></td></tr>
+  </table>
+  <div class="spacer"></div>
+  <div class="row" style="gap:56px;align-items:flex-start">
+    <ul class="cats big col">
+      <li class="fr" data-fr="1"><b>Labels are not first class</b><span class="why">A label cannot
+        be passed to a function, returned from one, or computed.</span></li>
+      <li class="fr" data-fr="3" style="margin-bottom:0"><b>No polymorphism over schemas</b><span
+        class="why">No static type that accepts tables with different schemas.</span></li>
+    </ul>
+    <div class="fr" data-fr="2" style="flex:0 0 auto">
+      <p class="kicker">one operation from the Table API</p>
+      <div class="spec big">
+        <div class="sig">tsort : <span class="spot" data-spot="3"><span class="t-bind">t1</span>:<span class="t-typ">Table</span></span>
+          &times; <span class="spot" data-spot="2"><span class="t-bind">c</span>:<span class="t-typ">ColName</span></span>
+          &times; <span class="t-bind">b</span>:<span class="t-typ">Bool</span>
+          <span class="t-op">&rarr;</span>
+          <span class="t-bind">t2</span>:<span class="t-typ">Table</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <script type="text/markdown" class="notes">
+    > Hazel expresses **17 of the 49** operations, and enforces few of the constraints.
+
+    *[CLICK.]*
+
+    > What's the problem? Labels aren't first class in Hazel: you can't pass one to a function,
+    > return one, or compute one.
+
+    *[CLICK — `tsort` comes back, with `c` highlighted.]*
+
+    > So `tsort` can't take its column name as an argument.
+
+    *[CLICK — the second point; the highlight moves from `c` to `t1 : Table`.]*
+
+    > And without polymorphism over schemas, there's no type for a table with an arbitrary schema.
+
+    > ⚠️ Don't preview the Hazel Lab row; the conversions haven't been introduced.
+    >
+    > 📎 ~25 seconds.
+    >
+    > 📌 The row is labelled **Hazel**, as in the paper's Table 1, and it is exactly the feature list
+    > from @labeled-tuples, so the 17 can be checked rather than taken on faith.
+    >
+    > 📌 **4 of 72** preconditions: largely out of reach from the start, so when that column barely
+    > moves later it isn't a regression — it's where this representation began.
+    >
+    > 📌 The 17 are the operations that never name a column.
+  </script>
+</section>
+
+<!-- 11 ──────────────────────────── to_lvs / from_lvs -->
+<section class="slide" data-id="lvs" data-title="Labeled tuple to list conversions — 6:50">
+  <div class="row center" style="gap:16px;margin-bottom:14px">
+    <h2 style="margin:0;flex:1">Labeled tuple to list conversions</h2>
+    <div class="ectl" data-embed-controls="lvs" data-embed-layout="wide" data-embed-font="30pt"
+      style="margin:0">
+      <div class="seg" role="group" aria-label="What the probes show">
+        <button data-view="value"  aria-pressed="true" data-fr-to="0">Value Probes</button>
+        <button data-view="static" aria-pressed="false" data-fr-to="1">Type Probes</button>
+      </div>
+      <span class="warn-msg"></span>
+      <button class="ebtn">Reset</button>
+    </div>
+  </div>
+  <div class="row" style="flex:1;min-height:0;align-items:stretch;margin-top:24px;gap:40px">
+    <div style="display:grid;align-self:center">
+      <ul class="cats big col" data-until="1" style="grid-area:1/1">
+        <li><b><code>to_lvs</code>: tuple to list</b><span class="why">Each entry becomes a label&ndash;value pair, the
+          label a string.</span></li>
+        <li style="margin-bottom:0"><b><code>from_lvs</code>: list to tuple</b><span class="why">Builds a tuple back from label&ndash;value
+          pairs.</span></li>
+      </ul>
+      <ul class="cats big col fr" data-fr="1" style="grid-area:1/1">
+        <li><b><code>to_lvs</code> returns</b><span class="why"><code
+          style="white-space:nowrap">[(label=String, value=τ)]</code><br>τ is the <strong>meet</strong> of the entry types</span></li>
+        <li style="margin-bottom:0"><b><code>from_lvs</code> returns
+          <span class="t-unk">?</span></b><span class="why">Labels are determined at runtime</span></li>
+      </ul>
+    </div>
+    <div class="embed" data-embed="embed/" style="flex:0 0 68%"></div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > Hazel Lab adds two functions that convert between labeled tuples and lists.
+
+    *[`lvs`]*
+
+    > `to_lvs` turns a labeled tuple into a list of label–value pairs, like `items()` on a Python
+    > dictionary, whereas `from_lvs`...
+
+    *[`row`]*
+
+    > ...turns that list back into a tuple.
+
+    *[`temps`]*
+
+    > In between, the labels are just strings, so we can compute with them at runtime: here we keep
+    > the labels that start with `temp`, and get back a tuple with just the two temperatures.
+
+    *[**Type Probes** (the bullets change with it)]*
+
+    > If I switch to static types, the purple probes are now **type probes**, displaying the static
+    > type of each expression.
+
+    *[Beat — let them find the probes before you read one.]*
+
+    > Here we can see that `to_lvs` knows the labels are strings. The value
+    > type is the **meet** of all the entries if they're consistent, and since the values mix `Int`
+    > and `String`, it falls back to the unknown type. If I remove the `city` entry...
+
+    *[Delete `, city="Oakland"`]*
+
+    > ...every value is now an integer, so the value type is now `Int`. `from_lvs` is always unknown,
+    > as there's no type for a tuple whose labels are determined at runtime.
+
+    > 📎 ~50 seconds: measured on solo takes (2026-09-30).
+    >
+    > ⚠️ Don't walk through each entry of the `lvs` probe; one sentence per binding. It opens on
+    > **Value Probes**, and its probe runs off the right edge on purpose. After the edit, Escape
+    > gives the keys back; Reset puts `city` back.
+    >
+    > 📌 Cut from the script: `temps` matches the regex `^temp` against each label. The value type is the **meet** of the entry types; don't say "join".
+    >
+    > 📌 `to_lvs` is like `Object.entries` in JavaScript or a dict's `items()` in Python, if asked.
+    >
+    > 📌 Mixed entry types: the value type is their meet, falling back to the unknown type when they
+    > are inconsistent — `to_lvs((a=1, b=true))` is `[(label=String, value=?)]`. The four cases are on
+    > @b-to-lvs; partial information combines pointwise, so `(a=(true,?), b=(?,1.0))` yields
+    > `(Bool, Float)`.
+    >
+    > 📌 In B2T2 these make `getColumnNames`, `renameColumns` and `dropColumns` expressible; with them
+    > all 49 are, four only under a side condition. Don't name benchmark operations on stage.
+    >
+    > 📌 The paper also gives Hazel Lab structural operations on tuples and tables (tuple extension,
+    > selecting and omitting labels, column-level projection), on @b-structural-ops. They are
+    > derivable from these two conversions; they are primitives for convenience.
+  </script>
+</section>
+
+<!-- 12 ────────────────────── scoreboard: what we gained and paid -->
+<section class="slide" data-id="scoreboard" data-title="B2T2: Hazel Lab — 7:25">
+  <h2>B2T2: Hazel Lab</h2>
+  <table class="score">
+    <tr><th></th>
+      <th class="grp">operations expressible<br><span style="font-weight:400">of 49</span></th>
+      <th class="grp">preconditions enforced<br><span style="font-weight:400">of 72</span></th>
+      <th class="grp">postconditions enforced<br><span style="font-weight:400">of 142</span></th>
+    </tr>
+    <tr><td class="lbl">Hazel</td>
+        <td class="num">17</td><td class="num">4</td><td class="num">29</td></tr>
+    <tr><td class="lbl">Hazel Lab</td>
+        <td class="num accent fr" data-fr="1">49<sup>*</sup></td><td class="num fr" data-fr="2">5</td>
+        <td class="num markc fr" data-fr="2">38</td></tr>
+  </table>
+  <p class="lead fr" data-fr="2" style="margin-top:40px">
+    Every operation is at least partially expressible, but most constraints go unchecked.</p>
+  <div class="spacer"></div>
+  <p class="fnote">The paper also reports an intermediate ablation, Hazel with tuple
+    extension.</p>
+  <p class="fnote fr" data-fr="1" style="margin-top:4px"><sup>*</sup> four only partially expressible, e.g.
+    <code class="inl">leftJoin</code> requires the right table to have at least one row</p>
+  <script type="text/markdown" class="notes">
+    > So what does that buy us?
+
+    *[CLICK — 49.]*
+
+    > With the two conversions, Hazel Lab is able to at least partially express **all 49**
+    > operations in the benchmark, four of them only under a side condition. `leftJoin`, for
+    > example, requires the right table to be non-empty, because our system has no way to get
+    > column names from a table that's empty.
+
+    *[CLICK — the guarantee columns.]*
+
+    > But most constraints still go unchecked. Runtime column names go through the unknown type, so
+    > statically there's no way to check them.
+
+    > 🔑 The turn in the talk: the expressivity is paid for here, and live typing is how it comes
+    > back. Slow down.
+    >
+    > 📎 The scoreboard's first of two appearances, and a timing checkpoint.
+    >
+    > 📌 Which four: each works only under a side condition. `leftJoin`, `ncols` and `header` need at
+    > least one row to recover a schema; `dropna` needs every column optional (the artifact's
+    > B2T2-COMPARISON.md).
+    >
+    > 📌 Preconditions constrain the inputs, which this representation was never going to check; they
+    > were 4 before we added anything.
+    >
+    > 📌 The footnote's ablation, Hazel with tuple extension, expresses 20 (4, 30, and 35 under live
+    > typing). The Hazel Lab row also has extension and the contractions (@b-structural-ops); by the
+    > benchmark programs' enforcement tags, none of them contributes to these counts. The contractions
+    > derive from `to_lvs`/`from_lvs`, and the three operations extension adds (`hcat`, `crossJoin`,
+    > `update`) are expressible with the conversions too. The ablation's gains are one static
+    > postcondition from `update`'s type parameter and six from live typing — none from extension's
+    > own type, which without row types is `?` on `?` rows.
+    >
+    > ⚠️ The footnote restates the `leftJoin` example the script gives; say it once, don't also read
+    > the footnote. The asterisk on 49 marks those four.
+  </script>
+</section>
+
+<!-- 13 ─────────────────────────────── live typing, the idea -->
+<section class="slide" data-id="live-typing-idea" data-title="Live typing — the idea — 7:50">
+  <div class="spacer"></div>
+  <h2 style="font-size:54px">Live typing</h2>
+  <p class="big" style="font-size:52px;margin-bottom:48px">
+    In a live programming environment, we have <strong>dynamic values</strong>.
+    <span class="accent" style="display:block">We should use them to bolster static
+    types.</span></p>
+  <ol class="chain fr" data-fr="1" style="height:auto;gap:30px">
+    <li><strong>Observe</strong> the values that reach each statically underspecified expression</li>
+    <li><strong>Synthesize</strong> the type of each observed value</li>
+    <li><strong>Combine</strong> those types with their meet
+      <span class="why">falling back to the static type if they conflict</span></li>
+    <li><strong>Re-check</strong> the program with the unknowns filled in</li>
+  </ol>
+  <div class="spacer"></div>
+  <script type="text/markdown" class="notes">
+    > So what can we do? Hazel is a live programming environment, where every editor state has a
+    > dynamic semantics. Right now we're not using those **dynamic values**. The idea is that **we
+    > should use them to help the static type system.**
+
+    *[CLICK — the four steps.]*
+
+    > First, we'll observe the values reaching underspecified expressions, synthesize their types,
+    > combine them with their meet, and re-check the program with the unknown types filled in.
+
+    > 📌 "Underspecified" includes partly unknown types, so a list of unknown can become a list of
+    > `Float` without the whole type starting as unknown. The meet is the least precise type that's at
+    > least as precise as each observation (@b-meet).
+  </script>
+</section>
+
+<!-- 14 ──────────────────────── to_string: the four-step build -->
+<section class="slide" data-id="to-string" data-title="to_string trace — 8:55">
+  <h2 style="margin-bottom:8px">Statically, this program has no errors</h2>
+  <p class="sub" style="margin-bottom:16px">
+    <span class="t-unk">?</span> is consistent with every type, so static analysis has nothing to
+    report.</p>
+    <div class="ectl" data-embed-controls="tostring" data-embed-layout="wide" data-embed-font="23pt">
+    <button id="lt-toggle" class="bigtoggle" aria-pressed="false">
+      <span class="knob"></span>Live typing <span class="state">off</span></button>
+    <div id="view-seg" class="seg" role="group" aria-label="What the probes show">
+      <button data-view="none"   aria-pressed="true">None</button>
+      <button data-view="static" aria-pressed="false">Static Type Probes</button>
+      <button data-view="value"  aria-pressed="false">Value Probes</button>
+      <button data-view="live"   aria-pressed="false">Live Type Probes</button>
+    </div>
+    <button id="embed-reset" class="ebtn">Reset</button>
+    <span class="grow"></span>
+    <span id="ectl-msg" class="warn-msg"></span>
+  </div>
+  <div class="embed" data-embed="embed/" style="flex:1"></div>
+<pre class="hz sm" data-embed-fallback hidden>let sum : [Int] -> Int = ... in
+let to_string(d : (String, ?)) =
+    case d                                           (String, ?)
+    | ("int",  v) => string_of_int(v)                Int
+    | ("bool", v) => string_of_int(v)                Bool
+    | ("nums", v) => string_of_int(sum(v))           [Float]
+    | (_,      v) => "Unknown: " ++ v                ?
+    end
+in
+to_string("int", 1);
+to_string("string", "hello");
+to_string("bool", true);
+to_string("nums", [1., 2.]);
+map([("string", "world"), ("bool", false), ("nums", [])], to_string)</pre>
+  <script type="text/markdown" class="notes">
+    > Here `to_string` is a function that takes a pair: a string tag describing a value, and the
+    > value. Based on the tag, it picks a string conversion function.
+
+    > We'd like to know whether this was implemented correctly, but **static typing gives us no
+    > feedback**. If I look at the static types...
+
+    *[**Static Type Probes**]*
+
+    > ...`v` is unknown in every branch, and **the unknown type is consistent with everything.**
+
+    > But the program has run. If I look at the live types...
+
+    *[**Live Type Probes**]*
+
+    > ...each branch's `v` gets the **meet** of the dynamic types that reached it: in the first branch
+    > it's `Int`, in the second `Bool`, and so on. So if we feed those types back into the static
+    > type checker...
+
+    *[TOGGLE]*
+
+    > ...we get two errors. If I click on the `bool` branch...
+
+    *[`v` in `bool` → bottom bar]*
+
+    > ...it says `v` is a `Bool`, but `string_of_int` expects an integer. Let me change it to
+    > `string_of_bool`...
+
+    *[`string_of_int` → `string_of_bool` · Esc]*
+
+    > ...and the error goes away.
+
+    *[`v` in `nums` → bottom bar]*
+
+    > The other error is in the `nums` branch: `v` is a list of floats, but `sum` takes a list of
+    > integers. **Neither of these errors existed for the static type checker until live typing
+    > refined the types.**
+
+    > 🔑 **The toggle is the argument.** Flip it on "feed those back into the type checker".
+    >
+    > 📎 ~1:05, measured on solo takes (2026-09-30): Value Probes is no longer visited, and the two marks are
+    > taken one at a time, the bool fix between them. "The unknown type is consistent with
+    > everything" is the one sentence to keep if it runs long.
+    >
+    > ⚠️ Opens on **None**, live typing off, `sum` folded. Step into it from the previous slide
+    > rather than jumping to it. Reset puts the program, view and toggle back.
+    >
+    > ⚠️ It's the **meet**, not the join: "join" was said on 2026-09-29 and 2026-09-30.
+    >
+    > ⚠️ Never name mark colors. Say "the mark on this branch" and point.
+    >
+    > ⚠️ Value Probes stays on the control bar for a question, not for the run. If someone asks
+    > what live typing saw, click it: each branch's `v` shows every value that reached it.
+    >
+    > ⚠️ Clicking into the embed takes the arrow keys. Escape, PageUp and PageDown still drive the
+    > deck, and changing slide takes the focus back.
+    >
+    > 📌 A join would give `[?]` for `[Float]` and `[?]` and tell you nothing; @b-meet has the lattice.
+    >
+    > 📌 **Precision never regresses**: refinement fills in unknown parts only, so a declared type is
+    > never overwritten by something observed.
+    >
+    > 📌 The stuck calls are `bool` and `[1., 2.]`, and the `false` inside the `map`. The `[]` in the
+    > map runs: `sum` of nothing is 0.
+    >
+    > 📌 Two frames worth reaching for. **None with the toggle on** is the two marks and nothing else —
+    > marks come from re-checking, not from a probe, so they survive the None view. **Value Probes
+    > with the toggle on** puts `true` and the mark it caused on one line, with the identical unmarked
+    > call and its `1` directly above.
+  </script>
+</section>
+
+<!-- 15 ─────────────────────── it applies to code that did not run -->
+<section class="slide" data-id="never-ran" data-title="Code that did not run — 10:05">
+  <h2 style="margin-bottom:8px">Is this just dynamic typing?</h2>
+  <p class="sub" style="margin-bottom:16px">The opening example again, with a
+    <code class="inl">report</code> that is never called.</p>
+  <div class="ectl" data-embed-controls="unstack" data-embed-layout="wide" data-embed-font="23pt">
+    <button class="bigtoggle" aria-pressed="false">
+      <span class="knob"></span>Live typing <span class="state">off</span></button>
+    <div class="seg" role="group" aria-label="What the probes show">
+      <button data-view="none"   aria-pressed="false">None</button>
+      <button data-view="static" aria-pressed="true">Static Type Probes</button>
+      <button data-view="value"  aria-pressed="false">Value Probes</button>
+      <button data-view="live"   aria-pressed="false">Live Type Probes</button>
+    </div>
+    <button class="ebtn">Reset</button>
+    <span class="grow"></span>
+    <span class="warn-msg"></span>
+  </div>
+  <div class="row" style="flex:1;min-height:0;align-items:stretch;gap:40px">
+    <ul class="cats big col" style="align-self:center">
+      <li><b>Checks code <span style="white-space:nowrap">that never ran</span></b><span class="why"><code>report</code> is never
+        called.</span></li>
+      <li style="margin-bottom:0"><b>Marks in the editor</b><span class="why">On the code, not in a stack
+        trace.</span></li>
+    </ul>
+    <div class="embed" data-embed="embed/" style="flex:0 0 70%"></div>
+<pre class="hz sm" data-raw="true" data-embed-fallback hidden><span class="t-kw">let</span> readings = [(id=<span class="t-str">"MX17004"</span>, element=<span class="t-str">"tmax"</span>, value=<span class="t-str">"27.8"</span>), …] <span class="t-kw">in</span>
+<span class="t-kw">let</span> wide =                  <span class="obs">[(index=String, tmax=String, tmin=String)]</span>
+  pivot_table(readings, …) <span class="t-kw">in</span>
+<span class="t-kw">let</span> report() = <span class="mk">wide.<span class="t-bind">tmean</span></span> <span class="t-kw">in</span>
+length(wide)</pre>
+  </div>
+  <script type="text/markdown" class="notes">
+    > A question you might have: **is this just dynamic typing?** Let's go back to the opening
+    > example.
+
+    > Here are the same weather readings, drawn as a table, with the `element` column holding the
+    > strings `tmax` and `tmin`. Statically, the `pivot_table` function can't tell what `wide`'s
+    > columns will be, so its type is a list of unknown.
+
+    > Since the program did run, we can look at the live types...
+
+    *[**Live Type Probes**]*
+
+    > ...where `wide` now has an `index`, `tmax` and `tmin` column, **even though no one had to
+    > write those in a type.**
+
+    > Then, when I turn live typing on...
+
+    *[TOGGLE · click `.tmean` → bottom bar]*
+
+    > ...these types are fed back into the static type checker, and we get an error on `wide.tmean`:
+    > **`tmean` isn't one of `wide`'s columns.** This is the same failure from the pandas example
+    > earlier, but now it's on the code instead of in a separate stack trace.
+
+    *[`report`]*
+
+    > Note where this error is: inside `report`, a function that's defined here but never
+    > called. A runtime error would need someone to call it. Live typing instead re-checks its body
+    > statically, with `wide`'s live type, so **we find the bug without anyone having to call `report`.**
+
+    > 📎 ~1:10, and worth it — this is what separates live typing from a better stack trace.
+    > Pause after "without anyone having to call `report`". Ends there (trimmed 2026-09-29): the mistake is no longer run.
+    >
+    > ⚠️ Opens on **Static Type Probes**, live typing off, so `wide` already shows `[?]`, and the readings are
+    > already a table (`^^table` in the program). Reset before moving on.
+    >
+    > ⚠️ Hazel **does** evaluate around errors (the 📌 below shows it); it was said as "can't" on
+    > 2026-09-30. It's off the slide and out of the script, so only say it if asked.
+    >
+    > ⚠️ Never name mark colors. Say "the mark on `wide.tmean`" and point.
+    >
+    > 📌 Cut from the script, for "what happens if you do run it?": at the start of the last line
+    > type `head(wide).tmean;` and probe it with **Cmd+E**. It is marked, its probe is stuck on the
+    > first row's `.tmean`, **but nothing else stops**: Hazel evaluates around it, and `length(wide)`
+    > still says 2. Type `head(wide).tmean`, not `report()`, whose stuck value runs off the edge;
+    > once you have typed, the arrow keys are Hazel's.
+    >
+    > 📌 `wide.tmean` is column-level projection, which we added: a label on a list of rows maps over
+    > the rows.
+    >
+    > 📌 The type moves with the data: take a station's readings out and its columns leave the type,
+    > and a mark on a column that's gone appears.
+    >
+    > 📌 False positives: had `wide` never been evaluated, there would be no observation, no
+    > refinement and no mark. We refine from observed values and then check statically; we never
+    > guess.
+  </script>
+</section>
+
+<!-- 17 ────────────────────────── constraint enforcement -->
+<section class="slide" data-id="scoreboard-live" data-title="Constraint enforcement — 10:45">
+  <h2>Back to the benchmark</h2>
+  <table class="score">
+    <tr>
+      <th rowspan="2"></th>
+      <th class="grp" rowspan="2">operations<br>expressible<br><span style="font-weight:400">of 49</span></th>
+      <th class="grp" rowspan="2">preconditions<br>enforced<br><span style="font-weight:400">of 72</span></th>
+      <th class="grp" colspan="2">postconditions enforced<br><span style="font-weight:400">of 142</span></th>
+    </tr>
+    <tr><th class="sub2">without running</th><th class="sub2">after running<br>(live typing)</th></tr>
+    <tr><td class="lbl">Hazel</td>
+        <td class="num">17</td><td class="num">4</td><td class="num">29</td><td class="num">29</td></tr>
+    <tr><td class="lbl">Hazel Lab</td>
+        <td class="num accent">49<sup>*</sup></td><td class="num">5</td><td class="num markc">38</td>
+        <td class="num pop win fr" data-fr="1">96<sup>†</sup></td></tr>
+  </table>
+  <p class="lead fr" data-fr="2" style="margin-top:40px">No extra annotations, and <strong>no
+    richer types</strong> in the surface language.</p>
+  <p class="lead markc fr" data-fr="3" style="margin-top:12px">Live typing doesn't help
+    preconditions.</p>
+  <div class="spacer"></div>
+  <p class="fnote">The paper also reports an intermediate ablation, Hazel with tuple
+    extension.</p>
+  <p class="fnote" style="margin-top:4px"><sup>*</sup> four only partially expressible, e.g.
+    <code class="inl">leftJoin</code> requires the right table to have at least one row</p>
+  <p class="fnote fr" data-fr="1" style="margin-top:4px"><sup>†</sup> assumes each call returns
+    a table with the same schema every time it runs</p>
+  <script type="text/markdown" class="notes">
+    > Back to the benchmark.
+
+    *[CLICK.]*
+
+    > With live typing, Hazel Lab enforces **96 of the 142** postconditions. That assumes
+    > each call returns a table with the same schema every time it runs, so live typing can give its
+    > result one concrete type.
+
+    *[CLICK.]*
+
+    > And that's with no extra type annotations, and no richer types in the surface language.
+
+    *[CLICK.]*
+
+    > But live typing **doesn't help the preconditions**. It refines the type of an operation's result,
+    > but doesn't tell you anything about what's required of its inputs.
+
+    > 📌 Cut from the script (2026-09-29), for "what does this need from a language?": gradual
+    > typing and instrumented evaluation, which Hazel provides; the integration with the typechecker
+    > is what live typing contributes.
+
+    > 📎 The scoreboard's second and last appearance, and a timing checkpoint.
+    >
+    > 📌 Isolated effect: for the 29 first-class-label operations alone, enforced postconditions go
+    > from 8 to 61 of 89 (paper §5).
+    >
+    > 📌 Row counts aren't tracked by the type system either.
+  </script>
+</section>
+
+<!-- 18 ────────────── rich probes -->
+<section class="slide" data-id="rich-probes" data-title="Rich probes — 12:30">
+  <h2 style="margin-bottom:8px">Rich probes for tables</h2>
+  <p class="sub" style="margin-bottom:16px">A domain-specific view of a probed value, where
+    <strong>direct manipulation edits the underlying syntax</strong>.</p>
+  <div class="ectl" data-embed-controls="cleaning" data-embed-layout="wide" data-embed-font="26pt">
+    <button class="bigtoggle" aria-pressed="false">
+      <span class="knob"></span>Live typing <span class="state">off</span></button>
+    <span class="grow"></span>
+    <span class="warn-msg"></span>
+    <button class="ebtn">Reset</button>
+  </div>
+  <div class="embed" data-embed="embed/" style="flex:1"></div>
+  <script type="text/markdown" class="notes">
+    > The last feature we introduced is **rich probes**.
+
+    *[`clean` → datasets → calls]*
+
+    > `clean` is a function that will clean these two datasets, from 2021 and 2022. For now it just
+    > returns its input. The 2022 one is folded to save space.
+
+    > If I place a probe on `data`...
+
+    *[`data` · **Cmd+E**]*
+
+    > ...we see two values, one for each dataset, and as text they're hard to read.
+
+    > If I right-click and choose **View as table**...
+
+    *[Right-click ▸ **View as table** · Esc]*
+
+    > ...it becomes a **rich probe**, showing a table for each call.
+
+    *[Dbl-click 2021]*
+
+    > Focusing in on the first dataset, we can see this data came from a CSV, so every column is a
+    > `String`.
+
+    *[Quotes]*
+
+    > Each column has an associated menu
+    > of actions **based on the column's type**.
+
+    *[`Temp` ⋮ · Transform]*
+
+    > Since the `Temp` column is a `String`, we have options to transform it into other types. Let
+    > me transform `Temp` to a `Float`...
+
+    *[**Float** · point at code]*
+
+    > If we look at what happened, `clean` now maps over the rows, parsing `Temp` as a
+    > `Float`. The rich probe didn't change the data: it **rewrote the program**. So the
+    > transformation is explicit, in the source code, where I can read it or keep editing it as
+    > text.
+
+    > Next, let's filter out some outliers. If I open Filter, since we know how to compare floats,
+    > we get options like greater than or less than. If I choose greater than...
+
+    *[`Temp` ▸ Filter ▸ **>** · hole → bottom bar]*
+
+    > ...the interface can't know the cutoff we want, so it leaves a **typed hole** in the code for me to
+    > fill in, and the bottom bar says it needs a `Float`. If I type 15...
+
+    *[Type `15.`]*
+
+    > ...the program re-evaluates, and we've filtered out every row below 15.
+
+    *[`|> filter` line → 2022 table]*
+
+    > And because these actions rewrote `clean`, the 2022 dataset on the right got the same
+    > cleaning without me touching it. In a spreadsheet, a conversion like this happens on the data
+    > and the steps aren't saved or modifiable. Here the steps are code, so **the source of truth
+    > stays in the code.**
+
+    > 📎 ~1:45: measured on three solo takes (2026-09-30, 1:39–1:48 on the 307-word script). Say
+    > what each action does, not every click, and point at the code after each one: in the study,
+    > one participant was so focused on the table they didn't notice it was writing code. Stop
+    > after the
+    > filter: no new columns, no sorting, no live typing on this slide. The hole is the design point people remember.
+    >
+    > 📌 Cut from the script, for questions: the `...` in the rewritten body is the extension
+    > operator (@b-structural-ops), which swaps the new `Temp` into each row; a variable of type `Float` could fill the hole
+    > as well as a literal, and a probe like this can go at any point in a program.
+    >
+    > ⚠️ Widening the probe (step 2) is **Shift**-drag on the value; a plain drag does nothing and a
+    > plain click only focuses the value.
+    >
+    > ⚠️ Live typing stays off on this slide. **Reset** (above the editor) restores the program and
+    > removes the probe — the only recovery you need.
+    >
+    > ⚠️ If typing into the hole goes wrong, press Reset, skip it, and say what it would have done.
+    >
+    > ⚠️ View as table opens the probe in drawer mode, under its line. Escape once closes the menu;
+    > a second Escape leaves drawer mode (the ⌄ on the probe brings it back).
+    >
+    > ⚠️ Before you type 15, the probe shows the stuck `filter` as text (`if 15.0 >. ? then …`).
+    > That's expected: the program can't finish until the hole is filled.
+    >
+    > 📌 `survey_2021` is drawn as a table in the source: the Table projector on the literal, the same
+    > thing Option+L does on @labeled-tuples. It has no column menus; the actions belong to the probe.
+    >
+    > 📌 The column actions: drop, rename, group by, sort, filter, transform, move. On a `String`
+    > column, Filter offers a regex match. Adding a column (the `+` on the header) inserts a hole the
+    > same way.
+    >
+    > 📌 One participant contrasted this with a spreadsheet, where a type conversion happens
+    > invisibly and isn't saved in the file.
+    >
+    > 📌 Current limits: a probe's actions reflect the invocation you're looking at, so they may not
+    > be valid for another one; probes attached to patterns are read-only. Invocation pinning is
+    > @b-pinning.
+  </script>
+</section>
+
+<!-- study: design -->
+<section class="slide" data-id="study-design" data-title="User study — 13:00">
+  <h2 style="margin-bottom:8px">User study</h2>
+  <p class="sub" style="margin-bottom:16px">An <strong>exploratory</strong> lab study with users
+    familiar with statically typed functional programming. Not intended to assess
+    transfer to data scientists without training.</p>
+  <div class="row" style="flex:1;gap:52px">
+    <div class="col" style="flex:1;align-self:center">
+      <ol class="rq">
+        <li>Can users use Hazel Lab's <strong>table operations</strong> to do basic data
+          transformation and data cleaning tasks?</li>
+        <li>Can users effectively use <strong>rich probes</strong> in data cleaning and
+          transformation tasks? What problems do they face?</li>
+        <li>Do users find <strong>live typing</strong> errors useful in identifying programming
+          errors, and helpful in understanding program behavior?</li>
+      </ol>
+    </div>
+    <div class="card fr" data-fr="1" style="flex:0 0 46%;align-self:center">
+      <h3>Study design</h3>
+      <ul>
+        <li>Seven participants, 9 to 30 years of programming</li>
+        <li>Two-hour remote sessions
+          <ul>
+            <li>Hazel tutorial</li>
+            <li>Six tasks</li>
+            <li>Exit survey</li>
+          </ul></li>
+        <li>Within-subjects design
+          <ul>
+            <li>Matched task pairs, off then on</li>
+            <li>Order counterbalanced</li>
+          </ul></li>
+      </ul>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > We ran an exploratory lab study, intended to help guide our design, asking whether
+    > Hazel Lab's features were usable and effective.
+
+    *[CLICK — the study design card.]*
+
+    > We had seven participants, all experienced programmers. Each did a remote session with a
+    > Hazel tutorial, a series of tasks, and an exit survey. The tasks included data
+    > cleaning, transformation, and bug identification tasks. They came in matched pairs: the same kind of task with a feature off, then on.
+
+    > 📎 ~30 seconds (expanded 2026-10-01; numbers left to the card). The research questions stay on screen in full; the
+    > script gives them one sentence and walks through the design card. Set up what the charts measure before showing them.
+    >
+    > 📌 Four professional programmers and three students, nine to thirty years of programming;
+    > recruited over social media and screened for statically typed functional programming. Four
+    > programming tasks and two bug finding; the exit survey rates each feature. Task 2 (mean of a
+    > gradebook column) is RQ1, Tasks 3–4 RQ2, Tasks 5–6 (read-only editor, ten minutes each) RQ3;
+    > Task 1 is a plain-Hazel baseline.
+    >
+    > 📌 The design's weakness: the feature is always on the *later* task, so learning and the feature
+    > can't be fully separated — the paper says so under threats to validity. Counterbalancing the
+    > order within each pair is the mitigation.
+    >
+    > 📌 The bug-finding programs are realistic: Task 5 unstacks a long table the way @never-ran does.
+    > Both are statically error-free, and both produce live typing errors.
+  </script>
+</section>
+
+<!-- study: adoption and scope -->
+<section class="slide" data-id="study-adoption" data-title="Results — adoption and scope — 13:35">
+  <h2 style="font-size:50px;margin-bottom:22px">Adoption intent questions</h2>
+  <div class="lk big stack">
+    <div class="g">I would want&hellip;</div>
+    <div class="r"><span class="l">to use this <strong>labeled tuple representation</strong> in my own
+        environment</span>
+      <span class="b"><i class="s4"></i><i class="s4"></i><i class="s5"></i><i class="s6"></i><i class="s6"></i><i class="s6"></i><i class="s7"></i></span><span class="m">μ = 5.4</span></div>
+    <div class="r"><span class="l"><strong>rich probes</strong> available in my programming
+        environment</span>
+      <span class="b"><i class="s4"></i><i class="s5"></i><i class="s5"></i><i class="s6"></i><i class="s6"></i><i class="s7"></i><i class="s7"></i></span><span class="m">μ = 5.7</span></div>
+    <div class="r"><span class="l">a programming environment that shows
+        <strong>live types</strong></span>
+      <span class="b"><i class="s5"></i><i class="s5"></i><i class="s5"></i><i class="s6"></i><i class="s6"></i><i class="s7"></i><i class="s7"></i></span><span class="m">μ = 5.9</span></div>
+    <div class="r"><span class="l">a programming environment that shows
+        <strong>live type errors</strong></span>
+      <span class="b"><i class="s4"></i><i class="s5"></i><i class="s6"></i><i class="s6"></i><i class="s6"></i><i class="s7"></i><i class="s7"></i></span><span class="m">μ = 5.9</span></div>
+  </div>
+  <div class="likert">
+    <span class="k"><i class="sw" style="background:#8c510a"></i>Strongly disagree (1)</span>
+    <span class="k"><i class="sw" style="background:#d8b365"></i>Disagree</span>
+    <span class="k"><i class="sw" style="background:#f6e8c3"></i>Somewhat disagree</span>
+    <span class="k"><i class="sw" style="background:#f5f5f5;border-color:var(--rule)"></i>Neutral</span>
+    <span class="k"><i class="sw" style="background:#c7eae5"></i>Somewhat agree</span>
+    <span class="k"><i class="sw" style="background:#5ab4ac"></i>Agree</span>
+    <span class="k"><i class="sw" style="background:#01665e"></i>Strongly agree (7)</span>
+  </div>
+  <p class="lead fr" data-fr="1" style="margin-top:30px">Every response at least neutral:
+    <strong>24 of 28 positive, none negative.</strong></p>
+  <div class="spacer"></div>
+  <p class="lead accent fr" data-fr="2">All seven were already fluent in statically typed
+    functional programming.</p>
+  <p class="sub fr" data-fr="2" style="margin-top:8px">Not intended to assess transfer to data
+    scientists without that training, many of whom work in Python or R.</p>
+  <script type="text/markdown" class="notes">
+    > The exit survey had Likert questions about each of the features, which are all in the paper.
+    > Here are the adoption intent questions, asking whether participants would want each feature in their
+    > own programming environment.
+
+    *[CLICK.]*
+
+    > Every response was at least neutral, and twenty-four of the twenty-eight were positive.
+
+    *[CLICK. Slow down.]*
+
+    > But **all seven participants were already fluent in statically typed functional programming.** The study
+    > evaluates whether the features are usable and useful for programmers with that background.
+    > **It wasn't meant to assess transfer to data scientists without that training**, many of
+    > whom work mainly in Python or R.
+
+    > 🛡️ Say this yourself, at this pace, looking at the room. It is the largest attack surface in the
+    > paper, and the paper concedes it explicitly. Say the full sentence.
+    >
+    > 📌 The paper's reading of the positive result: once Hazel Lab is production-ready, investing in
+    > the typed-functional background could be worthwhile for a working scientist. Whether it helps
+    > data scientists without that background is future work.
+    >
+    > 📎 The per-feature survey slide was cut (2026-09-29); "the rest of the survey" points at the
+    > paper. The numbers below are what it showed, for questions.
+    >
+    > 📌 Per-feature means (1–7). Rich probes: useful for understanding intermediate values 6.1,
+    > helped me work faster 4.3 (two participants didn't reach for them on the task), hard to
+    > understand or interpret 1.9, helpful for debugging errors 4.9; column-level actions 5.3 with
+    > three neutral; consistently rated not distracting and not in the way (1.9 to 2.4). Live types:
+    > helped me identify bugs 6.6, the highest-rated item in the survey; helpful in understanding
+    > program behavior 6.3; difficult to interpret 3.0, mostly because you have to put the cursor on
+    > a term to see its type. Live type errors: helped me identify bugs 6.1, increased my speed while
+    > debugging 4.3; "visually distracting" and "hard to understand" 3.0, with two participants
+    > agreeing to some degree.
+    >
+    > 📌 Quotes, if there is time. P4, on Task 5 with live typing: "Wow. Look at that! Live typing has
+    > just given us the type, so I don't even have to read this." P3, after turning it off to compare:
+    > "it would be impossible to spot that needle in this haystack of code in the given time frame."
+    > P1, on rich probes: "the textual source code stays the source of truth, but we have these fancy
+    > UIs to manipulate that."
+  </script>
+</section>
+
+<!-- related work: live typing and rich probes -->
+<section class="slide" data-id="related-work" data-title="Related work — 14:10">
+  <h2 style="margin-bottom:26px">Related work</h2>
+  <div class="row" style="flex:1;gap:64px">
+    <div class="col">
+      <p class="kicker">live typing</p>
+      <ul class="cats tight">
+        <li><b>Type providers <span class="at">Syme et al. 2012</span></b><span class="why">A compiler plugin builds types
+          from the data source.</span></li>
+        <li><b>The Gamma <span class="at">Petricek 2017</span></b><span class="why">Lazily generates methods for dot-driven
+          development, one pipeline step at a time.</span></li>
+        <li><b>RubyDust <span class="at">An et al. 2011</span></b><span class="why">Infers static types from test runs, as a batch step before type
+          checking.</span></li>
+        <li><b>REPLs, Jupyter <span class="at">Pérez &amp; Granger 2007</span></b><span class="why">Feedback is driven by the kernel's current state.</span></li>
+        <li><b>Cuis Smalltalk <span class="at">Wilkinson 2019 &middot; Ostrovsky 2024</span></b><span class="why">The VM tags each variable with the
+          set of classes it has held. A checker flags incompatible method calls.</span></li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="kicker">rich probes</p>
+      <ul class="cats tight">
+        <li><b>Livelits <span class="at">Omar et al. 2021</span></b><span class="why">GUIs that fill a hole with a literal of one fixed type.</span></li>
+        <li><b>The Gamma <span class="at">Petricek 2017 &middot; 2022</span></b><span class="why">The table preview doubles as an editor, with buttons to add or remove
+          steps in the chain of method calls.</span></li>
+        <li><b>Histogram <span class="at">Petricek 2019</span></b><span class="why">Direct manipulation of table previews. The program is a log of
+          interactions, and functions keep their sample inputs.</span></li>
+        <li><b>Mage <span class="at">Kery et al. 2020</span></b><span class="why">A table widget can be summoned on a notebook variable, and its actions are
+          written back into the cell as code.</span></li>
+      </ul>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > I won't go through all the related work. **Live typing** sits inside a live programming
+    > environment, so the types it infers come from the program's actual execution, and it's coupled
+    > to an ordinary type checker, so a fully typed program needs no runtime instrumentation.
+    >
+    > **Rich probes** can go on any expression in the program, including inside functions and in
+    > incomplete programs, so they can edit programs in more contexts. They show the probed value
+    > from every call, and the actions they offer come from its type.
+
+    > 📎 ~35 seconds. Leave the rows on the screen — they follow the paper's related work, in its
+    > order — and say only what ours does that none of them do.
+    >
+    > ⚠️ Cuis is what a PL audience will press on, and the meet is the distinction. The type-level
+    > alternatives were @richer-types; don't repeat them.
+    >
+    > 📌 If asked about type providers: an F# type provider is a compile-time component — a compiler
+    > plugin that queries the source, generates static types, and erases them at runtime — so it is
+    > the closest answer to the external schema problem, but nothing flows back from execution. The
+    > Gamma's pivot provider takes the schema plus a sample and simulates each transformation on the
+    > sample to generate the next class; the host language only ever sees provided class types, every
+    > query starts at a provider entry point, and there is no way to type a value of unknown
+    > provenance.
+    >
+    > 📌 If asked about the rest of the left column: **RubyDust** instruments a Ruby program, runs its
+    > test suite, and solves the collected constraints afterwards into annotations for DRuby, a
+    > separate static checker — a batch tool, not a live one, and complete only if the tests exercise
+    > every path through a method. Live typing runs inside the checker, on the program as currently
+    > edited, and only where static inference is insufficient. **REPLs and
+    > Jupyter** complete from the current kernel state, which goes stale under out-of-order
+    > execution. And on Cuis: the VM keeps, per variable and per return site, the set of classes
+    > seen there (Wilkinson 2019 lists a type checker only as future work); the checker Cuis later
+    > added, documented in Ostrovsky's 2024 thesis, runs on request over a method, class or category
+    > and flags a message send if any class in the receiver's set lacks the method. Because the set
+    > has no history, a variable that once held an integer and now holds a string is flagged for
+    > `isEmpty` even though the run would succeed — the false positive from mutable variables that
+    > Hazel's immutable bindings avoid.
+    >
+    > 📌 If asked about the right column, the distinctions in full:
+
+    - **Livelits** — the direct ancestor: user-definable GUIs that fill a hole by expanding to a
+      literal of a fixed expansion type. They are live too — Hazel collects the closures at the
+      hole and evaluates splices under them, and inside a function you pick between closures — but
+      the GUI's *output* is the literal. A rich probe's *input* is the value: it sits on any
+      expression, and its actions are AST transformations of that expression.
+    - **The Gamma** — the direct-manipulation editor is the "spreadsheet-inspired live editor" of
+      the ECOOP 2017 paper (§7, Figure 15): the preview of the pivot query at the cursor, computed
+      on the sample data, with "x" buttons to remove sort keys or transformations and "+" buttons
+      to add them. It exists only for the pivot provider and relies on the query being a single
+      chain of member accesses. The VL/HCC 2022 paper is the system paper: iterative prompting
+      (build the query by repeatedly picking from the completion list) with an instant preview,
+      and a study with 13 non-programmers. Ours is driven by types, so it works on unknown values
+      and, by pinning, across datasets.
+    - **Histogram** — an interactive essay, not a paper. Programs are lists of interactions. A
+      function is made by the *abstract* interaction, an extract-function refactoring that records
+      input and output references but keeps the concrete inputs, so evaluating inside the body
+      shows values from the sample the function was built from. Editing an existing formula is
+      future work (§7.1), hence append-only. Table previews can be filtered, sorted and indexed
+      through the UI, recorded as interactions. Our probes see every invocation.
+    - **Mage** — a Jupyter extension: `%summon table df` opens the widget in the cell's output on
+      the user's variable, and each action fills a code template that mage injects into the same
+      cell and re-runs. It reads variables from the kernel, so a value inside a function is out of
+      reach. The livelits paper calls these "ephemeral code generation GUIs".
+
+    > 📌 The four-system comparison table is @b-systems. Jump to it if anyone asks how this stacks up
+    > against Jupyter, Polynote or Scala.
+  </script>
+</section>
+
+<!-- future work -->
+<section class="slide" data-id="future-work" data-title="Future work — 14:35">
+  <h2 style="margin-bottom:26px">Future work</h2>
+  <div class="row" style="flex:1;gap:52px">
+    <div class="col">
+      <p class="kicker">live typing</p>
+      <ul class="compact">
+        <li><strong>Stream</strong> results into the typechecker as they are produced, so a mark can
+          appear <em>during</em> a long computation</li>
+        <li>Integration with <strong>fancy types</strong></li>
+        <li>User-configurable <strong>granularity</strong>, instead of on or off for the whole
+          program</li>
+        <li>Other treatments of <strong>inconsistent</strong> observations, which keep their static
+          type today</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="kicker">rich probes</p>
+      <ul class="compact">
+        <li><strong>User-definable</strong> and composable rich probes, reconciled with livelits</li>
+        <li>Actions for probes on <strong>patterns</strong>, read-only today</li>
+      </ul>
+      <p class="kicker" style="margin-top:26px">Scalability</p>
+      <ul class="compact">
+        <li><strong>Incremental</strong> typechecking and evaluation, for notebook-like
+          responsiveness</li>
+        <li><strong>Columnar</strong> table representations</li>
+        <li>A <strong>foreign data interface</strong>: data stays in external storage but behaves
+          like a table in the code</li>
+        <li><strong>Move computation to the data</strong>, such as by compiling Hazel data
+          pipelines to Apache Spark <span class="cite">Apache Foundation 2025</span></li>
+        <li><strong>Productionalization</strong>: performance engineering to move the research
+          prototype to a real tool</li>
+      </ul>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > There's a lot of future work, but something I'm excited about is streaming. Today live typing
+    > waits for the whole program to finish. Streaming results into the type checker as they are
+    > produced would give feedback during a long-running computation instead of waiting until it's
+    > completed. The open question is how to show these in-between states to users.
+
+    > 📎 ~25 seconds. Streaming only (cut 2026-09-29); the slide carries the rest, grouped like
+    > @related-work.
+    >
+    > 📌 The rest of the slide: integrating live typing with row or dependent types while keeping the
+    > ability to run without them; user-configurable granularity rather than on or off for the whole
+    > program; other treatments of inconsistent observations (today the meet is empty and the
+    > expression keeps its static type); user-definable, composable rich probes, and actions for
+    > probes on patterns. Scalability: incremental typechecking and evaluation; tables stored
+    > efficiently (persistent vectors, struct-of-arrays, Arrow or Parquet) while programs still see
+    > row-oriented labeled tuples; a foreign data interface, so the CSV loader no longer copies the
+    > dataset into the program text (with snapshot semantics, to keep live types reproducible);
+    > offloading — pushing projections and filters down to a columnar store, or translating
+    > pipelines to Apache Spark, with Hazel's evaluator handling whatever depends on live
+    > interaction; and productionalization, performance engineering to move the research prototype
+    > to a real tool.
+  </script>
+</section>
+
+<!-- close -->
+<section class="slide" data-id="summary" data-title="Summary — 14:55">
+  <img class="brandmark top" src="assets/cse-signature.svg"
+    alt="Computer Science and Engineering, University of Michigan">
+  <div class="spacer"></div>
+  <p class="kicker" style="margin-bottom:8px">summary</p>
+  <h2>Hazel Lab</h2>
+  <ul>
+    <li><strong>A gradually typed tabular programming system</strong>
+      <span class="sub" style="display:block">Conversions between labeled tuples and lists let a
+        program compute with column names at runtime,<br>relying on the unknown type when labels
+        can't be determined statically.</span></li>
+    <li><strong>Live typing</strong>
+      <span class="sub" style="display:block">Values from the running program refine underspecified
+        types, and the program is re-checked.<br>Column accesses are checked against names that came
+        from the data, including in functions that never ran.</span></li>
+    <li><strong>Rich probes for tables</strong>
+      <span class="sub" style="display:block">A probed value can be displayed as a table, with a menu
+        of actions on each column.<br>The actions rewrite the source code and leave typed holes when
+        the user has to supply a value.</span></li>
+  </ul>
+  <div class="spacer"></div>
+  <div class="row center fr" data-fr="1" style="gap:44px">
+    <div class="col">
+      <p class="big accent">hazel.org/build/tables-study</p>
+      <p class="lead dim" style="margin-top:6px">Hazel Lab in your browser, start with the
+        tutorial</p>
+      <p class="sub" style="margin-top:14px">Artifact on Zenodo: 10.5281/zenodo.21458220</p>
+    </div>
+    <img class="qr" src="assets/qr-tables-study.svg" alt="QR code for hazel.org/build/tables-study">
+  </div>
+  <script type="text/markdown" class="notes">
+    > In summary: **Hazel Lab** is a gradually typed tabular programming system built on top of
+    > Hazel that represents tables as lists of labeled tuples, supports **live typing** for richer
+    > feedback, and provides **rich probes** to help users observe and interact with programs.
+
+    *[CLICK — the link and the QR code.]*
+
+    > That link opens Hazel Lab on the study's tutorial. Thank you.
+
+    > 📎 Say what each is good for. The numbers were on @scoreboard-live; don't repeat them.
+    >
+    > 📌 The archived artifact is on Zenodo, if asked.
+    >
+    > 📌 Labeled tuples and gradual typing are Hazel's; the conversions, structural operations, live
+    > typing and rich probes are what the paper adds. The first point's heading names the system; its
+    > sub-line covers only what Hazel Lab adds (the two conversions, unnamed, as on @lvs). The spoken
+    > line is where labeled tuples come up.
+  </script>
+</section>
+
+<!-- ══════════════════ BACKUP SLIDES (after the summary) ══════════════════ -->
+
+<!-- backup: structural operations -->
+<section class="slide" data-id="b-structural-ops" data-backup="true" data-title="BACKUP · Structural operations">
+  <h2 style="margin-bottom:14px">Structural operations on labeled tuples</h2>
+  <p class="sub" style="margin-bottom:18px;min-height:40px">
+    <span class="fr" data-fr="1">The same operations on a row whose type is unknown:
+      <code class="inl">let x : <span class="t-unk">?</span> = (a=1, b=2, 3, c=4)</code></span></p>
+  <div class="swap">
+    <table class="ops" data-until="1">
+      <colgroup><col class="c-ex"><col class="c-ty"><col class="c-va"></colgroup>
+      <tr><th>example</th><th>type</th><th>value</th></tr>
+      <tr><td><code class="hz-in">(a=1, b=2) ... (b=3, c=4)</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">(a=Int, b=Int, c=Int)</code></td><td class="val"><span><code class="hz-in">(a=1, b=3, c=4)</code></span></td></tr>
+      <tr><td><code class="hz-in">project_labels((a=1, b=2, 3, c=4), `a`, `b`)</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">(Int, Int)</code></td><td class="val"><span><code class="hz-in">(1, 2)</code></span></td></tr>
+      <tr><td><code class="hz-in">omit_labels((a=1, b=2, 3, c=4), `b`, `c`)</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">(a=Int, Int)</code></td><td class="val"><span><code class="hz-in">(a=1, 3)</code></span></td></tr>
+      <tr><td><code class="hz-in">omit_all_labels((a=1, b=2, 3, c=4))</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">(Int, Int, Int, Int)</code></td><td class="val"><span><code class="hz-in">(1, 2, 3, 4)</code></span></td></tr>
+    </table>
+    <table class="ops layer fr" data-fr="1">
+      <colgroup><col class="c-ex"><col class="c-ty"><col class="c-va"></colgroup>
+      <tr><th>example</th><th>type</th><th>value</th></tr>
+      <tr><td><code class="hz-in">x ... (b=3, c=4)</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">?</code></td><td class="val"><span><code class="hz-in">(a=1, b=3, 3, c=4)</code></span></td></tr>
+      <tr><td><code class="hz-in">project_labels(x, `a`, `b`)</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">(?, ?)</code></td><td class="val"><span><code class="hz-in">(1, 2)</code></span></td></tr>
+      <tr><td><code class="hz-in">omit_labels(x, `b`, `c`)</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">?</code></td><td class="val"><span><code class="hz-in">(a=1, 3)</code></span></td></tr>
+      <tr><td><code class="hz-in">omit_all_labels(x)</code></td><td class="ty"><span class="arr">⇒</span><code class="hz-in">?</code></td><td class="val"><span><code class="hz-in">(1, 2, 3, 4)</code></span></td></tr>
+    </table>
+  </div>
+  <div class="spacer"></div>
+  <div class="row" style="gap:44px;align-items:flex-start">
+    <div class="col">
+      <p class="sub" data-until="1">These are <strong>primitives</strong> rather than library
+        functions, because labels are not first-class values in Hazel.</p>
+      <p class="lead fr" data-fr="2" style="margin-top:-6px">When the argument's type is unknown,
+        so is the result's.</p>
+      <p class="sub fr" data-fr="2"><code class="inl">project_labels</code> still knows how many
+        entries it returns, because the labels are written in the source.</p>
+    </div>
+    <div class="col fr" data-fr="3">
+      <p class="lead accent">The values are unaffected.</p>
+      <p class="sub" style="margin-top:6px">Each result is computed correctly at runtime. Only the
+        static type has lost the information.</p>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > The other 32 operations name columns, so we need to be able to build and take apart rows. Here
+    > is the whole set — example on the left, the resulting type, and what it evaluates to.
+
+    *[Point; do not walk the table.]*
+
+    > **Extension**, `t1 ... t2`, merges two rows: matching labels are replaced, new ones appended.
+    > The three below it name themselves: they select entries and optionally strip their labels.
+    > **Broadcast projection** isn't in the table: it takes a label off a *table* and gives you the
+    > column — `rs.x`, on the table from @labeled-tuples, is `map` over the rows, so it's a list
+    > of `Float`.
+    >
+    > These are **primitives** rather than library functions, because labels aren't first-class
+    > values in Hazel — you can't bind one to a variable.
+    >
+    > In the benchmark, extension is what makes `update`, `hcat` and `crossJoin` expressible, and
+    > broadcast gives you `getColumn` directly. **Which buys three operations. Seventeen to twenty,
+    > out of forty-nine.** They're necessary — you can't write row-shaping code without them. But
+    > they're not where the expressivity is.
+
+    *[CLICK — the table swaps in place: the same operations on a row of unknown type.]*
+
+    > Now the same operations on a row whose type is unknown.
+
+    *[CLICK.]*
+
+    > They're gradual: **when the argument's type is unknown, so is the result's.** `project_labels`
+    > still knows how many entries it returns, because the labels are written in the source — but not
+    > what they are.
+
+    *[CLICK.]*
+
+    > And the values are unaffected. Extension really does overwrite `b`; `omit_labels` really does
+    > leave `(a=1, 3)`. Each result is computed correctly at runtime — only the static type has lost
+    > the information. The other twenty-nine operations are where that happens most, and that's @lvs.
+
+    > 🔑 The last click sets up the whole second half: the precision exists at runtime, it just isn't
+    > available to the type system, and that is the gap live typing closes.
+    >
+    > ⚠️ The first click swaps the table rather than adding one. Don't re-read it — say what changed.
+    > Extension, `omit_labels` and `omit_all_labels` collapse to the unknown type outright;
+    > `project_labels` keeps the arity.
+    >
+    > 📎 A backup: out of the main run for time. The scoreboards credit these in a footnote; this is
+    > the slide for "what are the structural operations?" or "what does extension do?".
+    >
+    > 📌 The types and values on the slide were checked against the build, not derived on paper.
+    >
+    > 📌 If asked about the contraction operations individually, they are all derivable from
+    > `to_lvs`/`from_lvs`; they exist as primitives for convenience.
+  </script>
+</section>
+
+<section class="slide" data-id="b-systems" data-backup="true" data-title="BACKUP · Tabular systems compared">
+  <h2>Tabular programming systems</h2>
+  <div style="max-width:1460px;margin:16px auto 0">
+    <table class="cmp">
+      <tr><th class="lbl"></th><th>Scala<br>+ IDE</th><th>Polynote</th><th>Jupyter<br>+ pandas</th><th class="ours">Hazel<br>Lab</th></tr>
+      <tr><td class="lbl">function barrier<span class="gloss">no type-directed services inside a function</span></td><td class="yes">●</td><td class="part">◐</td><td class="no">○</td><td class="yes ours">●</td></tr>
+      <tr><td class="lbl">distal feedback<span class="gloss">errors reported far from the cause, and only after running</span></td><td class="part">◐</td><td class="part">◐</td><td class="no">○</td><td class="part ours">◐</td></tr>
+      <tr><td class="lbl">external schema<span class="gloss">data parsed at runtime, so its schema is invisible to static analysis</span></td><td class="part">◐</td><td class="part">◐</td><td class="part">◐</td><td class="yes ours">●</td></tr>
+      <tr><td class="lbl">expressivity<span class="gloss">structural table operations are hard to type statically</span></td><td class="part">◐</td><td class="part">◐</td><td class="part">◐</td><td class="yes ours">●</td></tr>
+      <tr><td class="lbl">out-of-order execution<span class="gloss">feedback from execution history rather than from the program</span></td><td class="yes">●</td><td class="part">◐</td><td class="no">○</td><td class="yes ours">●</td></tr>
+    </table>
+  </div>
+  <p class="lead" style="margin-top:26px">No existing system addresses all five. Our own row is
+    <strong>partial</strong> on distal feedback: live typing shortens the spatial distance and not
+    the temporal one &mdash; you still wait for the program to finish.</p>
+  <script type="text/markdown" class="notes">
+    > 📎 For "how does this compare with Jupyter, Polynote or Scala?" — the paper's table: Scala + IDE,
+    > Polynote, Jupyter + pandas and Hazel Lab against the five problems, each glossed under its
+    > name because the talk never says the names.
+
+    > No existing system addresses all five. Our own row is **partial** on distal feedback, because
+    > live typing shortens the spatial distance and not the temporal one — you still wait for the
+    > program to finish.
+
+    > ⚠️ Say our partial row yourself before anyone points at it. The temporal half is the lead line
+    > on @future-work.
+    >
+    > 📌 Out-of-order execution is the "edit cell one, don't re-run" point from @notebook: feedback
+    > derived from execution history. Hazel's comes from the program, so the row is full.
+  </script>
+</section>
+
+<section class="slide" data-id="b-meet" data-backup="true" data-title="BACKUP · Why meet, not join">
+  <h2>Why the meet?</h2>
+  <div class="row" style="flex:1;gap:44px;align-items:center">
+    <div class="col">
+      <ul>
+        <li>Hazel is a <strong>static-first</strong> gradually typed language. The unknown type
+          exists mainly to give a type to holes, and there is no typecase operation.</li>
+        <li>So we assume programs are <strong>converging toward more specific types</strong>, and
+          take the greatest lower bound with respect to precision.</li>
+        <li>In a system with subtyping, or a dynamic-first language, the <em>join</em> would be
+          the right choice instead.</li>
+      </ul>
+      <pre class="hz sm" style="margin-top:20px">(Int, ?) ⊓ (?, String)  =  (Int, String)
+(Int, ?) ⊔ (?, String)  =  (?, ?)</pre>
+    </div>
+    <div class="col">
+      <div class="lattice">
+        <div class="lvl"><span class="n">?</span></div>
+        <div class="arrows">↓</div>
+        <div class="lvl"><span class="n">(?, ?)</span></div>
+        <div class="arrows">↙&nbsp;&nbsp;↘</div>
+        <div class="lvl"><span class="n">(Int, ?)</span><span class="n">(?, String)</span></div>
+        <div class="arrows">↘&nbsp;&nbsp;↙</div>
+        <div class="lvl"><span class="n hi">(Int, String)</span></div>
+      </div>
+      <p class="sub" style="text-align:center;margin-top:16px">More precise as you go down. The
+        meet of two observations is the highest type below both.</p>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > 📎 For "why the greatest lower bound?" — the precision lattice and `(Int, ?) ⊓ (?, String)`.
+
+    > Hazel is a static-first gradually typed language. The unknown type exists mainly to give a type
+    > to holes, and there's no typecase operation. So we assume programs are converging toward more
+    > specific types, and take the greatest lower bound with respect to precision. The meet of two
+    > observations is the least precise type at least as precise as both — the highest point
+    > below them: `(Int, ?)` meet `(?, String)` is
+    > `(Int, String)`, where the join would give `(?, ?)` and tell you nothing.
+    >
+    > In a system with subtyping, or a dynamic-first language, the join would be the right choice
+    > instead.
+
+    > 🔑 This is the same point as the empty-list case on @to-string: `[Float]` meet `[?]` keeps the
+    > precision.
+  </script>
+</section>
+
+<section class="slide" data-id="b-any" data-backup="true" data-title="BACKUP · Hazel ? vs TypeScript any">
+  <h2>The unknown type is not <code class="inl">any</code></h2>
+  <div class="row" style="flex:1;gap:52px;align-items:center">
+    <div class="col">
+      <h3 style="margin-bottom:14px">Hazel</h3>
+<pre class="hz sm" data-raw="true"><span class="t-kw">let</span> x : <span class="t-unk">?</span> = <span class="t-str">""</span> <span class="t-kw">in</span>
+<span class="t-kw">let</span> y = [x, <span class="t-num">1</span>] <span class="t-kw">in</span> …</pre>
+      <p class="lead goodc" style="margin-top:18px">y : [Int]</p>
+      <p class="sub">The unknown type is a placeholder for something more precise, so it gives way
+        to the <code class="inl">Int</code> beside it.</p>
+    </div>
+    <div class="col">
+      <h3 style="margin-bottom:14px">TypeScript</h3>
+<pre class="hz sm" data-raw="true"><span class="js-kw">const</span> x : any = <span class="js-str">""</span>;
+<span class="js-kw">const</span> y = [x, <span class="t-num">1</span>];</pre>
+      <p class="lead dim" style="margin-top:18px">y : any[]</p>
+      <p class="sub"><code class="inl">any</code> is absorbing: it propagates outward and erases
+        the information its neighbors carried.</p>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > 📎 For "isn't this just `any`?"
+
+    > No. In Hazel, `x : ?` bound to a string, put in a list with `1`, gives `y : [Int]` — the unknown
+    > type is a placeholder for something more precise, so it gives way to the `Int` beside it. In TypeScript the same program gives `any[]`: `any` is absorbing — it propagates
+    > outward and erases the information its neighbors carried.
+  </script>
+</section>
+
+<section class="slide" data-id="b-to-lvs" data-backup="true" data-title="BACKUP · Typing to_lvs">
+  <h2>How <code class="inl">to_lvs</code> is typed</h2>
+  <p class="lead" style="margin-bottom:24px">A static error if the argument is not a tuple.
+    Otherwise the value type is the <strong>meet</strong> of the entry types, falling back to the
+    unknown type when they are inconsistent.</p>
+<pre class="hz sm">to_lvs((a=1, b=2, c=3))            ⤳ [(label=String, value=Int)]
+
+to_lvs((a=?, b=1, c=?))            ⤳ [(label=String, value=Int)]
+
+to_lvs((a=true, b=1, c=2.0))       ⤳ [(label=String, value=?)]
+
+to_lvs((a=(true,?), b=(?,?), c=(?,1.0)))
+                                   ⤳ [(label=String, value=(Bool, Float))]</pre>
+  <p class="sub" style="margin-top:24px">The last case is the interesting one: the meet is
+    computed pointwise, so partial information from several entries combines into a type more
+    precise than any single entry supplied.</p>
+  <script type="text/markdown" class="notes">
+    > 📎 For "how is `to_lvs` typed?" — the four cases, including the pointwise meet.
+
+    > It's a static error if the argument isn't a tuple. Otherwise the value type is the meet of the
+    > entry types, falling back to the unknown type when they're inconsistent. Entries of the same type
+    > give that type; unknown entries don't spoil it; mixed entries give the unknown type.
+    >
+    > The last case is the interesting one: the meet is computed pointwise, so `(true, ?)` and
+    > `(?, 1.0)` combine into `(Bool, Float)` — a type more precise than any single entry supplied.
+
+    > 📌 The short version is on @lvs; the four contraction operations on @b-structural-ops are all
+    > derivable from `to_lvs` and `from_lvs`.
+  </script>
+</section>
+
+<section class="slide" data-id="b-pinning" data-backup="true" data-title="BACKUP · Invocation pinning">
+  <h2>One function, two datasets</h2>
+  <div class="row" style="flex:1;gap:32px">
+    <div class="col shotwrap"><img class="shot" src="assets/pipelinepin1.png" alt="pinned to the first invocation"></div>
+    <div class="col shotwrap"><img class="shot" src="assets/pipelinepin2.png" alt="pinned to the second invocation"></div>
+  </div>
+  <p class="lead" style="margin-top:20px">Applied to two datasets, the schemas are inconsistent, so
+    no meet exists and the result keeps its static type — no marks. Each probe collects one value
+    per invocation, so <strong>pinning one invocation</strong> restricts live typing to that call:
+    the mark lands on <code class="inl">Unknown</code> for the first dataset and moves to
+    <code class="inl">Recreational</code> for the second.</p>
+  <script type="text/markdown" class="notes">
+    > 📎 For "what happens when one function sees two different datasets?" — the paper's §2.5
+    > two-dataset story.
+
+    > Applied to two datasets, the schemas are inconsistent, so no meet exists and the result keeps its
+    > static type — no marks. Each probe collects one value per invocation, so **pinning one
+    > invocation** restricts live typing to that call: the mark lands on `Unknown` for the first
+    > dataset, and moves to `Recreational` for the second.
+
+    > ⚠️ Never name mark colors. Say "the mark on `Unknown`" and point.
+    >
+    > 📌 This is also the limit mentioned on @rich-probes: a probe's actions reflect the invocation
+    > you're looking at, so they may not be valid for another one.
+  </script>
+</section>
+
+<section class="slide" data-id="b-why-works" data-backup="true" data-title="BACKUP · Why live typing works here">
+  <h2>What makes this work in Hazel</h2>
+  <ul>
+    <li><strong>Every caller of a function is running in the same environment.</strong> The editor
+      is not compiling a library against unknown future callers — it is observing this program, as
+      currently written, with its actual inputs.</li>
+    <li><strong>Purity</strong> makes the runtime-derived types deterministic and reproducible, and
+      <strong>continuous reevaluation</strong> keeps them current.</li>
+    <li><strong>The cost is dictated by how statically typed the program already is.</strong> The
+      more precise your static types, the less there is for live typing to do.</li>
+    <li>The flip side: if you were writing a library whose callers are elsewhere, the live types
+      you observe need not match the ones your users would produce.</li>
+  </ul>
+  <script type="text/markdown" class="notes">
+    > 📎 For "why does this work here, and would it work in my language?"
+
+    > Every caller of a function is running in the same environment. The editor isn't compiling a
+    > library against unknown future callers — it's observing this program, as currently written, with
+    > its actual inputs.
+    >
+    > Purity makes the runtime-derived types deterministic and reproducible, and continuous
+    > reevaluation keeps them current.
+    >
+    > The cost is dictated by how statically typed the program already is: the more precise your
+    > static types, the less there is for live typing to do.
+    >
+    > The flip side: if you were writing a library whose callers are elsewhere, the live types you
+    > observe need not match the ones your users would produce.
+
+    > 📌 What the host language needs — gradual typing, instrumented evaluation, and integration with
+    > the typechecker — is on @scoreboard-live.
+  </script>
+</section>
+
+<!-- backup: column names as data (B2T2 buildColumn) -->
+<section class="slide" data-id="header-as-data" data-backup="true" data-title="BACKUP · Column names as data">
+  <h2 style="margin-bottom:22px">Column names as data</h2>
+  <div class="row" style="flex:1;gap:40px">
+    <div class="col" style="flex:0 0 60%">
+      <table class="gb spot-t" data-spot="2" style="margin-bottom:22px">
+        <tr>
+          <th>name</th><th>age</th>
+          <th class="spot" data-spot="4">quiz1</th><th class="spot" data-spot="4">quiz2</th>
+          <th>midterm</th>
+          <th class="spot" data-spot="4">quiz3</th><th class="spot" data-spot="4">quiz4</th>
+          <th>final</th>
+          <th class="newcol fr" data-fr="1">average-quiz</th>
+        </tr>
+        <tr class="spot-r" data-spot="3"><td class="s">"Bob"</td><td>12</td><td class="spot" data-spot="5">8</td><td class="spot" data-spot="5">9</td><td>77</td><td class="spot" data-spot="5">7</td><td class="spot" data-spot="5">9</td><td>87</td><td class="newcol fr" data-fr="1">8.25</td></tr>
+        <tr><td class="s">"Alice"</td><td>17</td><td class="spot" data-spot="5">6</td><td class="spot" data-spot="5">8</td><td>88</td><td class="spot" data-spot="5">8</td><td class="spot" data-spot="5">7</td><td>85</td><td class="newcol fr" data-fr="1">7.25</td></tr>
+        <tr><td class="s">"Eve"</td><td>13</td><td class="spot" data-spot="5">7</td><td class="spot" data-spot="5">9</td><td>84</td><td class="spot" data-spot="5">8</td><td class="spot" data-spot="5">8</td><td>77</td><td class="newcol fr" data-fr="1">8.00</td></tr>
+      </table>
+<pre class="hz md js" data-raw="true"><span class="js-fn">buildColumn</span><span class="js-p">(</span><span class="spot" data-spot="2">gradebook</span><span class="js-p">, </span><span class="js-str">"average-quiz"</span><span class="js-p">, (</span><span class="spot" data-spot="3">row</span><span class="js-p">) =&gt; {</span>
+  <span class="js-kw">const</span> <span class="spot" data-spot="4">quizCols</span> = <span class="js-fn">header</span><span class="js-p">(</span><span class="spot" data-spot="3">row</span><span class="js-p">)</span>
+    <span class="js-p">.</span><span class="js-fn">filter</span><span class="js-p">((</span>c<span class="js-p">) =&gt; </span><span class="spot" data-spot="4"><span class="js-fn">startsWith</span><span class="js-p">(</span>c<span class="js-p">, </span><span class="js-str">"quiz"</span><span class="js-p">)</span></span><span class="js-p">);</span>
+
+  <span class="js-kw">const</span> scores = quizCols
+    <span class="js-p">.</span><span class="js-fn">map</span><span class="js-p">((</span>c<span class="js-p">) =&gt; </span><span class="js-fn">getValue</span><span class="js-p">(</span><span class="spot" data-spot="3">row</span><span class="js-p">, </span>c<span class="js-p">) </span><span class="spot" data-spot="5"><span class="js-kw">as</span> <span class="js-ty">number</span></span><span class="js-p">);</span>
+
+  <span class="js-kw">return</span> <span class="js-fn">sum</span><span class="js-p">(</span>scores<span class="js-p">) / </span><span class="js-fn">length</span><span class="js-p">(</span>scores<span class="js-p">);</span>
+<span class="js-p">});</span></pre>
+      <p class="sub" style="margin-top:14px">Add a column of mean quiz scores.
+        <span class="dim">Adapted from B2T2.</span></p>
+    </div>
+    <div class="col" style="display:flex;flex-direction:column;justify-content:center;align-self:stretch">
+      <div class="ann-row fr" data-fr="2"><span class="q">1</span>
+        <span class="t">What is the type of <code class="inl">gradebook</code>?</span></div>
+      <div class="ann-row fr" data-fr="3"><span class="q">2</span>
+        <span class="t">What about <code class="inl">row</code>?</span></div>
+      <div class="ann-row fr" data-fr="4"><span class="q">3</span>
+        <span class="t">Which columns are the quiz columns?</span></div>
+      <div class="ann-row fr" data-fr="5"><span class="q">4</span>
+        <span class="t">What type does <code class="inl">getValue(row, c)</code> return?</span></div>
+      <p class="lead fr" data-fr="6" style="margin-top:34px">Statically typing this requires
+        a <strong>sophisticated type system</strong>.</p>
+    </div>
+  </div>
+  <script type="text/markdown" class="notes">
+    > 📎 Backup, with @build-column after it: for "what about columns computed from the header?"
+    > Nothing here needs a cell — the header is being manipulated as data, which a rich enough type
+    > system could in principle handle. @schema-from-values is the case it can't.
+
+    *[The gradebook table, then the code.]*
+
+    > A gradebook, and a program that adds a column holding each student's mean quiz score.
+
+    *[CLICK — `average-quiz` appears on the end of the gradebook, highlighted.]*
+
+    > The same table, one column wider. Now try to type it.
+
+    *[CLICK ×4 through the four questions. The highlight follows each one.]*
+
+    > **What is the type of `gradebook`?** Does it know its columns, or is it just `Table`?
+    >
+    > **What about `row`?** The same question.
+    >
+    > **Which columns are the quiz ones?** They aren't contiguous — `midterm` sits between them — so
+    > the code finds them from the *header*, at runtime, as strings.
+    >
+    > **What type does `getValue(row, c)` return?** `c` is a computed string, so the checker can't know
+    > which cell it fetches. `as number` is an unchecked assertion.
+
+    *[CLICK — the conclusion.]*
+
+    > Typing this **requires a sophisticated type system**, one that can compute with column names.
+    > Most table libraries don't have one, so they forbid the operation or type it imprecisely.
+
+    > ⚠️ The highlight follows the question in the code and the table together: `gradebook` lights
+    > the whole table, `row` one row and both its uses, `quizCols` and its `startsWith` the four quiz
+    > headers, and `as number` the cells it fetches.
+  </script>
+</section>
+
+<!-- backup: buildColumn, live typed -->
+<section class="slide" data-id="build-column" data-backup="true" data-title="BACKUP · buildColumn, live typed">
+  <h2 style="margin-bottom:8px">Live typing on <code class="inl">buildColumn</code></h2>
+  <p class="sub" style="margin-bottom:16px">The gradebook example: a new column named by a
+    string, computed from the columns whose names start with <code class="inl">quiz</code>.</p>
+  <div class="ectl" data-embed-controls="buildcolumn" data-embed-layout="wide">
+    <button class="bigtoggle" aria-pressed="false">
+      <span class="knob"></span>Live typing <span class="state">off</span></button>
+    <div class="seg" role="group" aria-label="What the probes show">
+      <button data-view="none"   aria-pressed="true">None</button>
+      <button data-view="static" aria-pressed="false">Static Type Probes</button>
+      <button data-view="value"  aria-pressed="false">Value Probes</button>
+      <button data-view="live"   aria-pressed="false">Live Type Probes</button>
+    </div>
+    <button class="ebtn">Reset</button>
+    <span class="grow"></span>
+    <span class="warn-msg"></span>
+  </div>
+  <div class="embed" data-embed="embed/" style="flex:1"></div>
+  <script type="text/markdown" class="notes">
+    > ⚠️ Backup, a **live Hazel** with the same controls as @to-string. Opens on **Static Type Probes**,
+    > toggle **off**. It answers @header-as-data. The last two beats are **caret moves**: click in the
+    > code, read the bottom bar (the badge says EDITING), then press Escape.
+
+    *[The program: build_column, folded; the gradebook, folded; the pipeline.]*
+
+    > The gradebook again: a column of average quiz scores, named by a string, with the quiz columns
+    > found by matching the header. `build_column` is our actual implementation — `to_lvs`, an append,
+    > `from_lvs` — so its table argument is a list of unknown.
+
+    *[Point at the two `?`.]*
+
+    > Statically, `row` and `quizzes` are unknown.
+
+    *[Click **Value Probes**.]*
+
+    > But the program has run: `row` is a labeled tuple, and `quizzes` is `[8, 9, 7, 8]`, the four
+    > quiz columns.
+
+    *[FLIP THE TOGGLE, then click **Live Type Probes**.]*
+
+    > With live typing on, `row` has the whole gradebook schema, and `quizzes` is a list of `Int`.
+
+    *[Click on the `.` in `e.value`. Read the bottom bar.]*
+
+    > Statically, a value from `to_lvs` has an unknown type — the row mixes a `String` name with `Int`
+    > scores. But only quiz entries get this far, so live typing says **`Int`**.
+
+    *[Click on the `(` right after `build_column` in the call — not on the name, which gives the
+    function's type. Read the bottom bar; press Escape.]*
+
+    > And the result: every original column, plus **`average-quiz`, typed `Float`**. **A column named by
+    > a string computed at runtime has a type, and we know what it is** — no row polymorphism, no
+    > dependent types. We ran it.
+
+    *[The table below the code is the result, drawn as a rich table.]*
+  </script>
+</section>
+
+<div id="slidenum" aria-hidden="true"></div>
+</div><!-- /stage -->
+
+<div id="bar"><i></i></div>
+<div id="hud"></div>
+<div id="notes"></div>
+<div id="pbottom"></div>
+<div id="panel">
+  <div class="p-top" id="p-topbar">
+    <span class="p-clock" id="p-clock">--:--</span>
+    <span id="pclock">
+      <button id="p-run" title="start the clock (t)">▶</button>
+      <button id="p-reset" title="reset the clock and end the run (r, twice)">↺</button>
+    </span>
+    <span class="p-wall" id="p-wall"></span>
+  </div>
+  <div id="pstat" class="pstat"></div>
+  <div id="ptime" class="pstat"></div>
+  <div id="pnav">
+    <button id="p-prev" title="back (←)">◀</button>
+    <select id="p-pick" title="jump to a slide"></select>
+    <button id="p-next" title="next (→)">▶</button>
+  </div>
+</div>
+<div id="help">
+  <div>
+    <div><kbd>→ / space</kbd> next</div>
+    <div><kbd>←</kbd> back</div>
+    <div><kbd>1–9</kbd> jump to slide</div>
+    <div><kbd>s</kbd> speaker notes</div>
+    <div><kbd>t</kbd> start / pause timer &nbsp; <kbd>r</kbd> <kbd>r</kbd> reset</div>
+    <div><kbd>[</kbd> <kbd>]</kbd> presenter: shrink / grow the panel</div>
+    <div><kbd>esc</kbd> reclaim focus from the editor</div>
+    <div><kbd>?</kbd> this help</div>
+  </div>
+</div>
+
+<script type="module" src="deck.js"></script>
+</body>
+</html>

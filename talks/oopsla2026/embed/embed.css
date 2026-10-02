@@ -1,0 +1,138 @@
+/* Chrome removal for Hazel when it is embedded in a slide.
+ *
+ * Served as an overlay on top of the ordinary build (see talk/serve.sh), so the
+ * build itself is untouched and a rebuild never clobbers this. Everything here
+ * is presentational; nothing changes Hazel's behaviour.
+ *
+ * The proper version of this is `zen: true` gated on PatchworkComm.is_in_iframe()
+ * — see docs/embedding.md in the Hazel repo. This is the stopgap that needs no
+ * OCaml.
+ */
+
+/* the breadcrumb, the mode selectors, the hazelnut menu, the title */
+#top-bar { display: none !important; }
+
+/* reclaim the space the top bar occupied. #page is a grid whose first row is
+   a fixed 32px for the top bar, and hiding the bar leaves the row, so the code
+   started a blank line down. The rows are top bar, sample focus bar, main,
+   bottom bar. The editor's own top padding goes too, so the first line of code
+   sits at the top of the frame, and its bottom padding, which only cost a line. */
+#page { padding-top: 0 !important; grid-template-rows: 0 auto 1fr auto !important; }
+#main { top: 0 !important; }
+.cell > .code-editor { padding-top: 4px !important; padding-bottom: 0 !important; }
+
+/* The cursor inspector along the bottom. Its code follows --base-font-size but
+   its labels ("EXP / Type Alias definition") are a fixed 16px, so at a slide's
+   28pt the type read huge beside a tiny message. Tie the labels to the same
+   knob, a little smaller than the code, and let the bar's row grow to fit. */
+#bottom-bar { font-size: calc(var(--base-font-size) * 0.8) !important;
+              height: calc(var(--base-font-size) * 1.45) !important;
+              overflow: hidden; align-items: center; }
+/* A fixed height, not auto: auto sized the bar to whatever it held, so it
+   jumped as the caret moved between terms with a type and terms without, and
+   the editor above it jumped with it. 1.45x the font is one line of code. */
+
+/* ...and drop the syntactic form ("/ Type Alias definition"). It names the
+   construct under the caret, which the audience can see, and changes with
+   every caret move for reasons they cannot. The sort tag (EXP) and the type
+   stay. */
+#bottom-bar .divider,
+#bottom-bar .syntax-class { display: none !important; }
+
+/* The Table projector's column headers. Its cells follow --base-font-size but
+   the headers inherit a fixed 16px, so at a slide's 28pt the labels were a
+   fraction of the size of the values under them. The projector's height does
+   not change: the body rows give up the difference. */
+.projector.table th { font-size: calc(var(--base-font-size) * 0.7) !important; }
+
+/* Its inner wrapper's side padding is 5px, sized for Hazel's 16px; at a slide's
+   32pt the cells sit against the frame. TableProj.re's placeholder width
+   allows four characters for the frame (over 70px at 32pt), so the extra 10px
+   does not push the code after the table. */
+.projector.table > .table-inner { padding: 0 10px !important; }
+
+/* The same for a rich probe's table, and for the probe's menus. A probe's side
+   panel (.live-offside) inherits a fixed 16px, and only the values in it follow
+   --base-font-size, so at 26pt its headers, the ⋮ and + buttons, the column
+   menu (which inherits from its <th>) and the right-click menu (View as table)
+   were all a fraction of the code's size. Their spacing is in em, so it scales
+   with them. */
+.projector.probe th { font-size: calc(var(--base-font-size) * 0.7) !important; }
+.projector.probe th .closure-nav-button,
+.projector.probe th.add-column-header { font-size: 1em !important; }
+/* The menus a little larger than the headers: they are what the room has to
+   read while the presenter picks from them. */
+.projector.probe th .column-menu,
+.live-offside .sample-context-menu { font-size: calc(var(--base-font-size) * 0.85) !important; }
+/* ...and the editor's own right-click menu (Select term, Add probe, the
+   projector toggles), which sits outside any probe at a fixed 16px. */
+.context-menu.nut-menu { font-size: calc(var(--base-font-size) * 0.85) !important; }
+
+/* A rich probe's table cells in the Table projector's colors, not the probe's.
+   The probe colors every token of a probed value by its focus (green for the
+   focused call, faded for the rest), which is right for a text sample but
+   turned a whole table green. Tokens take their cell's color again, as they
+   do in the Table projector, and strings and holes get theirs back. The dim on
+   the calls out of focus is opacity, which this leaves alone. */
+.live-offside .value-rich .table td .code .token { color: inherit !important; }
+/* ...where the color they inherit is the cell text's, which the probe sets pale
+   (meant for the green band), so numbers nearly vanished. Give it the Table
+   projector's color for plain values. */
+.live-offside .value-rich .table td .code .code-text { color: var(--token-exp) !important; }
+.live-offside .value-rich .table td .code .token.mono.string-lit { color: var(--token-string-lit) !important; }
+.live-offside .value-rich .table td .code .token.explicit-hole { color: var(--token-explicit-hole) !important; }
+
+/* the right-hand sidebar of tool icons */
+.sidebar { display: none !important; }
+
+/* the docs pane (#explain-this) and the container that reserves its column.
+   It reacts to the caret, so on a slide it changes under the audience for
+   reasons they cannot see, and it costs a third of the width. */
+#sidebars,
+#explain-this { display: none !important; }
+
+/* code big enough to read from the back of a room.
+   NEVER scale this with a transform — FontMetrics.get_goal divides a
+   transform-aware rect by transform-unaware row/col sizes, so clicks land off
+   by the scale factor. --base-font-size is the supported knob. */
+:root { --base-font-size: 19pt; }
+
+/* The sample focus bar. It appears only once a probe has a focused invocation,
+ * so on a slide it arrives unannounced, pushes everything down, and shows a
+ * breadcrumb trail the audience has no way to read. Pinning still works. */
+#sample-focus-bar { display: none !important; }
+
+/* Editor beside its output rather than above it.
+ *
+ * The cell stacks them by default, which is right in a tall window and wrong in
+ * a slide: the frame is wide and short, the editor takes its natural height,
+ * and the output gets whatever is left — which here was a couple of lines and a
+ * scrollbar. Side by side, both get the full height of the frame and the
+ * fourteen-line program and eight-line result each fit without scrolling.
+ *
+ * min-width:0 on both because a flex item's default min-width is its content,
+ * which would let the code push the output off the edge instead of wrapping. */
+.cell {
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 18px;
+}
+.cell > .code-editor { flex: 1 1 58% !important; min-width: 0; }
+.cell > .cell-result { flex: 1 1 42% !important; min-width: 0; overflow: auto; }
+
+/* Some slides answer with a rich probe instead — a ^^probe_table on the result
+ * renders it as a table in the editor, which the evaluation panel cannot do
+ * (it is a read-only code editor, outside the rich-probe machinery). Where
+ * that happens the panel only restates the answer as text, so the deck adds
+ * this class to the iframe's root and takes the width back. */
+html.deck-wide .cell > .cell-result { display: none !important; }
+html.deck-wide .cell > .code-editor { flex: 1 1 100% !important; }
+
+/* And some want both, but weighted towards the editor — a rich table drawn
+ * inline is wider than the code around it, and at the even split it runs over
+ * the divider. */
+html.deck-code .cell > .code-editor { flex: 1 1 72% !important; }
+html.deck-code .cell > .cell-result { flex: 1 1 28% !important; }
+
+/* let the editor use the full frame */
+body { overflow: hidden; }
