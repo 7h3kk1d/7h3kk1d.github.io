@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - dev
+  # Run by hand after publishing to 7h3kk1d/talks, whose slides are copied in below.
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -21,6 +23,20 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Talk slides are built elsewhere and kept out of this repo; /talks/ itself
+      # is the Astro page, so only the talk folders are copied in.
+      - name: Check out talk slides
+        uses: actions/checkout@v4
+        with:
+          repository: 7h3kk1d/talks
+          path: talks-repo
+
+      - name: Add talk slides
+        run: |
+          for d in talks-repo/*/; do
+            cp -R "$d" "dist/talks/$(basename "$d")"
+          done
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
