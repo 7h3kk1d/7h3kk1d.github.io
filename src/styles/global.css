@@ -247,11 +247,62 @@ blockquote {
   cy: 6px;
 }
 
+/* Site header: title, nav and theme toggle. On wide screens they share one
+   row; on phones the toggle joins the title and the nav wraps below. */
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1.58rem;
+}
+
+.site-title {
+  text-shadow: none;
+  background-image: none;
+}
+
+.site-title h3 {
+  margin: 0;
+}
+
+.site-nav {
+  list-style: none;
+  margin: 0 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+}
+
+.site-nav li {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .site-theme-toggle {
+    order: 1;
+    margin-left: auto;
+  }
+
+  .site-nav {
+    order: 2;
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* Keep the title and theme toggle on one row on the narrowest phones */
+@media (max-width: 400px) {
+  .site-title h3 {
+    font-size: 1.1rem;
+  }
+}
+
 /* Social Dropdown */
 .social-dropdown {
   position: relative;
   display: inline-block;
-  margin-right: 1rem;
 }
 
 .social-dropdown-trigger {
@@ -288,7 +339,8 @@ blockquote {
   z-index: 100;
 }
 
-.social-dropdown:hover .social-dropdown-menu {
+.social-dropdown:hover .social-dropdown-menu,
+.social-dropdown:focus-within .social-dropdown-menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
@@ -333,7 +385,6 @@ blockquote {
 .search {
   position: relative;
   display: inline-block;
-  margin-right: 1rem;
 }
 
 .search-input {
@@ -429,6 +480,39 @@ blockquote {
 
   .search-input:focus {
     width: 140px;
+  }
+}
+
+@media (max-width: 600px) {
+  .search {
+    flex-basis: 100%;
+  }
+
+  .search-input,
+  .search-input:focus {
+    width: 100%;
+  }
+
+  .search-results {
+    left: 0;
+    min-width: 0;
+  }
+}
+
+/* Home page avatar: beside the intro on wide screens, above it on phones */
+.avatar {
+  float: right;
+  max-width: 40%;
+  margin-left: 20px;
+  border-radius: 50%;
+}
+
+@media (max-width: 600px) {
+  .avatar {
+    float: none;
+    display: block;
+    max-width: 60%;
+    margin: 0 auto 1.58rem;
   }
 }
 
