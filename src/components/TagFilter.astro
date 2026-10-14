@@ -1,0 +1,34 @@
+---
+import { countTags, tagUrl, type Post } from '../lib/posts'
+
+interface Props {
+  /** All posts, so every tag is offered whichever one is selected. */
+  posts: Post[]
+  /** The tag whose page this is, if any. */
+  selected?: string
+}
+
+const { posts, selected } = Astro.props
+const tags = countTags(posts)
+---
+
+<nav class="tags-container" aria-label="Filter posts by tag">
+  <a
+    href="/posts/"
+    class:list={['tag', { 'tag--selected': !selected }]}
+    aria-current={!selected ? 'page' : undefined}
+  >
+    All ({posts.length})
+  </a>
+  {
+    tags.map(([tag, count]) => (
+      <a
+        href={tagUrl(tag)}
+        class:list={['tag', { 'tag--selected': tag === selected }]}
+        aria-current={tag === selected ? 'page' : undefined}
+      >
+        {tag} ({count})
+      </a>
+    ))
+  }
+</nav>

@@ -137,7 +137,8 @@ blockquote {
   transition: all 0.2s ease;
 }
 
-.tag:hover {
+.tag:hover,
+.tag--selected {
   background-color: var(--color-link);
   border-color: var(--color-link);
   color: var(--color-bg);
@@ -152,7 +153,8 @@ blockquote {
   border-color: var(--color-link);
 }
 
-[data-theme='dark'] .tag:hover {
+[data-theme='dark'] .tag:hover,
+[data-theme='dark'] .tag--selected {
   background-color: var(--color-link);
   color: var(--color-bg);
 }
@@ -164,15 +166,11 @@ blockquote {
     border-color: var(--color-link);
   }
 
-  :root:not([data-theme='light']) .tag:hover {
+  :root:not([data-theme='light']) .tag:hover,
+  :root:not([data-theme='light']) .tag--selected {
     background-color: var(--color-link);
     color: var(--color-bg);
   }
-}
-
-.all-tags-link {
-  display: inline-block;
-  margin-bottom: 1rem;
 }
 
 /* Shiki dark mode override — switch to dark theme colors */

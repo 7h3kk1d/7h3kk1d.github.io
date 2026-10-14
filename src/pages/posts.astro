@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PostList from '../components/PostList.astro'
+import TagFilter from '../components/TagFilter.astro'
+import { getSortedPosts } from '../lib/posts'
+
+const posts = await getSortedPosts()
+---
+
+<BaseLayout
+  title="Posts"
+  description="Every post Alexander Bandukwala has written, filterable by topic."
+>
+  <div>
+    <h1>Posts</h1>
+    <TagFilter posts={posts} />
+    <PostList posts={posts} />
+  </div>
+</BaseLayout>
