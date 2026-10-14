@@ -12,6 +12,10 @@ export default defineConfig({
   // lossless HTML compression instead.
   compressHTML: true,
   integrations: [react(), sitemap()],
+  // The tag list became the filter at the top of /posts.
+  redirects: {
+    '/tags': '/posts',
+  },
   markdown: {
     shikiConfig: {
       themes: {
