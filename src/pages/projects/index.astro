@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+// Each project is its own repo deployed to GitHub Pages, which serves it under
+// this domain at /<repo name>/.
+const projects = [
+  {
+    title: 'Bidirectional JSON Editor',
+    description:
+      'text and tree views of a JSON document, kept in sync incrementally in both directions',
+    url: '/bidirectional-json-editor/',
+    repo: 'https://github.com/7h3kk1d/bidirectional-json-editor',
+  },
+  {
+    title: 'JSON Editor',
+    description: 'a structure editor for JSON',
+    url: '/json-editor/',
+    repo: 'https://github.com/7h3kk1d/json-editor',
+  },
+]
+---
+
+<BaseLayout
+  title="Projects"
+  description="Projects by Alexander Bandukwala that you can try in the browser."
+>
+  <div>
+    <h1>Projects</h1>
+    <ul>
+      {
+        projects.map((project) => (
+          <li>
+            <a href={project.url}>{project.title}</a>, {project.description}{' '}
+            <span>
+              (<a href={project.repo}>source</a>)
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
