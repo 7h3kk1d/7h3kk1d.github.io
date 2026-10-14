@@ -248,7 +248,8 @@ blockquote {
 }
 
 /* Site header: title, nav and theme toggle. On wide screens they share one
-   row; on phones the toggle joins the title and the nav wraps below. */
+   row; below the width where that row fits, the toggle joins the title and the
+   nav wraps below. Raise the breakpoint if the nav grows. */
 .site-header {
   display: flex;
   flex-wrap: wrap;
@@ -279,7 +280,7 @@ blockquote {
   margin: 0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 880px) {
   .site-theme-toggle {
     order: 1;
     margin-left: auto;
@@ -320,7 +321,8 @@ blockquote {
 .social-dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 0;
+  /* Open leftward: the trigger sits near the right edge, especially on phones */
+  right: 0;
   margin: 0;
   padding: 0.5rem 0;
   list-style: none;
