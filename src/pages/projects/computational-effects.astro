@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 
 <BaseLayout
   title="Cross-Cutting Concerns"
-  description="An interactive sketch: toggle cross-cutting effects like retries, transactions, logging and authorization, and watch them wrap an unchanged order-fulfillment function."
+  description="Toggle cross-cutting concerns like retries, transactions, logging and authorization on an order function, and see them woven in by hand or declared as aspects."
   wide
 >
   <div class="app" id="app">
@@ -16,7 +16,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     <div class="layout" id="layout">
       <aside class="panel sidebar">
         <div class="head">
-          <h2>Effects</h2>
+          <h2>Concerns</h2>
           <span class="count" id="count">0 enabled</span>
         </div>
         <div id="effects"></div>
@@ -43,8 +43,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
               <span class="count delta" id="delta"></span>
               <div class="tabs">
                 <button class="tab core-tab" data-view="core">Business</button>
-                <button class="tab active" data-view="expanded">Expanded</button
-                >
+                <button class="tab active" data-view="expanded">Woven</button>
                 <button class="tab" data-view="rules">Aspect rules</button>
               </div>
             </div>
@@ -67,10 +66,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
         </div>
         <div class="trace" id="trace"></div>
         <p class="note">
-          Effects are applied in one fixed order; they don't commute in general.
-          Only transient failures are retried, idempotency keeps a retried
-          payment from charging twice, and a database rollback can't undo an
-          external payment.
+          Concerns are woven in one fixed order, and in general the order
+          matters. Only transient failures are retried, idempotency keeps a
+          retried payment from charging twice, and a database rollback can't
+          undo an external payment.
         </p>
       </section>
     </div>
@@ -603,7 +602,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       name: 'Timeouts',
       group: 'Control & reliability',
       c: '#f1c27b',
-      desc: 'Places a deadline around remote calls. A timeout becomes a failure that other layers can handle.',
+      desc: 'Places a deadline around remote calls. A timeout becomes a failure that other concerns can handle.',
     },
     {
       id: 'transaction',
@@ -1053,7 +1052,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     const e = id ? byId[id] : null
     $('info').innerHTML = e
       ? `<b style="--c:${e.c}">${e.name}</b>${e.desc}`
-      : 'Hover over an effect or a highlighted line to see what it adds. Effects apply in one fixed order; in general they don’t commute.'
+      : 'Hover over a concern or a highlighted line to see what it adds. Concerns are woven in one fixed order, and in general the order matters.'
   }
 
   function controls() {
