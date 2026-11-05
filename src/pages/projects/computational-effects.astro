@@ -1,0 +1,1180 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="Cross-Cutting Concerns"
+  description="Toggle cross-cutting concerns like retries, transactions, logging and authorization on an order function, and see them woven in by hand or declared as aspects."
+  wide
+>
+  <div class="app" id="app">
+    <header class="intro">
+      <h1>Cross-cutting concerns</h1>
+      <p>Toggle concerns on an order function and see them woven in.</p>
+    </header>
+
+    <div class="layout" id="layout">
+      <aside class="panel sidebar">
+        <div class="head">
+          <h2>Concerns</h2>
+          <span class="count" id="count">0 enabled</span>
+        </div>
+        <div id="effects"></div>
+        <div class="actions">
+          <button class="btn" id="all">Enable all</button>
+          <button class="btn" id="clear">Clear all</button>
+        </div>
+        <div class="info" id="info"></div>
+      </aside>
+
+      <section class="codearea">
+        <div class="panels">
+          <div class="panel card core-panel" id="core-panel">
+            <div class="head">
+              <h2>Business program</h2>
+              <span class="count">unchanged</span>
+            </div>
+            <div class="code" id="core"></div>
+          </div>
+
+          <div class="panel card">
+            <div class="head">
+              <h2 id="title">Woven implementation</h2>
+              <span class="count delta" id="delta"></span>
+              <div class="tabs">
+                <button class="tab core-tab" data-view="core">Business</button>
+                <button class="tab active" data-view="expanded">Woven</button>
+                <button class="tab" data-view="rules">Aspect rules</button>
+              </div>
+            </div>
+            <div class="code" id="woven" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel card trace-panel">
+        <div class="head">
+          <h2>Run a request</h2>
+          <select id="scenario" aria-label="Scenario">
+            <option value="transient"
+              >Payment provider outage (temporary)</option
+            >
+            <option value="declined">Card declined (permanent)</option>
+            <option value="db">Database connection drops</option>
+            <option value="ok">Everything succeeds</option>
+          </select>
+        </div>
+        <div class="trace" id="trace"></div>
+        <p class="note">
+          Concerns are woven in one fixed order, and in general the order
+          matters. Only transient failures are retried, idempotency keeps a
+          retried payment from charging twice, and a database rollback can't
+          undo an external payment.
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Light-mode palette. Effect hues (--c) are set per effect in the script
+     and are tuned for dark backgrounds, so in light mode text drawn in an
+     effect's hue is darkened via --ink. */
+  .app {
+    --line: color-mix(in srgb, var(--color-text) 16%, transparent);
+    --panel: color-mix(in srgb, var(--color-text) 3%, var(--color-bg));
+    --inset: color-mix(in srgb, var(--color-text) 6%, var(--color-bg));
+    --muted: var(--color-text-secondary);
+    --code-bg: #f7f7f9;
+    --code-text: #3b4252;
+    --ln: #a0a8b8;
+    --syn-comment: #7a8599;
+    --syn-kw: #7c4dcc;
+    --syn-fn: #2c66c4;
+    --syn-str: #2f7d3b;
+    --good: #2f7d5c;
+    --bad: #b93b4a;
+    --ink-mix: 58%;
+    --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --gap: 0.7rem;
+    font-family: 'Varela Round', sans-serif;
+    font-size: 0.74rem;
+    line-height: 1.45;
+  }
+
+  :global([data-theme='dark']) .app {
+    --code-bg: #12121f;
+    --code-text: #d7deea;
+    --ln: #526580;
+    --syn-comment: #7489a8;
+    --syn-kw: #c5a5ff;
+    --syn-fn: #8bb8ff;
+    --syn-str: #a6d6a9;
+    --good: #a4e6c9;
+    --bad: #ffaaaa;
+    --ink-mix: 100%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .app {
+      --code-bg: #12121f;
+      --code-text: #d7deea;
+      --ln: #526580;
+      --syn-comment: #7489a8;
+      --syn-kw: #c5a5ff;
+      --syn-fn: #8bb8ff;
+      --syn-str: #a6d6a9;
+      --good: #a4e6c9;
+      --bad: #ffaaaa;
+      --ink-mix: 100%;
+    }
+  }
+
+  .app :global([style*='--c']) {
+    --ink: color-mix(in oklab, var(--c) var(--ink-mix), #000);
+  }
+
+  /* --- title row --- */
+  .intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .intro h1 {
+    font-size: 1.35rem;
+    margin: 0;
+  }
+
+  .intro p {
+    margin: 0;
+    color: var(--muted);
+    font-family: 'Lora', serif;
+    font-size: 0.85rem;
+  }
+
+  /* --- layout ---
+     Default (narrow): one column, page scrolls.
+     850px+: effects beside code, trace under code.
+     Desktop with enough height: fills the screen, panels scroll inside.
+     1600px+: trace gets its own column. */
+  .layout {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'fx' 'code' 'trace';
+  }
+
+  .sidebar {
+    grid-area: fx;
+  }
+
+  .codearea {
+    grid-area: code;
+    container: code / inline-size;
+    min-width: 0;
+  }
+
+  .trace-panel {
+    grid-area: trace;
+  }
+
+  @media (min-width: 850px) {
+    .layout {
+      grid-template-columns: 13.5rem minmax(0, 1fr);
+      grid-template-areas: 'fx code' 'fx trace';
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0.8rem;
+    }
+  }
+
+  @media (min-width: 1024px) and (min-height: 640px) {
+    .layout {
+      /* --top is the layout's offset from the top of the page, set by the
+         script, so the layout fills exactly what's left of the screen. */
+      height: calc(100dvh - var(--top, 9rem) - 1.75rem);
+      grid-template-rows: minmax(0, 1fr) auto;
+      align-items: stretch;
+    }
+
+    .sidebar,
+    .trace-panel {
+      position: static;
+      overflow: auto;
+    }
+
+    .trace-panel {
+      max-height: 14rem;
+    }
+
+    .trace-panel .note {
+      display: none;
+    }
+
+    .codearea,
+    .panels,
+    .panels > .card {
+      min-height: 0;
+      height: 100%;
+    }
+
+    .panels > .card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panels .code {
+      flex: 1;
+      min-height: 0;
+    }
+  }
+
+  @media (min-width: 1600px) and (min-height: 640px) {
+    .layout {
+      grid-template-columns: 13.5rem minmax(0, 1fr) 20rem;
+      grid-template-rows: minmax(0, 1fr);
+      grid-template-areas: 'fx code trace';
+    }
+
+    .trace-panel {
+      max-height: none;
+    }
+
+    .trace-panel .note {
+      display: block;
+    }
+
+    .trace-panel .head {
+      flex-wrap: wrap;
+    }
+  }
+
+  /* The business program sits beside the woven code when the code area is
+     wide enough; otherwise it becomes a tab. */
+  .panels {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panels > .core-panel {
+    display: none;
+  }
+
+  @container code (min-width: 46rem) {
+    .panels {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+
+    .panels > .core-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .core-tab {
+      display: none;
+    }
+  }
+
+  /* --- panels --- */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .sidebar,
+  .card {
+    padding: 0.75rem;
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .app h2 {
+    font-size: 0.8rem;
+    margin: 0;
+    margin-right: auto;
+    white-space: nowrap;
+  }
+
+  .count {
+    font-size: 0.65rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .delta {
+    color: var(--good);
+  }
+
+  .note {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin: 0.6rem 0 0;
+  }
+
+  /* --- effect list --- */
+  #effects :global(.group) {
+    font-size: 0.64rem;
+    color: var(--muted);
+    margin: 0.5rem 0 0.1rem;
+  }
+
+  #effects :global(.group:first-child) {
+    margin-top: 0;
+  }
+
+  #effects :global(.effect) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.12rem 0.4rem;
+    margin: 0 -0.4rem;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+
+  #effects :global(.effect:hover),
+  #effects :global(.effect.hot) {
+    background: color-mix(in srgb, var(--c) 14%, transparent);
+    border-color: color-mix(in srgb, var(--c) 45%, transparent);
+  }
+
+  #effects :global(input) {
+    appearance: none;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--muted);
+    border-radius: 4px;
+    margin: 0;
+    cursor: pointer;
+    position: relative;
+  }
+
+  #effects :global(input:checked) {
+    background: var(--c);
+    border-color: var(--c);
+  }
+
+  #effects :global(input:checked::after) {
+    content: '✓';
+    position: absolute;
+    inset: -3px 0;
+    text-align: center;
+    color: #08111f;
+    font-weight: 900;
+    font-size: 11px;
+  }
+
+  #effects :global(input:focus-visible) {
+    outline: 2px solid var(--c);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 849px) {
+    #effects {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+      gap: 0 1rem;
+    }
+
+    #effects :global(.group) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+  }
+
+  .info {
+    margin-top: 0.7rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line);
+    font-family: 'Lora', serif;
+    font-size: 0.68rem;
+    color: var(--muted);
+    min-height: 3.6rem;
+  }
+
+  .info :global(b) {
+    display: block;
+    font-family: 'Varela Round', sans-serif;
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  /* --- controls --- */
+  .app button,
+  .app select {
+    font: inherit;
+    font-size: 0.7rem;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--inset);
+    border-radius: 7px;
+    padding: 0.2rem 0.55rem;
+  }
+
+  .btn:hover {
+    border-color: var(--muted);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .tab {
+    border: 0;
+    background: transparent;
+    border-radius: 6px;
+    padding: 0.15rem 0.5rem;
+    color: var(--muted) !important;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    background: var(--inset);
+    color: var(--color-text) !important;
+  }
+
+  select {
+    max-width: 100%;
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.15rem 0.3rem;
+  }
+
+  /* --- code --- */
+  .code {
+    overflow: auto;
+    background: var(--code-bg);
+    color: var(--code-text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    font: 0.66rem/1.5 var(--mono);
+  }
+
+  .code :global(.line) {
+    display: grid;
+    grid-template-columns: 34px minmax(max-content, 1fr);
+    padding-right: 12px;
+    border-left: 2px solid transparent;
+    transition: opacity 0.12s ease;
+  }
+
+  .code :global(.ln) {
+    color: var(--ln);
+    text-align: right;
+    padding-right: 10px;
+    user-select: none;
+  }
+
+  .code :global(.src) {
+    white-space: pre;
+  }
+
+  .code :global(.added) {
+    background: color-mix(in srgb, var(--c) 14%, transparent);
+    border-left-color: var(--c);
+    cursor: default;
+  }
+
+  .code :global(.added .src) {
+    color: var(--ink);
+  }
+
+  .code :global(.added.hot) {
+    background: color-mix(in srgb, var(--c) 28%, transparent);
+  }
+
+  .app.focusing .code :global(.line:not(.hot)) {
+    opacity: 0.4;
+  }
+
+  .code :global(.comment) {
+    color: var(--syn-comment);
+    font-style: italic;
+  }
+
+  .code :global(.kw) {
+    color: var(--syn-kw);
+  }
+
+  .code :global(.fn) {
+    color: var(--syn-fn);
+  }
+
+  .code :global(.str) {
+    color: var(--syn-str);
+  }
+
+  /* --- trace --- */
+  .trace {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .trace :global(span) {
+    font: 0.64rem var(--mono);
+    padding: 0.2rem 0.45rem;
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+
+  .trace :global(.bad) {
+    color: var(--bad);
+    border-color: color-mix(in srgb, var(--bad) 55%, transparent);
+  }
+
+  .trace :global(.good) {
+    color: var(--good);
+    border-color: color-mix(in srgb, var(--good) 55%, transparent);
+  }
+
+  @media (min-width: 1600px) and (min-height: 640px) {
+    .trace {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .head {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+
+<script>
+  type Effect = {
+    id: string
+    name: string
+    group: string
+    c: string
+    desc: string
+  }
+
+  const E: Effect[] = [
+    {
+      id: 'failure',
+      name: 'Failure handling',
+      group: 'Control & reliability',
+      c: '#ff9292',
+      desc: 'Turns failures into an explicit Result path. A failed step short-circuits the happy path and returns an error.',
+    },
+    {
+      id: 'retry',
+      name: 'Retry + backoff',
+      group: 'Control & reliability',
+      c: '#83d6b0',
+      desc: 'Retries transient remote failures a bounded number of times, with exponential backoff. Permanent failures are not retried.',
+    },
+    {
+      id: 'timeout',
+      name: 'Timeouts',
+      group: 'Control & reliability',
+      c: '#f1c27b',
+      desc: 'Places a deadline around remote calls. A timeout becomes a failure that other concerns can handle.',
+    },
+    {
+      id: 'transaction',
+      name: 'Database transaction',
+      group: 'State & resources',
+      c: '#c5a5ff',
+      desc: 'Groups database writes into commit-or-rollback behavior. It cannot roll back a payment provider outside the database.',
+    },
+    {
+      id: 'connection',
+      name: 'Connection management',
+      group: 'State & resources',
+      c: '#7dd8e8',
+      desc: 'Acquires a database connection for the scope, reuses it, and releases it even when the body fails.',
+    },
+    {
+      id: 'logging',
+      name: 'Structured logging',
+      group: 'Observation',
+      c: '#8bb8ff',
+      desc: 'Adds structured entry, completion, and failure events around operations without changing their intended result.',
+    },
+    {
+      id: 'metrics',
+      name: 'Metrics',
+      group: 'Observation',
+      c: '#f2a6d5',
+      desc: 'Measures latency and outcome counts for remote and database operations.',
+    },
+    {
+      id: 'tracing',
+      name: 'Distributed tracing',
+      group: 'Observation',
+      c: '#e6b879',
+      desc: 'Creates a request span and propagates trace context to downstream calls.',
+    },
+    {
+      id: 'auth',
+      name: 'Authorization',
+      group: 'Security & consistency',
+      c: '#e7a0a0',
+      desc: 'Checks permission before side effects begin. Denial exits before charging or reserving stock.',
+    },
+    {
+      id: 'idempotency',
+      name: 'Idempotency',
+      group: 'Security & consistency',
+      c: '#b8c5ff',
+      desc: 'Deduplicates repeated order submissions using a stable order key and protects payment retries.',
+    },
+  ]
+  const byId = Object.fromEntries(E.map((e) => [e.id, e]))
+
+  const core = [
+    '// Business intent: fulfill one validated customer order',
+    'function placeOrder(order, customer) {',
+    '  const validOrder = validateOrder(order);',
+    '  const total = calculateTotal(validOrder);',
+    '  const payment = chargePayment(customer, total, order.id);',
+    '  reserveStock(validOrder.items);',
+    '  const shipment = createShipment(validOrder);',
+    '  saveOrder(validOrder, payment, shipment);',
+    '  sendConfirmation(customer, shipment);',
+    '  return makeReceipt(validOrder, payment, shipment);',
+    '}',
+  ]
+
+  type Line = [string, string?]
+
+  let on = new Set<string>()
+  let view = 'expanded'
+  let focused: string | null = null
+  const $ = (id: string) => document.getElementById(id)!
+  const has = (id: string) => on.has(id)
+
+  const esc = (s: string) =>
+    s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+
+  // ---------------------------------------------------------------------
+  // Responsive formatting: lines are re-wrapped to fit the panel width,
+  // measured in characters.
+
+  /** Index of the paren closing the one at `i`, or -1 if not on this line. */
+  function matchParen(s: string, i: number) {
+    let depth = 0
+    let quote = ''
+    for (let j = i; j < s.length; j++) {
+      const ch = s[j]
+      if (quote) {
+        if (ch === quote) quote = ''
+      } else if (ch === '"' || ch === '`') quote = ch
+      else if (ch === '(') depth++
+      else if (ch === ')' && --depth === 0) return j
+    }
+    return -1
+  }
+
+  /** Split on commas that aren't nested inside brackets or strings. */
+  function splitArgs(s: string) {
+    const out: string[] = []
+    let depth = 0
+    let quote = ''
+    let cur = ''
+    for (const ch of s) {
+      if (quote) {
+        if (ch === quote) quote = ''
+      } else if (ch === '"' || ch === '`') quote = ch
+      else if ('([{'.includes(ch)) depth++
+      else if (')]}'.includes(ch)) depth--
+      else if (ch === ',' && depth === 0) {
+        out.push(cur.trim())
+        cur = ''
+        continue
+      }
+      cur += ch
+    }
+    out.push(cur.trim())
+    return out.filter(Boolean)
+  }
+
+  /** Fit one line into `width` columns: wrap comments, then break the first
+   * call with several arguments one argument per line. Lines that can't be
+   * broken are left to scroll. */
+  function fit(line: string, id: string | undefined, width: number): Line[] {
+    if (line.length <= width) return [[line, id]]
+    const ind = line.match(/^ */)![0]
+    const body = line.slice(ind.length)
+    if (body.startsWith('// ')) {
+      const out: Line[] = []
+      let cur = '//'
+      for (const word of body.slice(3).split(' ')) {
+        if (cur !== '//' && ind.length + cur.length + word.length + 1 > width) {
+          out.push([ind + cur, id])
+          cur = '//'
+        }
+        cur += ' ' + word
+      }
+      out.push([ind + cur, id])
+      return out
+    }
+    for (let i = body.indexOf('('); i >= 0; i = body.indexOf('(', i + 1)) {
+      const j = matchParen(body, i)
+      if (j < 0) continue
+      const args = splitArgs(body.slice(i + 1, j))
+      if (args.length < 2) continue
+      return [
+        [ind + body.slice(0, i + 1), id],
+        ...args.flatMap((a, k) =>
+          fit(ind + '  ' + a + (k < args.length - 1 ? ',' : ''), id, width)
+        ),
+        ...fit(ind + body.slice(j), id, width),
+      ]
+    }
+    // Last resort: break after an assignment's `=`.
+    const eq = body.indexOf(' = ')
+    if (eq > 0 && !body.slice(0, eq).includes('('))
+      return [
+        [ind + body.slice(0, eq + 2), id],
+        ...fit(ind + '    ' + body.slice(eq + 3), id, width),
+      ]
+    return [[line, id]]
+  }
+
+  // ---------------------------------------------------------------------
+  // Syntax highlighting
+
+  const KW = new Set([
+    'function',
+    'const',
+    'return',
+    'if',
+    'else',
+    'try',
+    'catch',
+    'finally',
+    'throw',
+    'await',
+    'async',
+    'new',
+    'aspect',
+    'around',
+    'before',
+    'after',
+    'on',
+    'when',
+  ])
+  const FN = new Set([
+    'log',
+    'authorize',
+    'withTransaction',
+    'withConnection',
+    'retryTransient',
+    'withTimeout',
+    'measure',
+    'withSpan',
+    'idempotent',
+    'chargePayment',
+    'reserveStock',
+    'saveOrder',
+    'createShipment',
+    'sendConfirmation',
+    'validateOrder',
+    'calculateTotal',
+    'makeReceipt',
+    'placeOrder',
+    'Err',
+  ])
+
+  // Tokenize so that strings, comments and identifiers are coloured without
+  // one pass matching inside another's markup.
+  function highlight(s: string) {
+    return s.replace(
+      /(\/\/.*$)|("[^"]*"|`[^`]*`)|([A-Za-z_]\w*)|([^A-Za-z_"`/]+|\/)/g,
+      (_m, comment, str, word, other) => {
+        if (comment) return `<i class="comment">${esc(comment)}</i>`
+        if (str) return `<span class="str">${esc(str)}</span>`
+        if (word)
+          return KW.has(word)
+            ? `<span class="kw">${word}</span>`
+            : FN.has(word)
+              ? `<span class="fn">${word}</span>`
+              : word
+        return esc(other)
+      }
+    )
+  }
+
+  function paint(el: HTMLElement, lines: Line[]) {
+    el.innerHTML = lines
+      .map(([s, id], i) => {
+        const fx = id ? ` data-fx="${id}" style="--c:${byId[id].c}"` : ''
+        return `<div class="line${id ? ' added' : ''}"${fx}><span class="ln">${i + 1}</span><span class="src">${highlight(s)}</span></div>`
+      })
+      .join('')
+  }
+
+  /** How many characters fit across a code panel. */
+  function columns(el: HTMLElement) {
+    const probe = document.createElement('span')
+    probe.textContent = '0'.repeat(40)
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre'
+    el.appendChild(probe)
+    const ch = probe.getBoundingClientRect().width / 40
+    probe.remove()
+    return Math.max(24, Math.floor((el.clientWidth - 34 - 12 - 4) / ch))
+  }
+
+  // ---------------------------------------------------------------------
+  // Programs
+
+  function woven(width: number): Line[] {
+    const a: Line[] = []
+    const add = (s: string, id?: string) => a.push(...fit(s, id, width))
+    // Each scope-opening effect nests everything after it one level deeper.
+    let ind = '  '
+    const closers: Line[] = []
+    const open = (s: string, id: string) => {
+      add(ind + s, id)
+      closers.unshift([ind + '});', id])
+      ind += '  '
+    }
+    if (has('failure')) add('try {', 'failure')
+    if (has('tracing'))
+      open('return await withSpan("placeOrder", async (trace) => {', 'tracing')
+    if (has('logging'))
+      add(
+        ind + 'log.info("placeOrder.started", { orderId: order.id });',
+        'logging'
+      )
+    if (has('auth')) {
+      add(ind + 'if (!await authorize(customer, "order:fulfill")) {', 'auth')
+      add(ind + '  return Err("forbidden");', 'auth')
+      add(ind + '}', 'auth')
+    }
+    if (has('idempotency'))
+      open(
+        'return await idempotent(`order:${order.id}`, async () => {',
+        'idempotency'
+      )
+    if (has('connection'))
+      open('return await withConnection(db, async (conn) => {', 'connection')
+    if (has('transaction'))
+      open('return await withTransaction(conn, async (tx) => {', 'transaction')
+    const p = ind
+    add(p + '// Core business steps — same order and intent')
+    add(p + 'const validOrder = validateOrder(order);')
+    add(p + 'const total = calculateTotal(validOrder);')
+
+    // Remote calls get wrapped in one layer per effect. When the wrapped
+    // call fits it stays on one line; otherwise each layer gets its own
+    // line, in its own colour.
+    const operation = (name: string, call: string) => {
+      if (has('logging')) add(p + `log.debug("${name}.started");`, 'logging')
+      const layers: { id: string; open: string }[] = []
+      if (has('metrics'))
+        layers.push({ id: 'metrics', open: `measure("${name}", () =>` })
+      if (has('timeout'))
+        layers.push({ id: 'timeout', open: 'withTimeout("2s", () =>' })
+      if (has('retry'))
+        layers.push({
+          id: 'retry',
+          open: 'retryTransient({ attempts: 3, backoff: "exponential" }, () =>',
+        })
+      const lhs = `const ${name}Result = await `
+      const close = ')'.repeat(layers.length) + ';'
+      const oneLine =
+        p + lhs + layers.map((l) => l.open + ' ').join('') + call + close
+      if (!layers.length || oneLine.length <= width) {
+        add(oneLine, layers[0]?.id)
+      } else {
+        let ind = p
+        layers.forEach((l, k) => {
+          let prefix = k === 0 ? lhs : ''
+          if (k === 0 && (ind + lhs + l.open).length > width) {
+            a.push([ind + `const ${name}Result =`, l.id])
+            ind += '  '
+            prefix = 'await '
+          }
+          if (l.id === 'retry' && (ind + prefix + l.open).length > width) {
+            a.push([ind + prefix + 'retryTransient(', 'retry'])
+            a.push([
+              ind + '  { attempts: 3, backoff: "exponential" },',
+              'retry',
+            ])
+            a.push([ind + '  () =>', 'retry'])
+          } else a.push([ind + prefix + l.open, l.id])
+          ind += '  '
+        })
+        add(ind + call + close)
+      }
+      if (has('logging')) add(p + `log.debug("${name}.completed");`, 'logging')
+    }
+    operation('payment', 'chargePayment(customer, total, order.id)')
+    operation('inventory', 'reserveStock(validOrder.items)')
+
+    add(p + 'const shipment = createShipment(validOrder);')
+    if (has('transaction'))
+      add(
+        p + 'await tx.saveOrder(validOrder, paymentResult, shipment);',
+        'transaction'
+      )
+    else add(p + 'saveOrder(validOrder, paymentResult, shipment);')
+    add(p + 'await sendConfirmation(customer, shipment);')
+    if (has('logging'))
+      add(
+        p + 'log.info("placeOrder.finished", { orderId: order.id });',
+        'logging'
+      )
+    add(p + 'return makeReceipt(validOrder, paymentResult, shipment);')
+    closers.forEach(([text, id]) => add(text, id))
+    if (has('failure')) {
+      add('} catch (error) {', 'failure')
+      if (has('logging'))
+        add('  log.error("placeOrder.failed", { error });', 'logging')
+      add('  return Err(error);', 'failure')
+      add('}', 'failure')
+    }
+    return a
+  }
+
+  const ruleText: Record<string, string> = {
+    failure: '  on operation(*) when it fails => return Err(error);',
+    retry:
+      '  around [chargePayment, reserveStock] => retryTransient(3, exponentialBackoff, proceed);',
+    timeout: '  around remoteCall(*) => withTimeout(2s, proceed);',
+    transaction: '  around databaseWrites(*) => withTransaction(proceed);',
+    connection: '  around databaseOperation(*) => withConnection(db, proceed);',
+    logging: '  before/after operation(*) => logStructured(event, context);',
+    metrics:
+      '  around measuredOperation(*) => recordDurationAndOutcome(proceed);',
+    tracing:
+      '  around placeOrder => withSpan("placeOrder", propagateContext, proceed);',
+    auth: '  before placeOrder => requirePermission(customer, "order:fulfill");',
+    idempotency: '  around placeOrder => deduplicateBy(order.id, proceed);',
+  }
+
+  function rules(width: number): Line[] {
+    const a: Line[] = []
+    const add = (s: string, id?: string) => a.push(...fit(s, id, width))
+    add('// Aspect rules select join points and contribute behavior.')
+    add('aspect CheckoutPolicy {')
+    E.filter((e) => has(e.id)).forEach((e) => add(ruleText[e.id], e.id))
+    add('}')
+    add('// The core program remains separate and unchanged.')
+    add('placeOrder(order, customer);')
+    return a
+  }
+
+  const business = (width: number): Line[] =>
+    core.flatMap((l) => fit(l, undefined, width))
+
+  // ---------------------------------------------------------------------
+  // Rendering
+
+  const corePanel = $('core-panel')
+  const coreShown = () => getComputedStyle(corePanel).display !== 'none'
+
+  function render() {
+    const active = E.filter((e) => has(e.id))
+    if (view === 'core' && coreShown()) view = 'expanded'
+    const wovenEl = $('woven')
+    const width = columns(wovenEl)
+    const lines =
+      view === 'expanded'
+        ? woven(width)
+        : view === 'rules'
+          ? rules(width)
+          : business(width)
+    paint(wovenEl, lines)
+    if (coreShown()) paint($('core'), business(columns($('core'))))
+
+    // Count lines at unlimited width so the number doesn't depend on how
+    // the code happens to be wrapped.
+    const added = (view === 'rules' ? rules(Infinity) : woven(Infinity)).filter(
+      (l) => l[1]
+    ).length
+    $('count').textContent = active.length + ' enabled'
+    $('title').textContent =
+      view === 'expanded'
+        ? 'Woven implementation'
+        : view === 'rules'
+          ? 'Aspect rules'
+          : 'Business program'
+    $('delta').textContent =
+      active.length && view !== 'core'
+        ? view === 'expanded'
+          ? `+${added} line${added === 1 ? '' : 's'}`
+          : `${added} rule${added === 1 ? '' : 's'}`
+        : ''
+    document
+      .querySelectorAll<HTMLElement>('.tab')
+      .forEach((b) => b.classList.toggle('active', b.dataset.view === view))
+    focus(focused)
+    simulate()
+  }
+
+  /** Link an effect in the sidebar with its lines in the code. */
+  function focus(id: string | null) {
+    focused = id
+    const app = $('app')
+    app.classList.toggle('focusing', !!id && has(id))
+    app.querySelectorAll('.hot').forEach((el) => el.classList.remove('hot'))
+    if (id)
+      app
+        .querySelectorAll(`[data-fx="${id}"]`)
+        .forEach((el) => el.classList.add('hot'))
+    const e = id ? byId[id] : null
+    $('info').innerHTML = e
+      ? `<b style="--c:${e.c}">${e.name}</b>${e.desc}`
+      : 'Hover over a concern or a highlighted line to see what it adds. Concerns are woven in one fixed order, and in general the order matters.'
+  }
+
+  function controls() {
+    const groups = [...new Set(E.map((e) => e.group))]
+    $('effects').innerHTML = groups
+      .map(
+        (g) =>
+          `<div class="group">${g}</div>` +
+          E.filter((e) => e.group === g)
+            .map(
+              (e) =>
+                `<label class="effect" data-fx="${e.id}" style="--c:${e.c}"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}>${e.name}</label>`
+            )
+            .join('')
+      )
+      .join('')
+    E.forEach((e) => {
+      const box = $('fx-' + e.id) as HTMLInputElement
+      box.onchange = () => {
+        box.checked ? on.add(e.id) : on.delete(e.id)
+        render()
+      }
+    })
+  }
+
+  function simulate() {
+    const s = ($('scenario') as HTMLSelectElement).value
+    const t: string[] = []
+    const put = (x: string, c = '') => t.push(`<span class="${c}">${x}</span>`)
+    if (has('tracing')) put('start span')
+    if (has('logging')) put('log · request started')
+    if (has('auth')) put('authorize')
+    if (s === 'declined') {
+      put('payment · card declined', 'bad')
+      if (has('retry')) put('no retry · permanent failure', 'bad')
+    } else if (s === 'transient') {
+      if (has('retry')) {
+        put('payment · attempt 1', 'bad')
+        put('backoff 200ms')
+        put('payment · attempt 2', 'good')
+        put('reserve stock · success', 'good')
+      } else put('payment · provider unavailable', 'bad')
+    } else if (s === 'db') {
+      put('payment · success', 'good')
+      if (has('connection')) put('acquire DB connection')
+      if (has('transaction')) put('begin transaction')
+      put('reserve stock · connection lost', 'bad')
+      if (has('transaction')) put('rollback', 'bad')
+      if (has('connection')) put('release connection')
+    } else {
+      put('payment · success', 'good')
+      put('reserve stock · success', 'good')
+      put('save order · success', 'good')
+    }
+    if (has('metrics')) put('record latency + outcome')
+    if (has('logging')) put('log · request finished')
+    if (has('tracing')) put('end span')
+    if (s === 'ok' || (s === 'transient' && has('retry')))
+      put('return receipt', 'good')
+    else put(has('failure') ? 'return Err(error)' : 'failure escapes', 'bad')
+    $('trace').innerHTML = t.join('')
+  }
+
+  // ---------------------------------------------------------------------
+  // Wiring
+
+  const layout = $('layout')
+  const placeLayout = () =>
+    layout.style.setProperty(
+      '--top',
+      layout.getBoundingClientRect().top + window.scrollY + 'px'
+    )
+
+  controls()
+  placeLayout()
+  render()
+
+  // Re-wrap the code whenever a code panel changes width.
+  let lastWidths = ''
+  let pending = 0
+  new ResizeObserver(() => {
+    cancelAnimationFrame(pending)
+    pending = requestAnimationFrame(() => {
+      placeLayout()
+      const widths = `${$('woven').clientWidth}/${$('core').clientWidth}/${coreShown()}`
+      if (widths !== lastWidths) {
+        lastWidths = widths
+        render()
+      }
+    })
+  }).observe(layout)
+
+  $('all').onclick = () => {
+    on = new Set(E.map((e) => e.id))
+    controls()
+    render()
+  }
+  $('clear').onclick = () => {
+    on.clear()
+    controls()
+    render()
+  }
+  document.querySelectorAll<HTMLElement>('.tab').forEach(
+    (b) =>
+      (b.onclick = () => {
+        view = b.dataset.view!
+        render()
+      })
+  )
+  $('scenario').onchange = simulate
+
+  // Hovering (or tapping) an effect or one of its lines highlights both.
+  const fxAt = (t: EventTarget | null) =>
+    (t as HTMLElement | null)?.closest<HTMLElement>('[data-fx]')?.dataset.fx ??
+    null
+  for (const id of ['effects', 'woven', 'core']) {
+    const el = $(id)
+    el.addEventListener('mouseover', (ev) => {
+      const fx = fxAt(ev.target)
+      if (fx !== focused) focus(fx)
+    })
+    el.addEventListener('mouseleave', () => focus(null))
+  }
+  $('woven').addEventListener('click', (ev) => focus(fxAt(ev.target)))
+</script>
