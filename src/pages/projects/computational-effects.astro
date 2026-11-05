@@ -8,463 +8,473 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   wide
 >
   <div class="app">
-    <header class="top">
+    <header class="intro">
       <h1>Computational effects, woven in</h1>
       <p>
-        Toggle cross-cutting effects and watch them wrap the same order
-        function. Highlighted lines come from an effect; the rest is the
-        business program, unchanged.
+        An ordinary order-fulfillment function, and the cross-cutting behavior
+        that tends to grow around it. Turn effects on and watch the
+        implementation change while the business steps stay the same.
       </p>
     </header>
 
-    <div class="grid">
-      <aside class="panel controls">
-        <div class="panel-head">
+    <div class="layout">
+      <aside class="panel sidebar">
+        <div class="head">
           <h2>Effects</h2>
-          <span class="actions">
-            <button type="button" class="link" id="all">all</button>
-            <span aria-hidden="true">/</span>
-            <button type="button" class="link" id="clear">none</button>
-          </span>
+          <span class="count" id="count">0 enabled</span>
         </div>
         <div id="effects"></div>
-      </aside>
-
-      <section class="window main">
-        <div class="bar">
-          <span class="views" role="tablist">
-            <button type="button" class="view" data-view="expanded"
-              >placeOrder.js</button
-            >
-            <button type="button" class="view" data-view="rules"
-              >checkout-policy.aspect</button
-            >
-          </span>
-          <span class="delta" id="delta"></span>
+        <div class="actions">
+          <button class="btn" id="all">Enable all</button>
+          <button class="btn" id="clear">Clear all</button>
         </div>
-        <pre class="listing" id="woven" aria-live="polite"></pre>
-      </section>
-
-      <aside class="side">
-        <section class="window">
-          <div class="bar">
-            <span>business program</span>
-            <span class="meta">unchanged</span>
-          </div>
-          <pre class="listing small" id="core"></pre>
-        </section>
-
-        <section class="panel">
-          <div class="panel-head"><h2>Run a request</h2></div>
-          <div
-            class="scenarios"
-            id="scenarios"
-            role="radiogroup"
-            aria-label="Scenario"
-          >
-            <label class="chip"
-              ><input type="radio" name="scenario" value="transient" checked /> Provider
-              blips</label
-            >
-            <label class="chip"
-              ><input type="radio" name="scenario" value="declined" /> Card declined</label
-            >
-            <label class="chip"
-              ><input type="radio" name="scenario" value="db" /> DB drops</label
-            >
-            <label class="chip"
-              ><input type="radio" name="scenario" value="ok" /> All good</label
-            >
-          </div>
-          <ol class="trace" id="trace"></ol>
-        </section>
+        <p class="note">
+          Highlighted code is introduced by a selected effect. The layers are
+          applied in one fixed order; effects don't commute in general.
+        </p>
       </aside>
-    </div>
 
-    <p class="footnote">
-      The layers are illustrative handlers applied in one fixed order; effects
-      don't commute in general. Only transient failures are retried, idempotency
-      keeps a retried payment from charging twice, and a database rollback can't
-      undo a payment that already went to an external provider.
-    </p>
+      <section class="content">
+        <div class="panel card">
+          <div class="head">
+            <div>
+              <h2>1. Business program</h2>
+              <div class="sub">What the business wants done.</div>
+            </div>
+          </div>
+          <div class="code" id="core"></div>
+        </div>
+
+        <div class="panel card">
+          <div class="head">
+            <div>
+              <h2>2. Woven implementation</h2>
+              <div class="sub" id="caption"></div>
+            </div>
+            <div class="tabs">
+              <button class="tab active" data-view="expanded">Expanded</button>
+              <button class="tab" data-view="rules">Aspect rules</button>
+            </div>
+          </div>
+          <div class="code" id="woven" aria-live="polite"></div>
+          <div class="note" id="explain"></div>
+        </div>
+
+        <div class="panel card">
+          <div class="head">
+            <div>
+              <h2>3. What the effects add</h2>
+            </div>
+          </div>
+          <div class="details" id="details"></div>
+        </div>
+
+        <div class="panel card">
+          <div class="head">
+            <div>
+              <h2>4. Explore a failure</h2>
+              <div class="sub">
+                The steps one request goes through with the current effects.
+              </div>
+            </div>
+          </div>
+          <div class="simrow">
+            <label for="scenario">Scenario</label>
+            <select id="scenario">
+              <option value="transient"
+                >Temporary payment-provider outage</option
+              >
+              <option value="declined">Card declined (permanent)</option>
+              <option value="db">Database connection drops</option>
+              <option value="ok">Everything succeeds</option>
+            </select>
+          </div>
+          <div class="trace" id="trace"></div>
+          <p class="note">
+            Retry is limited to transient failures; idempotency prevents a
+            retried payment request from charging twice. A database rollback
+            cannot undo an external payment.
+          </p>
+        </div>
+      </section>
+    </div>
   </div>
 </BaseLayout>
 
 <style>
+  /* Light-mode palette. Effect hues (--c) are set per effect in the script
+     and are tuned for dark backgrounds, so in light mode text drawn in an
+     effect's hue is darkened via --ink. */
   .app {
-    /* One hue per effect group, borrowed from Solarized so they read on both
-       the cream light-mode code background and the dark one. */
-    --fx-control: #dc322f;
-    --fx-state: #6c71c4;
-    --fx-observe: #268bd2;
-    --fx-security: #2aa198;
-    --fx-good: #859900;
-    --fx-bad: #dc322f;
-    --rule: color-mix(in srgb, var(--color-text) 15%, transparent);
-    --sans: 'Varela Round', sans-serif;
+    --line: color-mix(in srgb, var(--color-text) 16%, transparent);
+    --panel: color-mix(in srgb, var(--color-text) 3%, var(--color-bg));
+    --inset: color-mix(in srgb, var(--color-text) 6%, var(--color-bg));
+    --muted: var(--color-text-secondary);
+    --code-bg: #f7f7f9;
+    --code-text: #3b4252;
+    --ln: #a0a8b8;
+    --syn-comment: #7a8599;
+    --syn-kw: #7c4dcc;
+    --syn-fn: #2c66c4;
+    --syn-str: #2f7d3b;
+    --good: #2f7d5c;
+    --bad: #b93b4a;
+    --ink-mix: 58%;
     --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-    --tall: calc(100vh - 2rem);
-    font-family: var(--sans);
-    font-size: 0.8rem;
-    line-height: 1.45;
+    font-family: 'Varela Round', sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.5;
   }
 
-  .top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 1.5rem;
-    margin-bottom: 1rem;
+  :global([data-theme='dark']) .app {
+    --code-bg: #12121f;
+    --code-text: #d7deea;
+    --ln: #526580;
+    --syn-comment: #7489a8;
+    --syn-kw: #c5a5ff;
+    --syn-fn: #8bb8ff;
+    --syn-str: #a6d6a9;
+    --good: #a4e6c9;
+    --bad: #ffaaaa;
+    --ink-mix: 100%;
   }
 
-  .top h1 {
-    font-size: 1.5rem;
-    margin: 0;
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .app {
+      --code-bg: #12121f;
+      --code-text: #d7deea;
+      --ln: #526580;
+      --syn-comment: #7489a8;
+      --syn-kw: #c5a5ff;
+      --syn-fn: #8bb8ff;
+      --syn-str: #a6d6a9;
+      --good: #a4e6c9;
+      --bad: #ffaaaa;
+      --ink-mix: 100%;
+    }
   }
 
-  .top p {
-    margin: 0;
-    flex: 1 1 24rem;
-    color: var(--color-text-secondary);
+  .app :global([style*='--c']) {
+    --ink: color-mix(in oklab, var(--c) var(--ink-mix), #000);
+  }
+
+  .intro h1 {
+    margin: 0 0 0.4rem;
+  }
+
+  .intro p {
+    color: var(--muted);
     font-family: 'Lora', serif;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
+    max-width: 50rem;
+    margin-bottom: 1.2rem;
   }
 
-  .grid {
+  .layout {
     display: grid;
-    grid-template-columns: 15rem minmax(0, 1fr) 22rem;
-    gap: 0.9rem;
-    align-items: start;
-  }
-
-  .controls,
-  .side {
-    position: sticky;
-    top: 1rem;
-    max-height: var(--tall);
-    overflow: auto;
-  }
-
-  .side {
-    display: grid;
-    gap: 0.9rem;
+    grid-template-columns: 17rem minmax(0, 1fr);
+    gap: 1rem;
   }
 
   .panel {
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    padding: 0.7rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
   }
 
-  .panel-head {
+  .sidebar {
+    padding: 1rem;
+    align-self: start;
+    position: sticky;
+    top: 1rem;
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+    min-width: 0;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .head {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 0.5rem;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 
   .app h2 {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin: 0;
-    letter-spacing: 0.03em;
   }
 
-  .actions {
-    color: var(--color-text-secondary);
+  .sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
   }
 
-  .app button {
-    font: inherit;
-    color: inherit;
-    background: none;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
+  .count {
+    font-size: 0.65rem;
+    color: var(--muted);
   }
 
-  .app .link {
-    color: var(--color-link);
-  }
-
-  .app .link:hover {
-    text-decoration: underline;
-  }
-
-  /* --- effect list --- */
-  #effects :global(fieldset) {
-    border: 0;
-    margin: 0 0 0.6rem;
-    padding: 0;
-  }
-
-  #effects :global(legend) {
+  #effects :global(.group) {
     font-size: 0.68rem;
-    letter-spacing: 0.05em;
-    color: var(--c);
-    padding: 0;
-    margin-bottom: 0.15rem;
+    color: var(--muted);
+    margin: 1rem 0 0.35rem;
   }
 
-  #effects :global(.row) {
+  #effects :global(.effect) {
     display: grid;
-    grid-template-columns: 0.9rem 1fr;
-    gap: 0.5rem;
-    padding: 0.3rem 0.4rem;
-    margin: 0 -0.4rem;
-    border-radius: 4px;
-    border-left: 2px solid transparent;
-    cursor: pointer;
+    grid-template-columns: 18px 1fr;
+    gap: 0.55rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
   }
 
-  #effects :global(.row:hover) {
-    background: color-mix(in srgb, var(--c) 8%, transparent);
-  }
-
-  #effects :global(.row:has(input:checked)) {
-    background: color-mix(in srgb, var(--c) 12%, transparent);
-    border-left-color: var(--c);
+  #effects :global(.effect:hover) {
+    background: var(--inset);
+    border-color: var(--line);
   }
 
   #effects :global(input) {
-    accent-color: var(--c);
-    margin: 0.15rem 0 0;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--muted);
+    border-radius: 4px;
+    margin: 2px 0 0;
+    cursor: pointer;
+    position: relative;
+  }
+
+  #effects :global(input:checked) {
+    background: var(--c);
+    border-color: var(--c);
+  }
+
+  #effects :global(input:checked::after) {
+    content: '✓';
+    position: absolute;
+    inset: -2px 0;
+    text-align: center;
+    color: #08111f;
+    font-weight: 900;
+    font-size: 12px;
+  }
+
+  #effects :global(input:focus-visible) {
+    outline: 2px solid var(--c);
+    outline-offset: 2px;
+  }
+
+  #effects :global(label) {
+    cursor: pointer;
   }
 
   #effects :global(small) {
     display: block;
-    color: var(--color-text-secondary);
+    color: var(--muted);
+    font-family: 'Lora', serif;
+    font-size: 0.68rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+  }
+
+  .app button,
+  .app select {
+    font: inherit;
+    font-size: 0.72rem;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--inset);
+    border-radius: 7px;
+    padding: 0.3rem 0.65rem;
+  }
+
+  .btn:hover {
+    border-color: var(--muted);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .tab {
+    border: 0;
+    background: transparent;
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    color: var(--muted) !important;
+  }
+
+  .tab.active {
+    background: var(--inset);
+    color: var(--color-text) !important;
+  }
+
+  .code {
+    overflow: auto;
+    background: var(--code-bg);
+    color: var(--code-text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.7rem 0;
+    font: 0.68rem/1.8 var(--mono);
+  }
+
+  .code :global(.line) {
+    display: grid;
+    grid-template-columns: 38px minmax(max-content, 1fr);
+    padding-right: 15px;
+    border-left: 2px solid transparent;
+  }
+
+  .code :global(.ln) {
+    color: var(--ln);
+    text-align: right;
+    padding-right: 12px;
+    user-select: none;
+  }
+
+  .code :global(.src) {
+    white-space: pre;
+  }
+
+  .code :global(.added) {
+    background: color-mix(in srgb, var(--c) 14%, transparent);
+    border-left-color: var(--c);
+  }
+
+  .code :global(.added .src) {
+    color: var(--ink);
+  }
+
+  .code :global(.comment) {
+    color: var(--syn-comment);
+    font-style: italic;
+  }
+
+  .code :global(.kw) {
+    color: var(--syn-kw);
+  }
+
+  .code :global(.fn) {
+    color: var(--syn-fn);
+  }
+
+  .code :global(.str) {
+    color: var(--syn-str);
+  }
+
+  .note {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin: 0.6rem 0 0;
+  }
+
+  .details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .details :global(.detail) {
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.6rem;
+  }
+
+  .details :global(b) {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  .details :global(p) {
     font-family: 'Lora', serif;
     font-size: 0.7rem;
-    line-height: 1.35;
+    color: var(--muted);
+    margin: 0.2rem 0 0;
   }
 
-  /* --- code windows --- */
-  .window {
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--color-code-bg);
-    color: var(--color-code-text);
-  }
-
-  .bar {
+  .simrow {
     display: flex;
-    justify-content: space-between;
+    gap: 0.6rem;
     align-items: center;
-    gap: 1rem;
-    padding: 0.35rem 0.8rem;
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    border-bottom: 1px solid var(--rule);
-    background: color-mix(in srgb, var(--color-text) 4%, var(--color-code-bg));
-  }
-
-  .meta {
-    opacity: 0.55;
-  }
-
-  .delta {
-    color: var(--fx-good);
-    font-weight: 700;
-  }
-
-  .views {
-    display: flex;
-    gap: 1rem;
-  }
-
-  .app .view {
-    opacity: 0.55;
-    border-bottom: 2px solid transparent;
-  }
-
-  .app .view:hover {
-    opacity: 0.85;
-  }
-
-  .app .view.active {
-    opacity: 1;
-    border-bottom-color: var(--color-link);
-  }
-
-  .listing {
-    margin: 0;
-    border-radius: 0;
-    background: transparent;
-    color: inherit;
-    padding: 0.6rem 0;
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    line-height: 1.6;
-  }
-
-  .main .listing {
-    max-height: calc(var(--tall) - 2rem);
-    min-height: 24rem;
-  }
-
-  .listing.small {
-    font-size: 0.62rem;
-  }
-
-  .listing :global(.line) {
-    display: block;
-    width: max-content;
-    min-width: 100%;
-    padding: 0 1rem 0 0;
-    border-left: 3px solid transparent;
-  }
-
-  .listing :global(.ln) {
-    display: inline-block;
-    width: 2.6em;
-    padding-right: 1em;
-    text-align: right;
-    opacity: 0.4;
-    user-select: none;
-  }
-
-  .listing :global(.added) {
-    border-left-color: var(--c);
-    background: color-mix(in srgb, var(--c) 12%, transparent);
-  }
-
-  .listing :global(.comment) {
-    font-style: italic;
-    opacity: 0.65;
-  }
-
-  .listing :global(.kw) {
-    font-weight: 700;
-  }
-
-  /* --- scenarios and trace --- */
-  .scenarios {
-    display: flex;
     flex-wrap: wrap;
-    gap: 0.3rem;
   }
 
-  .chip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.1rem 0.6rem;
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    font-size: 0.72rem;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .chip input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .chip:hover,
-  .chip:has(input:checked) {
-    border-color: var(--color-link);
-  }
-
-  .chip:has(input:checked) {
-    background: color-mix(in srgb, var(--color-link) 14%, transparent);
-  }
-
-  .chip:has(input:focus-visible) {
-    outline: 2px solid var(--color-link);
-    outline-offset: 2px;
+  .simrow select {
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.3rem 0.4rem;
   }
 
   .trace {
-    list-style: none;
-    margin: 0.8rem 0 0 0.35rem;
-    padding: 0;
-    font-family: 'Lora', serif;
-    font-size: 0.76rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
   }
 
-  .trace :global(li) {
-    position: relative;
-    margin: 0;
-    padding: 0 0 0.3rem 1.1rem;
-    border-left: 1px solid
-      color-mix(in srgb, var(--color-text-secondary) 50%, transparent);
-  }
-
-  .trace :global(li:last-child) {
-    border-left-color: transparent;
-  }
-
-  .trace :global(li::before) {
-    content: '';
-    position: absolute;
-    left: -0.27rem;
-    top: 0.4em;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--color-bg);
-    border: 1.5px solid var(--color-text-secondary);
-  }
-
-  .trace :global(.good) {
-    color: var(--fx-good);
+  .trace :global(span) {
+    font: 0.68rem var(--mono);
+    padding: 0.35rem 0.5rem;
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 6px;
   }
 
   .trace :global(.bad) {
-    color: var(--fx-bad);
+    color: var(--bad);
+    border-color: color-mix(in srgb, var(--bad) 55%, transparent);
   }
 
-  .trace :global(.good::before) {
-    border-color: var(--fx-good);
-    background: var(--fx-good);
+  .trace :global(.good) {
+    color: var(--good);
+    border-color: color-mix(in srgb, var(--good) 55%, transparent);
   }
 
-  .trace :global(.bad::before) {
-    border-color: var(--fx-bad);
-    background: var(--fx-bad);
-  }
-
-  .footnote {
-    margin: 1rem 0 0;
-    font-family: 'Lora', serif;
-    font-style: italic;
-    font-size: 0.72rem;
-    color: var(--color-text-secondary);
-  }
-
-  /* Medium screens: the business program and trace move under the code. */
-  @media (max-width: 1150px) {
-    .grid {
-      grid-template-columns: 15rem minmax(0, 1fr);
-    }
-
-    .side {
-      grid-column: 1 / -1;
-      position: static;
-      max-height: none;
-      grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-      align-items: start;
-    }
-  }
-
-  /* Phones: one column, nothing sticky. */
-  @media (max-width: 720px) {
-    .grid {
+  @media (max-width: 850px) {
+    .layout {
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .controls {
+    .sidebar {
       position: static;
-      max-height: none;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .details {
+      grid-template-columns: 1fr;
     }
 
-    .main .listing {
-      max-height: 70vh;
-      min-height: 0;
+    .head {
+      align-items: flex-start;
+      flex-direction: column;
     }
   }
 </style>
@@ -474,90 +484,85 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     id: string
     name: string
     group: string
-    hue: string
+    c: string
     desc: string
   }
 
-  const groups: Record<string, { label: string; hue: string }> = {
-    control: { label: 'Control & reliability', hue: 'var(--fx-control)' },
-    state: { label: 'State & resources', hue: 'var(--fx-state)' },
-    observe: { label: 'Observation', hue: 'var(--fx-observe)' },
-    security: { label: 'Security & consistency', hue: 'var(--fx-security)' },
-  }
-
-  const E: Effect[] = (
-    [
-      [
-        'failure',
-        'Failure handling',
-        'control',
-        'Turns failures into an explicit Result. A failed step short-circuits the rest and returns an error.',
-      ],
-      [
-        'retry',
-        'Retry with backoff',
-        'control',
-        'Retries transient remote failures a bounded number of times with exponential backoff. Permanent failures are not retried.',
-      ],
-      [
-        'timeout',
-        'Timeouts',
-        'control',
-        'Puts a deadline on remote calls. A timeout becomes a failure for the other layers to handle.',
-      ],
-      [
-        'transaction',
-        'Database transaction',
-        'state',
-        'Groups database writes into commit-or-rollback. It cannot roll back a payment provider outside the database.',
-      ],
-      [
-        'connection',
-        'Connection management',
-        'state',
-        'Acquires a database connection for the scope, reuses it, and releases it even when the body fails.',
-      ],
-      [
-        'logging',
-        'Structured logging',
-        'observe',
-        'Adds structured start, finish and failure events around operations without changing their results.',
-      ],
-      [
-        'metrics',
-        'Metrics',
-        'observe',
-        'Measures latency and outcome counts for remote and database operations.',
-      ],
-      [
-        'tracing',
-        'Distributed tracing',
-        'observe',
-        'Opens a request span and propagates trace context to downstream calls.',
-      ],
-      [
-        'auth',
-        'Authorization',
-        'security',
-        'Checks permission before any side effects. A denial exits before charging or reserving stock.',
-      ],
-      [
-        'idempotency',
-        'Idempotency',
-        'security',
-        'Deduplicates repeated order submissions by order id, which also makes payment retries safe.',
-      ],
-    ] as const
-  ).map(([id, name, group, desc]) => ({
-    id,
-    name,
-    group,
-    desc,
-    hue: groups[group].hue,
-  }))
+  const E: Effect[] = [
+    {
+      id: 'failure',
+      name: 'Failure handling',
+      group: 'Control & reliability',
+      c: '#ff9292',
+      desc: 'Turns failures into an explicit Result path. A failed step short-circuits the happy path and returns an error.',
+    },
+    {
+      id: 'retry',
+      name: 'Retry + backoff',
+      group: 'Control & reliability',
+      c: '#83d6b0',
+      desc: 'Retries transient remote failures a bounded number of times, with exponential backoff. Permanent failures are not retried.',
+    },
+    {
+      id: 'timeout',
+      name: 'Timeouts',
+      group: 'Control & reliability',
+      c: '#f1c27b',
+      desc: 'Places a deadline around remote calls. A timeout becomes a failure that other layers can handle.',
+    },
+    {
+      id: 'transaction',
+      name: 'Database transaction',
+      group: 'State & resources',
+      c: '#c5a5ff',
+      desc: 'Groups database writes into commit-or-rollback behavior. It cannot roll back a payment provider outside the database.',
+    },
+    {
+      id: 'connection',
+      name: 'Connection management',
+      group: 'State & resources',
+      c: '#7dd8e8',
+      desc: 'Acquires a database connection for the scope, reuses it, and releases it even when the body fails.',
+    },
+    {
+      id: 'logging',
+      name: 'Structured logging',
+      group: 'Observation',
+      c: '#8bb8ff',
+      desc: 'Adds structured entry, completion, and failure events around operations without changing their intended result.',
+    },
+    {
+      id: 'metrics',
+      name: 'Metrics',
+      group: 'Observation',
+      c: '#f2a6d5',
+      desc: 'Measures latency and outcome counts for remote and database operations.',
+    },
+    {
+      id: 'tracing',
+      name: 'Distributed tracing',
+      group: 'Observation',
+      c: '#e6b879',
+      desc: 'Creates a request span and propagates trace context to downstream calls.',
+    },
+    {
+      id: 'auth',
+      name: 'Authorization',
+      group: 'Security & consistency',
+      c: '#e7a0a0',
+      desc: 'Checks permission before side effects begin. Denial exits before charging or reserving stock.',
+    },
+    {
+      id: 'idempotency',
+      name: 'Idempotency',
+      group: 'Security & consistency',
+      c: '#b8c5ff',
+      desc: 'Deduplicates repeated order submissions using a stable order key and protects payment retries.',
+    },
+  ]
 
   const core = [
-    '// Fulfill one validated customer order',
+    '// Business intent: fulfill one validated customer order',
     'function placeOrder(order, customer) {',
     '  const validOrder = validateOrder(order);',
     '  const total = calculateTotal(validOrder);',
@@ -580,17 +585,72 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   const esc = (s: string) =>
     s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
+  const KW = new Set([
+    'function',
+    'const',
+    'return',
+    'if',
+    'else',
+    'try',
+    'catch',
+    'finally',
+    'throw',
+    'await',
+    'async',
+    'new',
+    'aspect',
+    'around',
+    'before',
+    'after',
+    'on',
+    'when',
+  ])
+  const FN = new Set([
+    'log',
+    'authorize',
+    'withTransaction',
+    'withConnection',
+    'retryTransient',
+    'withTimeout',
+    'measure',
+    'withSpan',
+    'idempotent',
+    'chargePayment',
+    'reserveStock',
+    'saveOrder',
+    'createShipment',
+    'sendConfirmation',
+    'validateOrder',
+    'calculateTotal',
+    'makeReceipt',
+    'placeOrder',
+    'Err',
+  ])
+
+  // Tokenize so that strings, comments and identifiers are coloured without
+  // one pass matching inside another's markup.
+  function highlight(s: string) {
+    return s.replace(
+      /(\/\/.*$)|("[^"]*"|`[^`]*`)|([A-Za-z_]\w*)|([^A-Za-z_"`/]+|\/)/g,
+      (_m, comment, str, word, other) => {
+        if (comment) return `<i class="comment">${esc(comment)}</i>`
+        if (str) return `<span class="str">${esc(str)}</span>`
+        if (word)
+          return KW.has(word)
+            ? `<span class="kw">${word}</span>`
+            : FN.has(word)
+              ? `<span class="fn">${word}</span>`
+              : word
+        return esc(other)
+      }
+    )
+  }
+
   function paint(el: HTMLElement, lines: Line[]) {
     el.innerHTML = lines
       .map(([s, id], i) => {
-        const hue = id ? E.find((e) => e.id === id)!.hue : ''
-        const t = esc(s)
-          .replace(
-            /\b(function|const|return|if|else|try|catch|finally|throw|await|async|new|aspect|around)\b/g,
-            '<span class="kw">$1</span>'
-          )
-          .replace(/(\/\/.*)$/, '<span class="comment">$1</span>')
-        return `<span class="line${id ? ' added' : ''}" style="--c:${hue}"><span class="ln">${i + 1}</span>${t}</span>`
+        const c = id ? E.find((x) => x.id === id)!.c : ''
+        return `<div class="line ${id ? 'added' : ''}" style="--c:${c}"><span class="ln">${i + 1}</span><span class="src">${highlight(s)}</span></div>`
       })
       .join('')
   }
@@ -623,7 +683,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     const p = ' '.repeat(
       6 + (has('connection') ? 2 : 0) + (has('idempotency') ? 2 : 0)
     )
-    add(p + '// The business steps, in the same order')
+    add(p + '// Core business steps — same order and intent')
     add(p + 'const validOrder = validateOrder(order);')
     add(p + 'const total = calculateTotal(validOrder);')
     const operation = (name: string, call: string) => {
@@ -693,14 +753,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 
   function rules(): Line[] {
     const a: Line[] = [
-      ['// Each rule picks join points and contributes behavior there.'],
+      ['// Aspect rules select join points and contribute behavior.'],
       ['aspect CheckoutPolicy {'],
     ]
     E.filter((e) => has(e.id)).forEach((e) => a.push([ruleText[e.id], e.id]))
     a.push(
       ['}'],
-      [''],
-      ['// The business program stays separate and unchanged.'],
+      ['// The core program remains separate and unchanged.'],
       ['placeOrder(order, customer);']
     )
     return a
@@ -711,31 +770,40 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     const lines = view === 'expanded' ? woven() : rules()
     paint($('woven'), lines)
     const added = lines.filter((l) => l[1]).length
-    $('delta').textContent = active.length
-      ? view === 'expanded'
-        ? `+${added} line${added === 1 ? '' : 's'}`
-        : `${added} rule${added === 1 ? '' : 's'}`
-      : ''
+    $('count').textContent = active.length + ' enabled'
+    $('details').innerHTML =
+      active
+        .map(
+          (e) =>
+            `<div class="detail" style="--c:${e.c}"><b>${e.name}</b><p>${e.desc}</p></div>`
+        )
+        .join('') ||
+      '<div class="detail" style="grid-column:1/-1"><b>Nothing woven in yet</b><p>Enable an effect to see where it applies and what behavior it contributes.</p></div>'
+    $('caption').textContent =
+      view === 'expanded'
+        ? 'The selected behavior woven around the business computation.'
+        : 'Declarative aspect rules and their join points.'
+    $('explain').textContent = active.length
+      ? `${active.length} effect${active.length === 1 ? '' : 's'} active, adding ${added} highlighted line${added === 1 ? '' : 's'}. Plain lines are the business computation.`
+      : 'Enable effects to see behavior woven around selected operations.'
+    document
+      .querySelectorAll<HTMLElement>('.tab')
+      .forEach((b) => b.classList.toggle('active', b.dataset.view === view))
     simulate()
-    document.querySelectorAll<HTMLElement>('.view').forEach((b) => {
-      const isActive = b.dataset.view === view
-      b.classList.toggle('active', isActive)
-      b.setAttribute('aria-selected', String(isActive))
-    })
   }
 
   function controls() {
-    $('effects').innerHTML = Object.entries(groups)
+    const groups = [...new Set(E.map((e) => e.group))]
+    $('effects').innerHTML = groups
       .map(
-        ([g, { label, hue }]) =>
-          `<fieldset style="--c:${hue}"><legend>${label}</legend>` +
+        (g) =>
+          `<div class="group">${g}</div>` +
           E.filter((e) => e.group === g)
             .map(
               (e) =>
-                `<label class="row"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}><span>${e.name}<small>${e.desc.split('. ')[0].replace(/\.$/, '')}.</small></span></label>`
+                `<div class="effect" style="--c:${e.c}"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}><div><label for="fx-${e.id}">${e.name}</label><small>${e.desc.split('.')[0]}.</small></div></div>`
             )
-            .join('') +
-          '</fieldset>'
+            .join('')
       )
       .join('')
     E.forEach((e) => {
@@ -748,49 +816,40 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   }
 
   function simulate() {
-    const s = document.querySelector<HTMLInputElement>(
-      'input[name="scenario"]:checked'
-    )!.value
+    const s = ($('scenario') as HTMLSelectElement).value
     const t: string[] = []
-    const put = (x: string, c = '') =>
-      t.push(`<li class="${c}" style="--i:${t.length}">${x}</li>`)
-    if (has('tracing')) put('Open request span')
-    if (has('logging')) put('Log: request started')
-    if (has('auth')) put('Authorize customer')
+    const put = (x: string, c = '') => t.push(`<span class="${c}">${x}</span>`)
+    if (has('tracing')) put('start span')
+    if (has('logging')) put('log · request started')
+    if (has('auth')) put('authorize')
     if (s === 'declined') {
-      put('Payment: card declined', 'bad')
-      if (has('retry')) put('No retry, the failure is permanent', 'bad')
+      put('payment · card declined', 'bad')
+      if (has('retry')) put('no retry · permanent failure', 'bad')
     } else if (s === 'transient') {
       if (has('retry')) {
-        put('Payment attempt 1: provider unavailable', 'bad')
-        put('Back off 200ms')
-        put('Payment attempt 2: success', 'good')
-        put('Reserve stock: success', 'good')
-      } else put('Payment: provider unavailable', 'bad')
+        put('payment · attempt 1', 'bad')
+        put('backoff 200ms')
+        put('payment · attempt 2', 'good')
+        put('reserve stock · success', 'good')
+      } else put('payment · provider unavailable', 'bad')
     } else if (s === 'db') {
-      put('Payment: success', 'good')
-      if (has('connection')) put('Acquire database connection')
-      if (has('transaction')) put('Begin transaction')
-      put('Reserve stock: connection lost', 'bad')
-      if (has('transaction')) put('Roll back transaction', 'bad')
-      if (has('connection')) put('Release connection')
+      put('payment · success', 'good')
+      if (has('connection')) put('acquire DB connection')
+      if (has('transaction')) put('begin transaction')
+      put('reserve stock · connection lost', 'bad')
+      if (has('transaction')) put('rollback', 'bad')
+      if (has('connection')) put('release connection')
     } else {
-      put('Payment: success', 'good')
-      put('Reserve stock: success', 'good')
-      put('Save order: success', 'good')
+      put('payment · success', 'good')
+      put('reserve stock · success', 'good')
+      put('save order · success', 'good')
     }
-    if (has('metrics')) put('Record latency and outcome')
-    if (has('logging')) put('Log: request finished')
-    if (has('tracing')) put('Close span')
+    if (has('metrics')) put('record latency + outcome')
+    if (has('logging')) put('log · request finished')
+    if (has('tracing')) put('end span')
     if (s === 'ok' || (s === 'transient' && has('retry')))
-      put('Return receipt', 'good')
-    else
-      put(
-        has('failure')
-          ? 'Return Err(error)'
-          : 'Exception escapes to the caller',
-        'bad'
-      )
+      put('return receipt', 'good')
+    else put(has('failure') ? 'return Err(error)' : 'failure escapes', 'bad')
     $('trace').innerHTML = t.join('')
   }
 
@@ -810,12 +869,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     controls()
     render()
   }
-  document.querySelectorAll<HTMLElement>('.view').forEach(
+  document.querySelectorAll<HTMLElement>('.tab').forEach(
     (b) =>
       (b.onclick = () => {
         view = b.dataset.view!
         render()
       })
   )
-  $('scenarios').onchange = simulate
+  $('scenario').onchange = simulate
 </script>
