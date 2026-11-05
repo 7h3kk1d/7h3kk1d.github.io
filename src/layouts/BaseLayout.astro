@@ -27,6 +27,8 @@ interface Props {
   publishedDate?: string
   /** For pages that stand in for many URLs, like the 404. */
   noindex?: boolean
+  /** Widen the page for app-like pages that need the room. */
+  wide?: boolean
 }
 
 const {
@@ -35,6 +37,7 @@ const {
   ogType = 'website',
   publishedDate,
   noindex = false,
+  wide = false,
 } = Astro.props
 const pageTitle = title ? `${title} | ${siteTitle}` : siteTitle
 const pageDescription = description ?? siteDescription
@@ -118,7 +121,9 @@ const searchPosts = allPosts
     </script>
   </head>
   <body>
-    <div style="margin: 0 auto; max-width: 960px; padding: 1.25rem 1rem;">
+    <div
+      style={`margin: 0 auto; max-width: ${wide ? 1440 : 960}px; padding: 1.25rem 1rem;`}
+    >
       <header class="site-header">
         <a href="/" class="site-title">
           <h3>{siteTitle}</h3>
