@@ -7,17 +7,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   description="An interactive sketch: toggle cross-cutting effects like retries, transactions, logging and authorization, and watch them wrap an unchanged order-fulfillment function."
   wide
 >
-  <div class="app">
+  <div class="app" id="app">
     <header class="intro">
       <h1>Computational effects, woven in</h1>
       <p>
-        An ordinary order-fulfillment function, and the cross-cutting behavior
-        that tends to grow around it. Turn effects on and watch the
-        implementation change while the business steps stay the same.
+        Turn effects on and watch the implementation grow around the same
+        business steps.
       </p>
     </header>
 
-    <div class="layout">
+    <div class="layout" id="layout">
       <aside class="panel sidebar">
         <div class="head">
           <h2>Effects</h2>
@@ -28,74 +27,54 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
           <button class="btn" id="all">Enable all</button>
           <button class="btn" id="clear">Clear all</button>
         </div>
-        <p class="note">
-          Highlighted code is introduced by a selected effect. The layers are
-          applied in one fixed order; effects don't commute in general.
-        </p>
+        <div class="info" id="info"></div>
       </aside>
 
-      <section class="content">
-        <div class="panel card">
-          <div class="head">
-            <div>
-              <h2>1. Business program</h2>
-              <div class="sub">What the business wants done.</div>
+      <section class="codearea">
+        <div class="panels">
+          <div class="panel card core-panel" id="core-panel">
+            <div class="head">
+              <h2>Business program</h2>
+              <span class="count">unchanged</span>
             </div>
+            <div class="code" id="core"></div>
           </div>
-          <div class="code" id="core"></div>
-        </div>
 
-        <div class="panel card">
-          <div class="head">
-            <div>
-              <h2>2. Woven implementation</h2>
-              <div class="sub" id="caption"></div>
-            </div>
-            <div class="tabs">
-              <button class="tab active" data-view="expanded">Expanded</button>
-              <button class="tab" data-view="rules">Aspect rules</button>
-            </div>
-          </div>
-          <div class="code" id="woven" aria-live="polite"></div>
-          <div class="note" id="explain"></div>
-        </div>
-
-        <div class="panel card">
-          <div class="head">
-            <div>
-              <h2>3. What the effects add</h2>
-            </div>
-          </div>
-          <div class="details" id="details"></div>
-        </div>
-
-        <div class="panel card">
-          <div class="head">
-            <div>
-              <h2>4. Explore a failure</h2>
-              <div class="sub">
-                The steps one request goes through with the current effects.
+          <div class="panel card">
+            <div class="head">
+              <h2 id="title">Woven implementation</h2>
+              <span class="count delta" id="delta"></span>
+              <div class="tabs">
+                <button class="tab core-tab" data-view="core">Business</button>
+                <button class="tab active" data-view="expanded">Expanded</button
+                >
+                <button class="tab" data-view="rules">Aspect rules</button>
               </div>
             </div>
+            <div class="code" id="woven" aria-live="polite"></div>
           </div>
-          <div class="simrow">
-            <label for="scenario">Scenario</label>
-            <select id="scenario">
-              <option value="transient"
-                >Temporary payment-provider outage</option
-              >
-              <option value="declined">Card declined (permanent)</option>
-              <option value="db">Database connection drops</option>
-              <option value="ok">Everything succeeds</option>
-            </select>
-          </div>
-          <div class="trace" id="trace"></div>
-          <p class="note">
-            Retry is limited to transient failures; idempotency prevents a
-            retried payment request from charging twice. A database rollback
-            cannot undo an external payment.
-          </p>
         </div>
+      </section>
+
+      <section class="panel card trace-panel">
+        <div class="head">
+          <h2>Run a request</h2>
+          <select id="scenario" aria-label="Scenario">
+            <option value="transient"
+              >Payment provider outage (temporary)</option
+            >
+            <option value="declined">Card declined (permanent)</option>
+            <option value="db">Database connection drops</option>
+            <option value="ok">Everything succeeds</option>
+          </select>
+        </div>
+        <div class="trace" id="trace"></div>
+        <p class="note">
+          Effects are applied in one fixed order; they don't commute in general.
+          Only transient failures are retried, idempotency keeps a retried
+          payment from charging twice, and a database rollback can't undo an
+          external payment.
+        </p>
       </section>
     </div>
   </div>
@@ -121,9 +100,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     --bad: #b93b4a;
     --ink-mix: 58%;
     --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --gap: 0.7rem;
     font-family: 'Varela Round', sans-serif;
-    font-size: 0.78rem;
-    line-height: 1.5;
+    font-size: 0.74rem;
+    line-height: 1.45;
   }
 
   :global([data-theme='dark']) .app {
@@ -158,99 +138,232 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     --ink: color-mix(in oklab, var(--c) var(--ink-mix), #000);
   }
 
+  /* --- title row --- */
+  .intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 1rem;
+    margin-bottom: 0.8rem;
+  }
+
   .intro h1 {
-    margin: 0 0 0.4rem;
+    font-size: 1.35rem;
+    margin: 0;
   }
 
   .intro p {
+    margin: 0;
     color: var(--muted);
     font-family: 'Lora', serif;
-    font-size: 0.95rem;
-    max-width: 50rem;
-    margin-bottom: 1.2rem;
+    font-size: 0.85rem;
   }
 
+  /* --- layout ---
+     Default (narrow): one column, page scrolls.
+     850px+: effects beside code, trace under code.
+     Desktop with enough height: fills the screen, panels scroll inside.
+     1600px+: trace gets its own column. */
   .layout {
     display: grid;
-    grid-template-columns: 17rem minmax(0, 1fr);
-    gap: 1rem;
+    gap: var(--gap);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'fx' 'code' 'trace';
   }
 
+  .sidebar {
+    grid-area: fx;
+  }
+
+  .codearea {
+    grid-area: code;
+    container: code / inline-size;
+    min-width: 0;
+  }
+
+  .trace-panel {
+    grid-area: trace;
+  }
+
+  @media (min-width: 850px) {
+    .layout {
+      grid-template-columns: 13.5rem minmax(0, 1fr);
+      grid-template-areas: 'fx code' 'fx trace';
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0.8rem;
+    }
+  }
+
+  @media (min-width: 1024px) and (min-height: 640px) {
+    .layout {
+      /* --top is the layout's offset from the top of the page, set by the
+         script, so the layout fills exactly what's left of the screen. */
+      height: calc(100dvh - var(--top, 9rem) - 1.75rem);
+      grid-template-rows: minmax(0, 1fr) auto;
+      align-items: stretch;
+    }
+
+    .sidebar,
+    .trace-panel {
+      position: static;
+      overflow: auto;
+    }
+
+    .trace-panel {
+      max-height: 14rem;
+    }
+
+    .trace-panel .note {
+      display: none;
+    }
+
+    .codearea,
+    .panels,
+    .panels > .card {
+      min-height: 0;
+      height: 100%;
+    }
+
+    .panels > .card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panels .code {
+      flex: 1;
+      min-height: 0;
+    }
+  }
+
+  @media (min-width: 1600px) and (min-height: 640px) {
+    .layout {
+      grid-template-columns: 13.5rem minmax(0, 1fr) 20rem;
+      grid-template-rows: minmax(0, 1fr);
+      grid-template-areas: 'fx code trace';
+    }
+
+    .trace-panel {
+      max-height: none;
+    }
+
+    .trace-panel .note {
+      display: block;
+    }
+
+    .trace-panel .head {
+      flex-wrap: wrap;
+    }
+  }
+
+  /* The business program sits beside the woven code when the code area is
+     wide enough; otherwise it becomes a tab. */
+  .panels {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panels > .core-panel {
+    display: none;
+  }
+
+  @container code (min-width: 46rem) {
+    .panels {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+
+    .panels > .core-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .core-tab {
+      display: none;
+    }
+  }
+
+  /* --- panels --- */
   .panel {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 10px;
   }
 
-  .sidebar {
-    padding: 1rem;
-    align-self: start;
-    position: sticky;
-    top: 1rem;
-  }
-
-  .content {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.9rem;
-    min-width: 0;
-  }
-
+  .sidebar,
   .card {
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
   .head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    gap: 0.6rem;
+    margin-bottom: 0.55rem;
   }
 
   .app h2 {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     margin: 0;
-  }
-
-  .sub {
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-top: 0.15rem;
+    margin-right: auto;
+    white-space: nowrap;
   }
 
   .count {
     font-size: 0.65rem;
     color: var(--muted);
+    white-space: nowrap;
   }
 
-  #effects :global(.group) {
-    font-size: 0.68rem;
+  .delta {
+    color: var(--good);
+  }
+
+  .note {
+    font-size: 0.65rem;
     color: var(--muted);
-    margin: 1rem 0 0.35rem;
+    margin: 0.6rem 0 0;
+  }
+
+  /* --- effect list --- */
+  #effects :global(.group) {
+    font-size: 0.64rem;
+    color: var(--muted);
+    margin: 0.5rem 0 0.1rem;
+  }
+
+  #effects :global(.group:first-child) {
+    margin-top: 0;
   }
 
   #effects :global(.effect) {
-    display: grid;
-    grid-template-columns: 18px 1fr;
-    gap: 0.55rem;
-    padding: 0.5rem;
-    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.12rem 0.4rem;
+    margin: 0 -0.4rem;
+    border-radius: 6px;
     border: 1px solid transparent;
+    cursor: pointer;
   }
 
-  #effects :global(.effect:hover) {
-    background: var(--inset);
-    border-color: var(--line);
+  #effects :global(.effect:hover),
+  #effects :global(.effect.hot) {
+    background: color-mix(in srgb, var(--c) 14%, transparent);
+    border-color: color-mix(in srgb, var(--c) 45%, transparent);
   }
 
   #effects :global(input) {
     appearance: none;
-    width: 16px;
-    height: 16px;
+    flex: none;
+    width: 14px;
+    height: 14px;
     border: 1.5px solid var(--muted);
     border-radius: 4px;
-    margin: 2px 0 0;
+    margin: 0;
     cursor: pointer;
     position: relative;
   }
@@ -263,11 +376,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   #effects :global(input:checked::after) {
     content: '✓';
     position: absolute;
-    inset: -2px 0;
+    inset: -3px 0;
     text-align: center;
     color: #08111f;
     font-weight: 900;
-    font-size: 12px;
+    font-size: 11px;
   }
 
   #effects :global(input:focus-visible) {
@@ -275,27 +388,46 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     outline-offset: 2px;
   }
 
-  #effects :global(label) {
-    cursor: pointer;
-  }
+  @media (max-width: 849px) {
+    #effects {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+      gap: 0 1rem;
+    }
 
-  #effects :global(small) {
-    display: block;
-    color: var(--muted);
-    font-family: 'Lora', serif;
-    font-size: 0.68rem;
+    #effects :global(.group) {
+      grid-column: 1 / -1;
+    }
   }
 
   .actions {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 0.9rem;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
   }
 
+  .info {
+    margin-top: 0.7rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line);
+    font-family: 'Lora', serif;
+    font-size: 0.68rem;
+    color: var(--muted);
+    min-height: 3.6rem;
+  }
+
+  .info :global(b) {
+    display: block;
+    font-family: 'Varela Round', sans-serif;
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  /* --- controls --- */
   .app button,
   .app select {
     font: inherit;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: var(--color-text);
     cursor: pointer;
   }
@@ -304,7 +436,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     border: 1px solid var(--line);
     background: var(--inset);
     border-radius: 7px;
-    padding: 0.3rem 0.65rem;
+    padding: 0.2rem 0.55rem;
   }
 
   .btn:hover {
@@ -314,7 +446,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   .tabs {
     display: flex;
     gap: 2px;
-    padding: 3px;
+    padding: 2px;
     border: 1px solid var(--line);
     border-radius: 8px;
   }
@@ -323,8 +455,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     border: 0;
     background: transparent;
     border-radius: 6px;
-    padding: 0.25rem 0.6rem;
+    padding: 0.15rem 0.5rem;
     color: var(--muted) !important;
+    white-space: nowrap;
   }
 
   .tab.active {
@@ -332,27 +465,37 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     color: var(--color-text) !important;
   }
 
+  select {
+    max-width: 100%;
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.15rem 0.3rem;
+  }
+
+  /* --- code --- */
   .code {
     overflow: auto;
     background: var(--code-bg);
     color: var(--code-text);
     border: 1px solid var(--line);
     border-radius: 8px;
-    padding: 0.7rem 0;
-    font: 0.68rem/1.8 var(--mono);
+    padding: 0.5rem 0;
+    font: 0.66rem/1.5 var(--mono);
   }
 
   .code :global(.line) {
     display: grid;
-    grid-template-columns: 38px minmax(max-content, 1fr);
-    padding-right: 15px;
+    grid-template-columns: 34px minmax(max-content, 1fr);
+    padding-right: 12px;
     border-left: 2px solid transparent;
+    transition: opacity 0.12s ease;
   }
 
   .code :global(.ln) {
     color: var(--ln);
     text-align: right;
-    padding-right: 12px;
+    padding-right: 10px;
     user-select: none;
   }
 
@@ -363,10 +506,19 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   .code :global(.added) {
     background: color-mix(in srgb, var(--c) 14%, transparent);
     border-left-color: var(--c);
+    cursor: default;
   }
 
   .code :global(.added .src) {
     color: var(--ink);
+  }
+
+  .code :global(.added.hot) {
+    background: color-mix(in srgb, var(--c) 28%, transparent);
+  }
+
+  .app.focusing .code :global(.line:not(.hot)) {
+    opacity: 0.4;
   }
 
   .code :global(.comment) {
@@ -386,62 +538,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     color: var(--syn-str);
   }
 
-  .note {
-    font-size: 0.68rem;
-    color: var(--muted);
-    margin: 0.6rem 0 0;
-  }
-
-  .details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-
-  .details :global(.detail) {
-    background: var(--inset);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 0.6rem;
-  }
-
-  .details :global(b) {
-    font-size: 0.72rem;
-    font-weight: 400;
-    color: var(--ink);
-  }
-
-  .details :global(p) {
-    font-family: 'Lora', serif;
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin: 0.2rem 0 0;
-  }
-
-  .simrow {
-    display: flex;
-    gap: 0.6rem;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .simrow select {
-    background: var(--inset);
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    padding: 0.3rem 0.4rem;
-  }
-
+  /* --- trace --- */
   .trace {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.75rem;
+    gap: 0.3rem;
   }
 
   .trace :global(span) {
-    font: 0.68rem var(--mono);
-    padding: 0.35rem 0.5rem;
+    font: 0.64rem var(--mono);
+    padding: 0.2rem 0.45rem;
     background: var(--inset);
     border: 1px solid var(--line);
     border-radius: 6px;
@@ -457,24 +563,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     border-color: color-mix(in srgb, var(--good) 55%, transparent);
   }
 
-  @media (max-width: 850px) {
-    .layout {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .sidebar {
-      position: static;
+  @media (min-width: 1600px) and (min-height: 640px) {
+    .trace {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 
   @media (max-width: 520px) {
-    .details {
-      grid-template-columns: 1fr;
-    }
-
     .head {
-      align-items: flex-start;
-      flex-direction: column;
+      flex-wrap: wrap;
     }
   }
 </style>
@@ -560,6 +658,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       desc: 'Deduplicates repeated order submissions using a stable order key and protects payment retries.',
     },
   ]
+  const byId = Object.fromEntries(E.map((e) => [e.id, e]))
 
   const core = [
     '// Business intent: fulfill one validated customer order',
@@ -579,11 +678,100 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 
   let on = new Set<string>()
   let view = 'expanded'
+  let focused: string | null = null
   const $ = (id: string) => document.getElementById(id)!
   const has = (id: string) => on.has(id)
 
   const esc = (s: string) =>
     s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+
+  // ---------------------------------------------------------------------
+  // Responsive formatting: lines are re-wrapped to fit the panel width,
+  // measured in characters.
+
+  /** Index of the paren closing the one at `i`, or -1 if not on this line. */
+  function matchParen(s: string, i: number) {
+    let depth = 0
+    let quote = ''
+    for (let j = i; j < s.length; j++) {
+      const ch = s[j]
+      if (quote) {
+        if (ch === quote) quote = ''
+      } else if (ch === '"' || ch === '`') quote = ch
+      else if (ch === '(') depth++
+      else if (ch === ')' && --depth === 0) return j
+    }
+    return -1
+  }
+
+  /** Split on commas that aren't nested inside brackets or strings. */
+  function splitArgs(s: string) {
+    const out: string[] = []
+    let depth = 0
+    let quote = ''
+    let cur = ''
+    for (const ch of s) {
+      if (quote) {
+        if (ch === quote) quote = ''
+      } else if (ch === '"' || ch === '`') quote = ch
+      else if ('([{'.includes(ch)) depth++
+      else if (')]}'.includes(ch)) depth--
+      else if (ch === ',' && depth === 0) {
+        out.push(cur.trim())
+        cur = ''
+        continue
+      }
+      cur += ch
+    }
+    out.push(cur.trim())
+    return out.filter(Boolean)
+  }
+
+  /** Fit one line into `width` columns: wrap comments, then break the first
+   * call with several arguments one argument per line. Lines that can't be
+   * broken are left to scroll. */
+  function fit(line: string, id: string | undefined, width: number): Line[] {
+    if (line.length <= width) return [[line, id]]
+    const ind = line.match(/^ */)![0]
+    const body = line.slice(ind.length)
+    if (body.startsWith('// ')) {
+      const out: Line[] = []
+      let cur = '//'
+      for (const word of body.slice(3).split(' ')) {
+        if (cur !== '//' && ind.length + cur.length + word.length + 1 > width) {
+          out.push([ind + cur, id])
+          cur = '//'
+        }
+        cur += ' ' + word
+      }
+      out.push([ind + cur, id])
+      return out
+    }
+    for (let i = body.indexOf('('); i >= 0; i = body.indexOf('(', i + 1)) {
+      const j = matchParen(body, i)
+      if (j < 0) continue
+      const args = splitArgs(body.slice(i + 1, j))
+      if (args.length < 2) continue
+      return [
+        [ind + body.slice(0, i + 1), id],
+        ...args.flatMap((a, k) =>
+          fit(ind + '  ' + a + (k < args.length - 1 ? ',' : ''), id, width)
+        ),
+        ...fit(ind + body.slice(j), id, width),
+      ]
+    }
+    // Last resort: break after an assignment's `=`.
+    const eq = body.indexOf(' = ')
+    if (eq > 0 && !body.slice(0, eq).includes('('))
+      return [
+        [ind + body.slice(0, eq + 2), id],
+        ...fit(ind + '    ' + body.slice(eq + 3), id, width),
+      ]
+    return [[line, id]]
+  }
+
+  // ---------------------------------------------------------------------
+  // Syntax highlighting
 
   const KW = new Set([
     'function',
@@ -649,64 +837,111 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   function paint(el: HTMLElement, lines: Line[]) {
     el.innerHTML = lines
       .map(([s, id], i) => {
-        const c = id ? E.find((x) => x.id === id)!.c : ''
-        return `<div class="line ${id ? 'added' : ''}" style="--c:${c}"><span class="ln">${i + 1}</span><span class="src">${highlight(s)}</span></div>`
+        const fx = id ? ` data-fx="${id}" style="--c:${byId[id].c}"` : ''
+        return `<div class="line${id ? ' added' : ''}"${fx}><span class="ln">${i + 1}</span><span class="src">${highlight(s)}</span></div>`
       })
       .join('')
   }
 
-  function woven(): Line[] {
+  /** How many characters fit across a code panel. */
+  function columns(el: HTMLElement) {
+    const probe = document.createElement('span')
+    probe.textContent = '0'.repeat(40)
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre'
+    el.appendChild(probe)
+    const ch = probe.getBoundingClientRect().width / 40
+    probe.remove()
+    return Math.max(24, Math.floor((el.clientWidth - 34 - 12 - 4) / ch))
+  }
+
+  // ---------------------------------------------------------------------
+  // Programs
+
+  function woven(width: number): Line[] {
     const a: Line[] = []
-    const add = (s: string, id?: string) => a.push([s, id])
+    const add = (s: string, id?: string) => a.push(...fit(s, id, width))
+    // Each scope-opening effect nests everything after it one level deeper.
+    let ind = '  '
+    const closers: Line[] = []
+    const open = (s: string, id: string) => {
+      add(ind + s, id)
+      closers.unshift([ind + '});', id])
+      ind += '  '
+    }
     if (has('failure')) add('try {', 'failure')
     if (has('tracing'))
-      add('  return await withSpan("placeOrder", async (trace) => {', 'tracing')
+      open('return await withSpan("placeOrder", async (trace) => {', 'tracing')
     if (has('logging'))
-      add('  log.info("placeOrder.started", { orderId: order.id });', 'logging')
+      add(
+        ind + 'log.info("placeOrder.started", { orderId: order.id });',
+        'logging'
+      )
     if (has('auth')) {
-      add('  if (!await authorize(customer, "order:fulfill")) {', 'auth')
-      add('    return Err("forbidden");', 'auth')
-      add('  }', 'auth')
+      add(ind + 'if (!await authorize(customer, "order:fulfill")) {', 'auth')
+      add(ind + '  return Err("forbidden");', 'auth')
+      add(ind + '}', 'auth')
     }
     if (has('idempotency'))
-      add(
-        '  return await idempotent(`order:${order.id}`, async () => {',
+      open(
+        'return await idempotent(`order:${order.id}`, async () => {',
         'idempotency'
       )
     if (has('connection'))
-      add('    return await withConnection(db, async (conn) => {', 'connection')
+      open('return await withConnection(db, async (conn) => {', 'connection')
     if (has('transaction'))
-      add(
-        '      return await withTransaction(conn, async (tx) => {',
-        'transaction'
-      )
-    const p = ' '.repeat(
-      6 + (has('connection') ? 2 : 0) + (has('idempotency') ? 2 : 0)
-    )
+      open('return await withTransaction(conn, async (tx) => {', 'transaction')
+    const p = ind
     add(p + '// Core business steps — same order and intent')
     add(p + 'const validOrder = validateOrder(order);')
     add(p + 'const total = calculateTotal(validOrder);')
+
+    // Remote calls get wrapped in one layer per effect. When the wrapped
+    // call fits it stays on one line; otherwise each layer gets its own
+    // line, in its own colour.
     const operation = (name: string, call: string) => {
       if (has('logging')) add(p + `log.debug("${name}.started");`, 'logging')
-      let expr = call
-      let outer: string | undefined
-      if (has('retry')) {
-        expr = `retryTransient({ attempts: 3, backoff: "exponential" }, () => ${expr})`
-        outer = 'retry'
+      const layers: { id: string; open: string }[] = []
+      if (has('metrics'))
+        layers.push({ id: 'metrics', open: `measure("${name}", () =>` })
+      if (has('timeout'))
+        layers.push({ id: 'timeout', open: 'withTimeout("2s", () =>' })
+      if (has('retry'))
+        layers.push({
+          id: 'retry',
+          open: 'retryTransient({ attempts: 3, backoff: "exponential" }, () =>',
+        })
+      const lhs = `const ${name}Result = await `
+      const close = ')'.repeat(layers.length) + ';'
+      const oneLine =
+        p + lhs + layers.map((l) => l.open + ' ').join('') + call + close
+      if (!layers.length || oneLine.length <= width) {
+        add(oneLine, layers[0]?.id)
+      } else {
+        let ind = p
+        layers.forEach((l, k) => {
+          let prefix = k === 0 ? lhs : ''
+          if (k === 0 && (ind + lhs + l.open).length > width) {
+            a.push([ind + `const ${name}Result =`, l.id])
+            ind += '  '
+            prefix = 'await '
+          }
+          if (l.id === 'retry' && (ind + prefix + l.open).length > width) {
+            a.push([ind + prefix + 'retryTransient(', 'retry'])
+            a.push([
+              ind + '  { attempts: 3, backoff: "exponential" },',
+              'retry',
+            ])
+            a.push([ind + '  () =>', 'retry'])
+          } else a.push([ind + prefix + l.open, l.id])
+          ind += '  '
+        })
+        add(ind + call + close)
       }
-      if (has('timeout')) {
-        expr = `withTimeout("2s", () => ${expr})`
-        outer = 'timeout'
-      }
-      if (has('metrics')) {
-        expr = `measure("${name}", () => ${expr})`
-        outer = 'metrics'
-      }
-      add(p + `const ${name}Result = await ${expr};`, outer)
       if (has('logging')) add(p + `log.debug("${name}.completed");`, 'logging')
     }
     operation('payment', 'chargePayment(customer, total, order.id)')
     operation('inventory', 'reserveStock(validOrder.items)')
+
     add(p + 'const shipment = createShipment(validOrder);')
     if (has('transaction'))
       add(
@@ -715,16 +950,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       )
     else add(p + 'saveOrder(validOrder, paymentResult, shipment);')
     add(p + 'await sendConfirmation(customer, shipment);')
-    add(p + 'return makeReceipt(validOrder, paymentResult, shipment);')
-    if (has('transaction')) add('      });', 'transaction')
-    if (has('connection')) add('    });', 'connection')
-    if (has('idempotency')) add('  });', 'idempotency')
-    if (has('tracing')) add('  }); // end request span', 'tracing')
     if (has('logging'))
       add(
-        '  log.info("placeOrder.finished", { orderId: order.id });',
+        p + 'log.info("placeOrder.finished", { orderId: order.id });',
         'logging'
       )
+    add(p + 'return makeReceipt(validOrder, paymentResult, shipment);')
+    closers.forEach(([text, id]) => add(text, id))
     if (has('failure')) {
       add('} catch (error) {', 'failure')
       if (has('logging'))
@@ -751,45 +983,80 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     idempotency: '  around placeOrder => deduplicateBy(order.id, proceed);',
   }
 
-  function rules(): Line[] {
-    const a: Line[] = [
-      ['// Aspect rules select join points and contribute behavior.'],
-      ['aspect CheckoutPolicy {'],
-    ]
-    E.filter((e) => has(e.id)).forEach((e) => a.push([ruleText[e.id], e.id]))
-    a.push(
-      ['}'],
-      ['// The core program remains separate and unchanged.'],
-      ['placeOrder(order, customer);']
-    )
+  function rules(width: number): Line[] {
+    const a: Line[] = []
+    const add = (s: string, id?: string) => a.push(...fit(s, id, width))
+    add('// Aspect rules select join points and contribute behavior.')
+    add('aspect CheckoutPolicy {')
+    E.filter((e) => has(e.id)).forEach((e) => add(ruleText[e.id], e.id))
+    add('}')
+    add('// The core program remains separate and unchanged.')
+    add('placeOrder(order, customer);')
     return a
   }
 
+  const business = (width: number): Line[] =>
+    core.flatMap((l) => fit(l, undefined, width))
+
+  // ---------------------------------------------------------------------
+  // Rendering
+
+  const corePanel = $('core-panel')
+  const coreShown = () => getComputedStyle(corePanel).display !== 'none'
+
   function render() {
     const active = E.filter((e) => has(e.id))
-    const lines = view === 'expanded' ? woven() : rules()
-    paint($('woven'), lines)
-    const added = lines.filter((l) => l[1]).length
-    $('count').textContent = active.length + ' enabled'
-    $('details').innerHTML =
-      active
-        .map(
-          (e) =>
-            `<div class="detail" style="--c:${e.c}"><b>${e.name}</b><p>${e.desc}</p></div>`
-        )
-        .join('') ||
-      '<div class="detail" style="grid-column:1/-1"><b>Nothing woven in yet</b><p>Enable an effect to see where it applies and what behavior it contributes.</p></div>'
-    $('caption').textContent =
+    if (view === 'core' && coreShown()) view = 'expanded'
+    const wovenEl = $('woven')
+    const width = columns(wovenEl)
+    const lines =
       view === 'expanded'
-        ? 'The selected behavior woven around the business computation.'
-        : 'Declarative aspect rules and their join points.'
-    $('explain').textContent = active.length
-      ? `${active.length} effect${active.length === 1 ? '' : 's'} active, adding ${added} highlighted line${added === 1 ? '' : 's'}. Plain lines are the business computation.`
-      : 'Enable effects to see behavior woven around selected operations.'
+        ? woven(width)
+        : view === 'rules'
+          ? rules(width)
+          : business(width)
+    paint(wovenEl, lines)
+    if (coreShown()) paint($('core'), business(columns($('core'))))
+
+    // Count lines at unlimited width so the number doesn't depend on how
+    // the code happens to be wrapped.
+    const added = (view === 'rules' ? rules(Infinity) : woven(Infinity)).filter(
+      (l) => l[1]
+    ).length
+    $('count').textContent = active.length + ' enabled'
+    $('title').textContent =
+      view === 'expanded'
+        ? 'Woven implementation'
+        : view === 'rules'
+          ? 'Aspect rules'
+          : 'Business program'
+    $('delta').textContent =
+      active.length && view !== 'core'
+        ? view === 'expanded'
+          ? `+${added} line${added === 1 ? '' : 's'}`
+          : `${added} rule${added === 1 ? '' : 's'}`
+        : ''
     document
       .querySelectorAll<HTMLElement>('.tab')
       .forEach((b) => b.classList.toggle('active', b.dataset.view === view))
+    focus(focused)
     simulate()
+  }
+
+  /** Link an effect in the sidebar with its lines in the code. */
+  function focus(id: string | null) {
+    focused = id
+    const app = $('app')
+    app.classList.toggle('focusing', !!id && has(id))
+    app.querySelectorAll('.hot').forEach((el) => el.classList.remove('hot'))
+    if (id)
+      app
+        .querySelectorAll(`[data-fx="${id}"]`)
+        .forEach((el) => el.classList.add('hot'))
+    const e = id ? byId[id] : null
+    $('info').innerHTML = e
+      ? `<b style="--c:${e.c}">${e.name}</b>${e.desc}`
+      : 'Hover over an effect or a highlighted line to see what it adds. Effects apply in one fixed order; in general they don’t commute.'
   }
 
   function controls() {
@@ -801,7 +1068,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
           E.filter((e) => e.group === g)
             .map(
               (e) =>
-                `<div class="effect" style="--c:${e.c}"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}><div><label for="fx-${e.id}">${e.name}</label><small>${e.desc.split('.')[0]}.</small></div></div>`
+                `<label class="effect" data-fx="${e.id}" style="--c:${e.c}"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}>${e.name}</label>`
             )
             .join('')
       )
@@ -853,12 +1120,35 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     $('trace').innerHTML = t.join('')
   }
 
-  paint(
-    $('core'),
-    core.map((s) => [s])
-  )
+  // ---------------------------------------------------------------------
+  // Wiring
+
+  const layout = $('layout')
+  const placeLayout = () =>
+    layout.style.setProperty(
+      '--top',
+      layout.getBoundingClientRect().top + window.scrollY + 'px'
+    )
+
   controls()
+  placeLayout()
   render()
+
+  // Re-wrap the code whenever a code panel changes width.
+  let lastWidths = ''
+  let pending = 0
+  new ResizeObserver(() => {
+    cancelAnimationFrame(pending)
+    pending = requestAnimationFrame(() => {
+      placeLayout()
+      const widths = `${$('woven').clientWidth}/${$('core').clientWidth}/${coreShown()}`
+      if (widths !== lastWidths) {
+        lastWidths = widths
+        render()
+      }
+    })
+  }).observe(layout)
+
   $('all').onclick = () => {
     on = new Set(E.map((e) => e.id))
     controls()
@@ -877,4 +1167,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       })
   )
   $('scenario').onchange = simulate
+
+  // Hovering (or tapping) an effect or one of its lines highlights both.
+  const fxAt = (t: EventTarget | null) =>
+    (t as HTMLElement | null)?.closest<HTMLElement>('[data-fx]')?.dataset.fx ??
+    null
+  for (const id of ['effects', 'woven', 'core']) {
+    const el = $(id)
+    el.addEventListener('mouseover', (ev) => {
+      const fx = fxAt(ev.target)
+      if (fx !== focused) focus(fx)
+    })
+    el.addEventListener('mouseleave', () => focus(null))
+  }
+  $('woven').addEventListener('click', (ev) => focus(fxAt(ev.target)))
 </script>
