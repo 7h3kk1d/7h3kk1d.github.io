@@ -7,65 +7,93 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   description="An interactive sketch: toggle cross-cutting effects like retries, transactions, logging and authorization, and watch them wrap an unchanged order-fulfillment function."
 >
   <article class="fx">
-    <h1>Computational effects, woven in</h1>
-    <p>
-      Below is an ordinary order-fulfillment function. Real implementations of
-      it rarely stay this small: retries, timeouts, transactions, logging,
-      tracing and authorization all get wrapped around it. Each one is a
-      cross-cutting effect that changes how the program runs without changing
-      what the business wants done. Toggle them to see how much code they add
-      around the same few business steps.
-    </p>
+    <header class="intro">
+      <p class="kicker">An interactive sketch</p>
+      <h1>Computational effects, woven in</h1>
+      <p class="lede">
+        Below is an ordinary order-fulfillment function. Real implementations of
+        it rarely stay this small: retries, timeouts, transactions, logging,
+        tracing and authorization all get wrapped around it. Each one is a
+        cross-cutting effect that changes how the program runs without changing
+        what the business wants done. Toggle them to see how much code they add
+        around the same few business steps.
+      </p>
+    </header>
 
-    <h2>The business program</h2>
-    <p class="aside">
-      This part stays the same no matter which effects are on.
-    </p>
-    <pre class="listing" id="core"></pre>
+    <section>
+      <h2><span class="num">i.</span> The business program</h2>
+      <figure class="window">
+        <figcaption>
+          <span class="file">placeOrder.js</span>
+          <span class="meta">stays the same throughout</span>
+        </figcaption>
+        <pre class="listing" id="core"></pre>
+      </figure>
+    </section>
 
-    <h2>Effects</h2>
-    <div id="effects" class="groups"></div>
-    <p class="buttons">
-      <button type="button" id="all">Enable all</button>
-      <button type="button" id="clear">Clear all</button>
-    </p>
+    <section>
+      <h2><span class="num">ii.</span> Effects</h2>
+      <div id="effects" class="groups"></div>
+      <p class="buttons">
+        <button type="button" class="link" id="all">Enable all</button>
+        <span aria-hidden="true">·</span>
+        <button type="button" class="link" id="clear">Clear all</button>
+      </p>
+    </section>
 
-    <h2>The woven implementation</h2>
-    <p class="views" role="tablist">
-      <button type="button" class="view" data-view="expanded">Expanded</button>
-      <button type="button" class="view" data-view="rules"
-        >As aspect rules</button
-      >
-    </p>
-    <pre class="listing" id="woven" aria-live="polite"></pre>
-    <p class="aside" id="summary"></p>
-    <dl id="details"></dl>
-    <p class="aside">
-      The layers here are illustrative handlers, applied in one fixed order.
-      Effects don't commute in general. Retrying inside a transaction is a
-      different program from wrapping a retry around one.
-    </p>
+    <section>
+      <h2><span class="num">iii.</span> The woven implementation</h2>
+      <figure class="window">
+        <figcaption>
+          <span class="views" role="tablist">
+            <button type="button" class="view" data-view="expanded"
+              >placeOrder.js</button
+            >
+            <button type="button" class="view" data-view="rules"
+              >checkout-policy.aspect</button
+            >
+          </span>
+          <span class="meta delta" id="delta"></span>
+        </figcaption>
+        <pre class="listing" id="woven" aria-live="polite"></pre>
+      </figure>
+      <p class="aside" id="summary"></p>
+      <dl id="details"></dl>
+      <aside class="note">
+        The layers here are illustrative handlers, applied in one fixed order.
+        Effects don't commute in general. Retrying inside a transaction is a
+        different program from wrapping a retry around one.
+      </aside>
+    </section>
 
-    <h2>Running a request</h2>
-    <p>
-      Pick a scenario to see which steps one request goes through with the
-      effects that are currently on.
-    </p>
-    <p class="buttons">
-      <label for="scenario">Scenario</label>
-      <select id="scenario">
-        <option value="transient">Payment provider briefly unavailable</option>
-        <option value="declined">Card declined</option>
-        <option value="db">Database connection drops</option>
-        <option value="ok">Everything succeeds</option>
-      </select>
-    </p>
-    <ol class="trace" id="trace"></ol>
-    <p class="aside">
-      Only transient failures are retried, and idempotency keeps a retried
-      payment from charging twice. A database rollback can't undo a payment that
-      has already gone to an external provider.
-    </p>
+    <section>
+      <h2><span class="num">iv.</span> Running a request</h2>
+      <p>
+        Pick a scenario to see which steps one request goes through with the
+        effects that are currently on.
+      </p>
+      <div class="chips" id="scenarios" role="radiogroup" aria-label="Scenario">
+        <label class="chip"
+          ><input type="radio" name="scenario" value="transient" checked /> Payment
+          provider blips</label
+        >
+        <label class="chip"
+          ><input type="radio" name="scenario" value="declined" /> Card declined</label
+        >
+        <label class="chip"
+          ><input type="radio" name="scenario" value="db" /> Database drops</label
+        >
+        <label class="chip"
+          ><input type="radio" name="scenario" value="ok" /> All good</label
+        >
+      </div>
+      <ol class="trace" id="trace"></ol>
+      <aside class="note">
+        Only transient failures are retried, and idempotency keeps a retried
+        payment from charging twice. A database rollback can't undo a payment
+        that has already gone to an external provider.
+      </aside>
+    </section>
   </article>
 </BaseLayout>
 
@@ -79,10 +107,50 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     --fx-security: #2aa198;
     --fx-good: #859900;
     --fx-bad: #dc322f;
+    --rule: color-mix(in srgb, var(--color-text) 15%, transparent);
+    --sans: 'Varela Round', sans-serif;
+    --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  }
+
+  /* --- intro --- */
+  .kicker {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--color-link);
+    margin-bottom: 0.3rem;
+  }
+
+  .intro h1 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .lede {
+    font-size: 1.08rem;
+    border-left: 3px solid var(--color-link);
+    padding-left: 1rem;
+  }
+
+  /* --- sections --- */
+  .fx section {
+    margin-top: 2.6rem;
   }
 
   .fx h2 {
-    margin-top: 2.2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .num {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 0.9em;
+    color: var(--color-link);
+    min-width: 1.6em;
   }
 
   .aside {
@@ -90,12 +158,65 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     font-size: 0.85rem;
   }
 
-  .listing {
+  .note {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--color-text-secondary);
+    margin: 1.2rem 0;
+    padding: 0.2rem 0 0.2rem 1rem;
+    border-left: 2px solid var(--rule);
+  }
+
+  /* --- code windows --- */
+  .window {
+    margin: 1rem 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
     background: var(--color-code-bg);
+  }
+
+  .window figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.35rem 0.9rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-align: left;
+    color: var(--color-code-text);
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--color-text) 4%, var(--color-code-bg));
+  }
+
+  .file::before {
+    content: '● ● ●';
+    letter-spacing: 0.15em;
+    margin-right: 0.8rem;
+    opacity: 0.3;
+  }
+
+  .meta {
+    opacity: 0.6;
+  }
+
+  .delta {
+    opacity: 1;
+    color: var(--fx-good);
+    font-weight: 700;
+  }
+
+  .listing {
+    margin: 0;
+    border-radius: 0;
+    background: transparent;
     color: var(--color-code-text);
     padding: 0.8rem 0;
-    font-size: 0.75rem;
-    line-height: 1.6;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.65;
   }
 
   .listing :global(.line) {
@@ -111,128 +232,258 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     width: 2.6em;
     padding-right: 1em;
     text-align: right;
-    opacity: 0.5;
+    opacity: 0.4;
     user-select: none;
   }
 
   .listing :global(.added) {
     border-left-color: var(--c);
     background: color-mix(in srgb, var(--c) 12%, transparent);
+    animation: fx-in 0.35s ease-out;
+  }
+
+  @keyframes fx-in {
+    from {
+      background: color-mix(in srgb, var(--c) 35%, transparent);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .listing :global(.added) {
+      animation: none;
+    }
   }
 
   .listing :global(.comment) {
-    opacity: 0.7;
+    font-style: italic;
+    opacity: 0.65;
   }
 
   .listing :global(.kw) {
     font-weight: 700;
   }
 
+  /* --- effect chips --- */
   .groups {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-    gap: 0 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 0.4rem 1.5rem;
   }
 
   .groups :global(fieldset) {
     border: 0;
-    margin: 0 0 1rem;
+    margin: 0;
     padding: 0;
   }
 
   .groups :global(legend) {
-    font-style: italic;
-    margin-bottom: 0.3rem;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--c);
+    margin-bottom: 0.4rem;
     padding: 0;
   }
 
-  .groups :global(label) {
+  .groups :global(.chips),
+  .chips {
     display: flex;
-    gap: 0.5rem;
-    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .fx :global(.chip) {
+    --c: var(--color-link);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.7rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-family: var(--sans);
+    font-size: 0.78rem;
     cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
   }
 
-  .groups :global(input) {
-    accent-color: var(--c);
+  .groups :global(.chip) {
+    --c: inherit;
   }
 
-  .groups :global(.swatch) {
-    display: inline-block;
-    width: 0.6em;
-    height: 0.6em;
-    border-radius: 2px;
+  .fx :global(.chip input) {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fx :global(.chip::before) {
+    content: '';
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    border: 1.5px solid var(--c);
+    transition: background-color 0.15s ease;
+  }
+
+  .fx :global(.chip:hover) {
+    border-color: var(--c);
+  }
+
+  .fx :global(.chip:has(input:checked)) {
+    border-color: var(--c);
+    background: color-mix(in srgb, var(--c) 14%, transparent);
+  }
+
+  .fx :global(.chip:has(input:checked)::before) {
     background: var(--c);
   }
 
-  .fx button,
-  .fx select {
-    font: inherit;
+  .fx :global(.chip:has(input:focus-visible)) {
+    outline: 2px solid var(--c);
+    outline-offset: 2px;
+  }
+
+  /* --- buttons and view tabs --- */
+  .buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
     font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+
+  .fx button {
+    font: inherit;
     color: inherit;
-    background: transparent;
-    border: 1px solid var(--color-text-secondary);
-    border-radius: 4px;
-    padding: 0.15rem 0.6rem;
+    background: none;
+    border: 0;
+    padding: 0;
     cursor: pointer;
   }
 
-  .fx button:hover {
-    border-color: var(--color-link);
+  .fx .link {
     color: var(--color-link);
   }
 
-  .buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
+  .fx .link:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
   }
 
   .views {
     display: flex;
-    gap: 1.2rem;
+    gap: 1rem;
   }
 
   .fx .view {
-    border: 0;
+    font-family: var(--mono);
+    opacity: 0.55;
+    padding-bottom: 0.1rem;
     border-bottom: 2px solid transparent;
-    border-radius: 0;
-    padding: 0 0 0.1rem;
-    color: var(--color-text-secondary);
+  }
+
+  .fx .view:hover {
+    opacity: 0.85;
   }
 
   .fx .view.active {
-    color: var(--color-text);
+    opacity: 1;
     border-bottom-color: var(--color-link);
   }
 
-  #details :global(dt) {
-    font-weight: 700;
+  /* --- active effect notes --- */
+  #details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 0.6rem 1.5rem;
+    font-size: 0.82rem;
   }
 
-  #details :global(dt span) {
+  #details :global(div) {
+    border-left: 2px solid var(--c);
+    padding-left: 0.7rem;
+  }
+
+  #details :global(dt) {
+    font-family: var(--sans);
     color: var(--c);
   }
 
   #details :global(dd) {
-    margin: 0 0 0.6rem;
+    margin: 0;
+    color: var(--color-text-secondary);
   }
 
+  /* --- trace timeline --- */
   .trace {
+    list-style: none;
+    margin: 1.2rem 0 0 0.4rem;
+    padding: 0;
     font-size: 0.85rem;
+    counter-reset: step;
   }
 
   .trace :global(li) {
-    margin-bottom: 0.15rem;
+    position: relative;
+    margin: 0;
+    padding: 0 0 0.45rem 1.4rem;
+    border-left: 1px solid
+      color-mix(in srgb, var(--color-text-secondary) 50%, transparent);
+    counter-increment: step;
+    animation: fx-step 0.3s ease-out backwards;
+    animation-delay: calc(var(--i) * 40ms);
+  }
+
+  .trace :global(li:last-child) {
+    border-left-color: transparent;
+  }
+
+  .trace :global(li::before) {
+    content: '';
+    position: absolute;
+    left: -0.3rem;
+    top: 0.45em;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--color-bg);
+    border: 1.5px solid var(--color-text-secondary);
   }
 
   .trace :global(.good) {
     color: var(--fx-good);
   }
 
+  .trace :global(.good::before) {
+    border-color: var(--fx-good);
+    background: var(--fx-good);
+  }
+
   .trace :global(.bad) {
     color: var(--fx-bad);
+  }
+
+  .trace :global(.bad::before) {
+    border-color: var(--fx-bad);
+    background: var(--fx-bad);
+  }
+
+  @keyframes fx-step {
+    from {
+      opacity: 0;
+      transform: translateX(-4px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trace :global(li) {
+      animation: none;
+    }
   }
 </style>
 
@@ -481,10 +732,15 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     $('summary').textContent = active.length
       ? `${active.length} effect${active.length === 1 ? '' : 's'} on, contributing the ${added} highlighted line${added === 1 ? '' : 's'}. Unhighlighted lines are the business program.`
       : 'No effects on yet, so this is just the business program.'
+    $('delta').textContent = active.length
+      ? view === 'expanded'
+        ? `+${added} line${added === 1 ? '' : 's'}`
+        : `${added} rule${added === 1 ? '' : 's'}`
+      : ''
     $('details').innerHTML = active
       .map(
         (e) =>
-          `<dt style="--c:${e.hue}"><span>■</span> ${e.name}</dt><dd>${e.desc}</dd>`
+          `<div style="--c:${e.hue}"><dt>${e.name}</dt><dd>${e.desc}</dd></div>`
       )
       .join('')
     simulate()
@@ -499,14 +755,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     $('effects').innerHTML = Object.entries(groups)
       .map(
         ([g, { label, hue }]) =>
-          `<fieldset style="--c:${hue}"><legend>${label}</legend>` +
+          `<fieldset style="--c:${hue}"><legend>${label}</legend><div class="chips">` +
           E.filter((e) => e.group === g)
             .map(
               (e) =>
-                `<label title="${e.desc}"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}> ${e.name}</label>`
+                `<label class="chip" title="${e.desc}"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}> ${e.name}</label>`
             )
             .join('') +
-          '</fieldset>'
+          '</div></fieldset>'
       )
       .join('')
     E.forEach((e) => {
@@ -519,9 +775,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   }
 
   function simulate() {
-    const s = ($('scenario') as HTMLSelectElement).value
+    const s = document.querySelector<HTMLInputElement>(
+      'input[name="scenario"]:checked'
+    )!.value
     const t: string[] = []
-    const put = (x: string, c = '') => t.push(`<li class="${c}">${x}</li>`)
+    const put = (x: string, c = '') =>
+      t.push(`<li class="${c}" style="--i:${t.length}">${x}</li>`)
     if (has('tracing')) put('Open request span')
     if (has('logging')) put('Log: request started')
     if (has('auth')) put('Authorize customer')
@@ -585,5 +844,5 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
         render()
       })
   )
-  $('scenario').onchange = simulate
+  $('scenarios').onchange = simulate
 </script>
