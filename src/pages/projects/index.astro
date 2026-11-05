@@ -1,9 +1,20 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 
-// Each project is its own repo deployed to GitHub Pages, which serves it under
-// this domain at /<repo name>/.
-const projects = [
+// Most projects are their own repo deployed to GitHub Pages, which serves them
+// under this domain at /<repo name>/. Ones without a `repo` are pages here.
+const projects: {
+  title: string
+  description: string
+  url: string
+  repo?: string
+}[] = [
+  {
+    title: 'Computational Effects, Woven In',
+    description:
+      'toggle cross-cutting effects and watch them wrap an unchanged business function',
+    url: '/projects/computational-effects/',
+  },
   {
     title: 'Bidirectional JSON Editor',
     description:
@@ -30,10 +41,13 @@ const projects = [
       {
         projects.map((project) => (
           <li>
-            <a href={project.url}>{project.title}</a>, {project.description}{' '}
-            <span>
-              (<a href={project.repo}>source</a>)
-            </span>
+            <a href={project.url}>{project.title}</a>, {project.description}
+            {project.repo && (
+              <span>
+                {' '}
+                (<a href={project.repo}>source</a>)
+              </span>
+            )}
           </li>
         ))
       }

@@ -1,0 +1,589 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="Computational Effects, Woven In"
+  description="An interactive sketch: toggle cross-cutting effects like retries, transactions, logging and authorization, and watch them wrap an unchanged order-fulfillment function."
+>
+  <article class="fx">
+    <h1>Computational effects, woven in</h1>
+    <p>
+      Below is an ordinary order-fulfillment function. Real implementations of
+      it rarely stay this small: retries, timeouts, transactions, logging,
+      tracing and authorization all get wrapped around it. Each one is a
+      cross-cutting effect that changes how the program runs without changing
+      what the business wants done. Toggle them to see how much code they add
+      around the same few business steps.
+    </p>
+
+    <h2>The business program</h2>
+    <p class="aside">
+      This part stays the same no matter which effects are on.
+    </p>
+    <pre class="listing" id="core"></pre>
+
+    <h2>Effects</h2>
+    <div id="effects" class="groups"></div>
+    <p class="buttons">
+      <button type="button" id="all">Enable all</button>
+      <button type="button" id="clear">Clear all</button>
+    </p>
+
+    <h2>The woven implementation</h2>
+    <p class="views" role="tablist">
+      <button type="button" class="view" data-view="expanded">Expanded</button>
+      <button type="button" class="view" data-view="rules"
+        >As aspect rules</button
+      >
+    </p>
+    <pre class="listing" id="woven" aria-live="polite"></pre>
+    <p class="aside" id="summary"></p>
+    <dl id="details"></dl>
+    <p class="aside">
+      The layers here are illustrative handlers, applied in one fixed order.
+      Effects don't commute in general. Retrying inside a transaction is a
+      different program from wrapping a retry around one.
+    </p>
+
+    <h2>Running a request</h2>
+    <p>
+      Pick a scenario to see which steps one request goes through with the
+      effects that are currently on.
+    </p>
+    <p class="buttons">
+      <label for="scenario">Scenario</label>
+      <select id="scenario">
+        <option value="transient">Payment provider briefly unavailable</option>
+        <option value="declined">Card declined</option>
+        <option value="db">Database connection drops</option>
+        <option value="ok">Everything succeeds</option>
+      </select>
+    </p>
+    <ol class="trace" id="trace"></ol>
+    <p class="aside">
+      Only transient failures are retried, and idempotency keeps a retried
+      payment from charging twice. A database rollback can't undo a payment that
+      has already gone to an external provider.
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .fx {
+    /* One hue per effect group, borrowed from Solarized so they read on both
+       the cream light-mode code background and the dark one. */
+    --fx-control: #dc322f;
+    --fx-state: #6c71c4;
+    --fx-observe: #268bd2;
+    --fx-security: #2aa198;
+    --fx-good: #859900;
+    --fx-bad: #dc322f;
+  }
+
+  .fx h2 {
+    margin-top: 2.2rem;
+  }
+
+  .aside {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .listing {
+    background: var(--color-code-bg);
+    color: var(--color-code-text);
+    padding: 0.8rem 0;
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+
+  .listing :global(.line) {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    padding: 0 1rem 0 0;
+    border-left: 3px solid transparent;
+  }
+
+  .listing :global(.ln) {
+    display: inline-block;
+    width: 2.6em;
+    padding-right: 1em;
+    text-align: right;
+    opacity: 0.5;
+    user-select: none;
+  }
+
+  .listing :global(.added) {
+    border-left-color: var(--c);
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+  }
+
+  .listing :global(.comment) {
+    opacity: 0.7;
+  }
+
+  .listing :global(.kw) {
+    font-weight: 700;
+  }
+
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 0 1.5rem;
+  }
+
+  .groups :global(fieldset) {
+    border: 0;
+    margin: 0 0 1rem;
+    padding: 0;
+  }
+
+  .groups :global(legend) {
+    font-style: italic;
+    margin-bottom: 0.3rem;
+    padding: 0;
+  }
+
+  .groups :global(label) {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    cursor: pointer;
+  }
+
+  .groups :global(input) {
+    accent-color: var(--c);
+  }
+
+  .groups :global(.swatch) {
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 2px;
+    background: var(--c);
+  }
+
+  .fx button,
+  .fx select {
+    font: inherit;
+    font-size: 0.85rem;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--color-text-secondary);
+    border-radius: 4px;
+    padding: 0.15rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .fx button:hover {
+    border-color: var(--color-link);
+    color: var(--color-link);
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .views {
+    display: flex;
+    gap: 1.2rem;
+  }
+
+  .fx .view {
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 0 0 0.1rem;
+    color: var(--color-text-secondary);
+  }
+
+  .fx .view.active {
+    color: var(--color-text);
+    border-bottom-color: var(--color-link);
+  }
+
+  #details :global(dt) {
+    font-weight: 700;
+  }
+
+  #details :global(dt span) {
+    color: var(--c);
+  }
+
+  #details :global(dd) {
+    margin: 0 0 0.6rem;
+  }
+
+  .trace {
+    font-size: 0.85rem;
+  }
+
+  .trace :global(li) {
+    margin-bottom: 0.15rem;
+  }
+
+  .trace :global(.good) {
+    color: var(--fx-good);
+  }
+
+  .trace :global(.bad) {
+    color: var(--fx-bad);
+  }
+</style>
+
+<script>
+  type Effect = {
+    id: string
+    name: string
+    group: string
+    hue: string
+    desc: string
+  }
+
+  const groups: Record<string, { label: string; hue: string }> = {
+    control: { label: 'Control & reliability', hue: 'var(--fx-control)' },
+    state: { label: 'State & resources', hue: 'var(--fx-state)' },
+    observe: { label: 'Observation', hue: 'var(--fx-observe)' },
+    security: { label: 'Security & consistency', hue: 'var(--fx-security)' },
+  }
+
+  const E: Effect[] = (
+    [
+      [
+        'failure',
+        'Failure handling',
+        'control',
+        'Turns failures into an explicit Result. A failed step short-circuits the rest and returns an error.',
+      ],
+      [
+        'retry',
+        'Retry with backoff',
+        'control',
+        'Retries transient remote failures a bounded number of times with exponential backoff. Permanent failures are not retried.',
+      ],
+      [
+        'timeout',
+        'Timeouts',
+        'control',
+        'Puts a deadline on remote calls. A timeout becomes a failure for the other layers to handle.',
+      ],
+      [
+        'transaction',
+        'Database transaction',
+        'state',
+        'Groups database writes into commit-or-rollback. It cannot roll back a payment provider outside the database.',
+      ],
+      [
+        'connection',
+        'Connection management',
+        'state',
+        'Acquires a database connection for the scope, reuses it, and releases it even when the body fails.',
+      ],
+      [
+        'logging',
+        'Structured logging',
+        'observe',
+        'Adds structured start, finish and failure events around operations without changing their results.',
+      ],
+      [
+        'metrics',
+        'Metrics',
+        'observe',
+        'Measures latency and outcome counts for remote and database operations.',
+      ],
+      [
+        'tracing',
+        'Distributed tracing',
+        'observe',
+        'Opens a request span and propagates trace context to downstream calls.',
+      ],
+      [
+        'auth',
+        'Authorization',
+        'security',
+        'Checks permission before any side effects. A denial exits before charging or reserving stock.',
+      ],
+      [
+        'idempotency',
+        'Idempotency',
+        'security',
+        'Deduplicates repeated order submissions by order id, which also makes payment retries safe.',
+      ],
+    ] as const
+  ).map(([id, name, group, desc]) => ({
+    id,
+    name,
+    group,
+    desc,
+    hue: groups[group].hue,
+  }))
+
+  const core = [
+    '// Fulfill one validated customer order',
+    'function placeOrder(order, customer) {',
+    '  const validOrder = validateOrder(order);',
+    '  const total = calculateTotal(validOrder);',
+    '  const payment = chargePayment(customer, total, order.id);',
+    '  reserveStock(validOrder.items);',
+    '  const shipment = createShipment(validOrder);',
+    '  saveOrder(validOrder, payment, shipment);',
+    '  sendConfirmation(customer, shipment);',
+    '  return makeReceipt(validOrder, payment, shipment);',
+    '}',
+  ]
+
+  type Line = [string, string?]
+
+  let on = new Set<string>()
+  let view = 'expanded'
+  const $ = (id: string) => document.getElementById(id)!
+  const has = (id: string) => on.has(id)
+
+  const esc = (s: string) =>
+    s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+
+  function paint(el: HTMLElement, lines: Line[]) {
+    el.innerHTML = lines
+      .map(([s, id], i) => {
+        const hue = id ? E.find((e) => e.id === id)!.hue : ''
+        const t = esc(s)
+          .replace(
+            /\b(function|const|return|if|else|try|catch|finally|throw|await|async|new|aspect|around)\b/g,
+            '<span class="kw">$1</span>'
+          )
+          .replace(/(\/\/.*)$/, '<span class="comment">$1</span>')
+        return `<span class="line${id ? ' added' : ''}" style="--c:${hue}"><span class="ln">${i + 1}</span>${t}</span>`
+      })
+      .join('')
+  }
+
+  function woven(): Line[] {
+    const a: Line[] = []
+    const add = (s: string, id?: string) => a.push([s, id])
+    if (has('failure')) add('try {', 'failure')
+    if (has('tracing'))
+      add('  return await withSpan("placeOrder", async (trace) => {', 'tracing')
+    if (has('logging'))
+      add('  log.info("placeOrder.started", { orderId: order.id });', 'logging')
+    if (has('auth')) {
+      add('  if (!await authorize(customer, "order:fulfill")) {', 'auth')
+      add('    return Err("forbidden");', 'auth')
+      add('  }', 'auth')
+    }
+    if (has('idempotency'))
+      add(
+        '  return await idempotent(`order:${order.id}`, async () => {',
+        'idempotency'
+      )
+    if (has('connection'))
+      add('    return await withConnection(db, async (conn) => {', 'connection')
+    if (has('transaction'))
+      add(
+        '      return await withTransaction(conn, async (tx) => {',
+        'transaction'
+      )
+    const p = ' '.repeat(
+      6 + (has('connection') ? 2 : 0) + (has('idempotency') ? 2 : 0)
+    )
+    add(p + '// The business steps, in the same order')
+    add(p + 'const validOrder = validateOrder(order);')
+    add(p + 'const total = calculateTotal(validOrder);')
+    const operation = (name: string, call: string) => {
+      if (has('logging')) add(p + `log.debug("${name}.started");`, 'logging')
+      let expr = call
+      let outer: string | undefined
+      if (has('retry')) {
+        expr = `retryTransient({ attempts: 3, backoff: "exponential" }, () => ${expr})`
+        outer = 'retry'
+      }
+      if (has('timeout')) {
+        expr = `withTimeout("2s", () => ${expr})`
+        outer = 'timeout'
+      }
+      if (has('metrics')) {
+        expr = `measure("${name}", () => ${expr})`
+        outer = 'metrics'
+      }
+      add(p + `const ${name}Result = await ${expr};`, outer)
+      if (has('logging')) add(p + `log.debug("${name}.completed");`, 'logging')
+    }
+    operation('payment', 'chargePayment(customer, total, order.id)')
+    operation('inventory', 'reserveStock(validOrder.items)')
+    add(p + 'const shipment = createShipment(validOrder);')
+    if (has('transaction'))
+      add(
+        p + 'await tx.saveOrder(validOrder, paymentResult, shipment);',
+        'transaction'
+      )
+    else add(p + 'saveOrder(validOrder, paymentResult, shipment);')
+    add(p + 'await sendConfirmation(customer, shipment);')
+    add(p + 'return makeReceipt(validOrder, paymentResult, shipment);')
+    if (has('transaction')) add('      });', 'transaction')
+    if (has('connection')) add('    });', 'connection')
+    if (has('idempotency')) add('  });', 'idempotency')
+    if (has('tracing')) add('  }); // end request span', 'tracing')
+    if (has('logging'))
+      add(
+        '  log.info("placeOrder.finished", { orderId: order.id });',
+        'logging'
+      )
+    if (has('failure')) {
+      add('} catch (error) {', 'failure')
+      if (has('logging'))
+        add('  log.error("placeOrder.failed", { error });', 'logging')
+      add('  return Err(error);', 'failure')
+      add('}', 'failure')
+    }
+    return a
+  }
+
+  const ruleText: Record<string, string> = {
+    failure: '  on operation(*) when it fails => return Err(error);',
+    retry:
+      '  around [chargePayment, reserveStock] => retryTransient(3, exponentialBackoff, proceed);',
+    timeout: '  around remoteCall(*) => withTimeout(2s, proceed);',
+    transaction: '  around databaseWrites(*) => withTransaction(proceed);',
+    connection: '  around databaseOperation(*) => withConnection(db, proceed);',
+    logging: '  before/after operation(*) => logStructured(event, context);',
+    metrics:
+      '  around measuredOperation(*) => recordDurationAndOutcome(proceed);',
+    tracing:
+      '  around placeOrder => withSpan("placeOrder", propagateContext, proceed);',
+    auth: '  before placeOrder => requirePermission(customer, "order:fulfill");',
+    idempotency: '  around placeOrder => deduplicateBy(order.id, proceed);',
+  }
+
+  function rules(): Line[] {
+    const a: Line[] = [
+      ['// Each rule picks join points and contributes behavior there.'],
+      ['aspect CheckoutPolicy {'],
+    ]
+    E.filter((e) => has(e.id)).forEach((e) => a.push([ruleText[e.id], e.id]))
+    a.push(
+      ['}'],
+      [''],
+      ['// The business program stays separate and unchanged.'],
+      ['placeOrder(order, customer);']
+    )
+    return a
+  }
+
+  function render() {
+    const active = E.filter((e) => has(e.id))
+    const lines = view === 'expanded' ? woven() : rules()
+    paint($('woven'), lines)
+    const added = lines.filter((l) => l[1]).length
+    $('summary').textContent = active.length
+      ? `${active.length} effect${active.length === 1 ? '' : 's'} on, contributing the ${added} highlighted line${added === 1 ? '' : 's'}. Unhighlighted lines are the business program.`
+      : 'No effects on yet, so this is just the business program.'
+    $('details').innerHTML = active
+      .map(
+        (e) =>
+          `<dt style="--c:${e.hue}"><span>■</span> ${e.name}</dt><dd>${e.desc}</dd>`
+      )
+      .join('')
+    simulate()
+    document.querySelectorAll<HTMLElement>('.view').forEach((b) => {
+      const isActive = b.dataset.view === view
+      b.classList.toggle('active', isActive)
+      b.setAttribute('aria-selected', String(isActive))
+    })
+  }
+
+  function controls() {
+    $('effects').innerHTML = Object.entries(groups)
+      .map(
+        ([g, { label, hue }]) =>
+          `<fieldset style="--c:${hue}"><legend>${label}</legend>` +
+          E.filter((e) => e.group === g)
+            .map(
+              (e) =>
+                `<label title="${e.desc}"><input type="checkbox" id="fx-${e.id}" ${has(e.id) ? 'checked' : ''}> ${e.name}</label>`
+            )
+            .join('') +
+          '</fieldset>'
+      )
+      .join('')
+    E.forEach((e) => {
+      const box = $('fx-' + e.id) as HTMLInputElement
+      box.onchange = () => {
+        box.checked ? on.add(e.id) : on.delete(e.id)
+        render()
+      }
+    })
+  }
+
+  function simulate() {
+    const s = ($('scenario') as HTMLSelectElement).value
+    const t: string[] = []
+    const put = (x: string, c = '') => t.push(`<li class="${c}">${x}</li>`)
+    if (has('tracing')) put('Open request span')
+    if (has('logging')) put('Log: request started')
+    if (has('auth')) put('Authorize customer')
+    if (s === 'declined') {
+      put('Payment: card declined', 'bad')
+      if (has('retry')) put('No retry, the failure is permanent', 'bad')
+    } else if (s === 'transient') {
+      if (has('retry')) {
+        put('Payment attempt 1: provider unavailable', 'bad')
+        put('Back off 200ms')
+        put('Payment attempt 2: success', 'good')
+        put('Reserve stock: success', 'good')
+      } else put('Payment: provider unavailable', 'bad')
+    } else if (s === 'db') {
+      put('Payment: success', 'good')
+      if (has('connection')) put('Acquire database connection')
+      if (has('transaction')) put('Begin transaction')
+      put('Reserve stock: connection lost', 'bad')
+      if (has('transaction')) put('Roll back transaction', 'bad')
+      if (has('connection')) put('Release connection')
+    } else {
+      put('Payment: success', 'good')
+      put('Reserve stock: success', 'good')
+      put('Save order: success', 'good')
+    }
+    if (has('metrics')) put('Record latency and outcome')
+    if (has('logging')) put('Log: request finished')
+    if (has('tracing')) put('Close span')
+    if (s === 'ok' || (s === 'transient' && has('retry')))
+      put('Return receipt', 'good')
+    else
+      put(
+        has('failure')
+          ? 'Return Err(error)'
+          : 'Exception escapes to the caller',
+        'bad'
+      )
+    $('trace').innerHTML = t.join('')
+  }
+
+  paint(
+    $('core'),
+    core.map((s) => [s])
+  )
+  controls()
+  render()
+  $('all').onclick = () => {
+    on = new Set(E.map((e) => e.id))
+    controls()
+    render()
+  }
+  $('clear').onclick = () => {
+    on.clear()
+    controls()
+    render()
+  }
+  document.querySelectorAll<HTMLElement>('.view').forEach(
+    (b) =>
+      (b.onclick = () => {
+        view = b.dataset.view!
+        render()
+      })
+  )
+  $('scenario').onchange = simulate
+</script>
