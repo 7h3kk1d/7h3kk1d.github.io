@@ -8,12 +8,26 @@ const projects: {
   description: string
   url: string
   repo?: string
+  /** A blog post the project goes with. */
+  post?: string
+  /** Built mostly by an AI coding agent: shown as 🤖 with hover text. */
+  vibecoded?: boolean
 }[] = [
+  {
+    title: 'Compositional Window Management',
+    description:
+      'nest windows inside tabs, splits, canvases, kanban boards and timelines, and switch any container between views without losing its layout',
+    url: '/compositional-window-management/',
+    repo: 'https://github.com/7h3kk1d/compositional-window-management',
+    post: '/on-compositional-window-management/',
+    vibecoded: true,
+  },
   {
     title: 'Cross-Cutting Concerns',
     description:
       'toggle concerns like retries, transactions and logging on an order function and see them woven in',
     url: '/projects/computational-effects/',
+    vibecoded: true,
   },
   {
     title: 'Bidirectional JSON Editor',
@@ -21,6 +35,7 @@ const projects: {
       'text and tree views of a JSON document, kept in sync incrementally in both directions',
     url: '/bidirectional-json-editor/',
     repo: 'https://github.com/7h3kk1d/bidirectional-json-editor',
+    vibecoded: true,
   },
   {
     title: 'JSON Editor',
@@ -42,6 +57,25 @@ const projects: {
         projects.map((project) => (
           <li>
             <a href={project.url}>{project.title}</a>, {project.description}
+            {project.vibecoded && (
+              <span>
+                {' '}
+                <span
+                  class="vibecoded"
+                  role="img"
+                  aria-label="Vibecoded"
+                  title="Vibecoded: built mostly by an AI coding agent"
+                >
+                  🤖
+                </span>
+              </span>
+            )}
+            {project.post && (
+              <span>
+                {' '}
+                (<a href={project.post}>blog post</a>)
+              </span>
+            )}
             {project.repo && (
               <span>
                 {' '}
@@ -54,3 +88,9 @@ const projects: {
     </ul>
   </div>
 </BaseLayout>
+
+<style>
+  .vibecoded {
+    cursor: help;
+  }
+</style>

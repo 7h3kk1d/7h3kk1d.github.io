@@ -14,6 +14,8 @@ description: 'Window management is one of the least valued categories of softwar
 
 # Draft -->
 
+**Update (November 2026):** I vibecoded an [interactive demo](/compositional-window-management/) of these ideas. Any container can switch between the views described below (tabs, splits, canvases, documents and more) and switch back without losing its layout, and the same window can appear in several places at once.
+
 As someone interested in providing more agency in our computing environment I am on the lookout for pieces of our current computing environments that can be enriched to provide a more [malleable](https://malleable.systems/) experience. Window management is an area that I keep coming back to given how prevalent the domain is. I will provide a recap of what window management is, how it’s used today, and how modern applications have evolved to deal with current deficiencies. Then I’ll provide a compositional approach for window management to move towards and discuss how I think this could make applications more malleable.
 
 ## Where we’re at
